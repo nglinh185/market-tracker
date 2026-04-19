@@ -32,17 +32,23 @@ def _run_for_category(cat: dict, today: str) -> None:
 
     items = fetch_dataset(dataset_id)
 
-    ranking_rows, asin_map = [], {}
+    ranking_map, asin_map = {}, {}
     for rank, item in enumerate(items, start=1):
         if not item.get("asin"):
             continue
         ranking_row, asin_row = parse_item(item, cat["id"], today, rank)
-        ranking_rows.append(ranking_row)
-        asin_map[asin_row["asin"]] = asin_row   # dedup: same ASIN giữ 1 bản
 
+        # Dedupe by rank: Apify có thể trả item trùng position, giữ row đầu tiên
+        rank_key = (ranking_row["snapshot_date"], ranking_row["browse_node"], ranking_row["rank"])
+        if rank_key not in ranking_map:
+            ranking_map[rank_key] = ranking_row
+
+        asin_map[asin_row["asin"]] = asin_row   # dedup ASIN
+
+    ranking_rows = list(ranking_map.values())
     upsert("asins", list(asin_map.values()), "asin")
     n = upsert("category_rankings", ranking_rows, "snapshot_date,browse_node,rank")
-    print(f"  → {n} ranking rows | {len(asin_rows)} ASINs upserted")
+    print(f"  → {n} ranking rows | {len(asin_map)} ASINs upserted")
 
 
 def main() -> None:

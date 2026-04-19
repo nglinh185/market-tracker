@@ -53,7 +53,7 @@ def main() -> None:
         for i in range(0, len(asins), BATCH):
             batch = asins[i:i + BATCH]
             print(f"  Batch {i//BATCH + 1}/{n_batches}: {batch}")
-            urls = [{"url": f"https://www.amazon.com/s?k={a}"} for a in batch]
+            urls = [{"url": f"https://www.amazon.com/dp/{a}"} for a in batch]
             try:
                 dataset_id = run_actor(
                     actor_id=ACTOR_CATEGORY,
