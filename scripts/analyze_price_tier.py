@@ -77,8 +77,15 @@ def main() -> None:
                 "cluster_name":  tier_map[cluster],
             })
 
-    n = upsert("price_tier_daily", rows, "snapshot_date,browse_node,asin")
-    print(f"[PriceTier] {n} ASINs tiered.")
+    # Dedupe theo (snapshot_date, browse_node, asin) vì 1 ASIN có thể xuất hiện nhiều rank
+    dedup_map = {}
+    for r in rows:
+        key = (r["snapshot_date"], r["browse_node"], r["asin"])
+        dedup_map[key] = r
+    deduped = list(dedup_map.values())
+
+    n = upsert("price_tier_daily", deduped, "snapshot_date,browse_node,asin")
+    print(f"[PriceTier] {n} ASINs tiered (dedupe: {len(rows)} -> {len(deduped)}).")
 
 
 if __name__ == "__main__":
