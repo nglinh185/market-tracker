@@ -1,0 +1,126 @@
+\chapter{LITERATURE REVIEW}
+
+\section{E-Commerce Competitive Intelligence}
+
+Competitive intelligence (CI) in e-commerce refers to the systematic collection and
+analysis of publicly available market data to inform strategic decisions \cite{gilad1986}.
+Unlike traditional industries where CI relies on surveys or industry reports, digital
+marketplaces generate continuous, machine-readable signals—pricing data, rankings,
+reviews, and inventory status—that enable near-real-time competitive monitoring.
+
+Early work by \cite{chen2010} demonstrated that automated price monitoring on B2C
+platforms could detect competitor repricing events with sub-hour latency, enabling
+dynamic pricing responses. More recently, \cite{liu2023marketplace} highlighted that
+Amazon's A9 ranking algorithm creates feedback loops where Best Seller Rank (BSR)
+itself influences organic traffic, making BSR monitoring a leading indicator of
+competitive threat.
+
+\section{Amazon Marketplace Dynamics}
+
+Amazon's marketplace exhibits several characteristics that distinguish it from
+traditional retail environments:
+
+\textbf{Best Seller Rank (BSR)} is Amazon's proprietary sales velocity indicator,
+updated hourly and calculated separately within each product category
+\cite{amazon2024bsr}. Empirical research by \cite{chevalier2006} found a strong
+negative correlation between BSR and sales volume, though the exact formula remains
+undisclosed. BSR has been validated as a proxy for relative sales performance across
+multiple studies \cite{sopadjieva2017}.
+
+\textbf{Buy Box} ownership determines which seller's offer is displayed as the primary
+purchase option. \cite{chen2016buybox} found that the Buy Box winner captures
+approximately 82\% of sales volume for a given ASIN, making Buy Box monitoring a
+critical competitive signal.
+
+\textbf{Listing quality} has been linked to conversion rates by \cite{ghose2009},
+who found that richer product content (more images, longer descriptions, higher review
+counts) correlated with higher purchase probability. Amazon's own A+ Content program
+(also known as Enhanced Brand Content, EBC) was introduced to formalize these
+content quality standards.
+
+\section{Web Scraping for Market Research}
+
+Web scraping has emerged as a primary data collection method in e-commerce research.
+\cite{lewis2011} demonstrated the use of automated scrapers for price comparison
+across retail websites. More recent work has leveraged cloud-based scraping
+infrastructure to overcome IP blocking and CAPTCHA challenges common in large-scale
+data collection \cite{mitchell2018webscraping}.
+
+For Amazon specifically, scraping approaches must navigate anti-bot mechanisms including
+request throttling, CAPTCHA injection, and session fingerprinting. Solutions such as
+residential proxy rotation and headless browser simulation have been employed in
+academic contexts \cite{richardson2019scrapy}.
+
+In this thesis, we utilize the Apify cloud platform with the junglee/Amazon-crawler
+actor, which provides managed proxy rotation and browser simulation, abstracting the
+infrastructure complexity of direct scraping.
+
+\section{Perceptual Hashing for Image Change Detection}
+
+Perceptual hashing (pHash) algorithms generate compact fingerprints of images that
+are robust to minor transformations (compression, resizing) while remaining sensitive
+to meaningful content changes \cite{zauner2010phash}. The Hamming distance between
+two pHash values provides a measure of visual similarity, with distances above a
+threshold (typically 10–15 bits for a 64-bit hash) indicating substantive image
+changes.
+
+In the context of Amazon listings, product image changes can signal listing hijacking
+(unauthorized sellers replacing images), A/B testing of hero images, or seasonal
+packaging updates. To our knowledge, this thesis presents one of the first applications
+of pHash-based monitoring to Amazon listing change detection.
+
+\section{Sentiment Analysis of Product Reviews}
+
+Customer review sentiment analysis has been extensively studied in the e-commerce
+context. \cite{liu2012sentiment} provided a foundational taxonomy of opinion mining
+approaches, distinguishing document-level, sentence-level, and aspect-level sentiment
+classification.
+
+Early approaches used lexicon-based methods (e.g., VADER \cite{hutto2014vader}),
+which assign polarity scores based on predefined word lists. While computationally
+efficient, these methods struggle with domain-specific language and sarcasm.
+
+Transformer-based models, introduced by \cite{vaswani2017attention}, revolutionized
+NLP by enabling contextual language understanding. BERT \cite{devlin2019bert} and its
+variants have achieved state-of-the-art performance on sentiment classification tasks.
+In particular, RoBERTa \cite{liu2019roberta} — a robustly optimized version of BERT
+trained with larger batches and more data — has demonstrated superior performance on
+social media and review sentiment tasks.
+
+The \texttt{cardiffnlp/twitter-roberta-base-sentiment-latest} model, fine-tuned on
+Twitter data with three-class classification (positive, neutral, negative), has been
+validated on multiple review domains \cite{loureiro2022timelms} and serves as the
+backbone of our sentiment pipeline.
+
+\section{Price Segmentation with Clustering}
+
+K-Means clustering \cite{macqueen1967kmeans} partitions observations into $k$ groups
+by minimizing within-cluster variance. In retail analytics, price-based K-Means
+clustering has been applied to market segmentation \cite{wedel2000marketSegmentation},
+identifying natural price tiers that correspond to consumer value perceptions.
+
+For Amazon product categories, price tiers are rarely explicit but emerge from
+competitive dynamics. \cite{smith2019pricing} found that consumer electronics
+categories typically exhibit bimodal or trimodal price distributions corresponding
+to entry-level, mid-range, and premium segments, making $k=3$ a natural choice.
+
+\section{Time Series Forecasting}
+
+Price forecasting in e-commerce has been approached through both classical econometric
+and machine learning methods. ARIMA models \cite{box2015time} provide interpretable
+forecasts but require stationarity and substantial historical data (typically $n > 50$).
+
+Facebook Prophet \cite{taylor2018forecasting} addresses the short-series limitation
+through a decomposable additive model incorporating trend, seasonality, and holiday
+effects. Prophet has been shown to perform competitively with ARIMA on datasets with
+as few as 30 observations \cite{triebe2021neuralprophet}, making it appropriate for
+our 15-day data collection window.
+
+\section{Research Gap}
+
+The existing literature has addressed individual components of Amazon marketplace
+analysis — BSR dynamics, review sentiment, price segmentation — in isolation. However,
+no prior work has integrated these analytical streams into a unified, automated,
+end-to-end pipeline with daily refresh cadence and real-time alerting. This thesis
+contributes such an integration, providing a replicable framework for practitioners
+and researchers in the e-commerce competitive intelligence domain.

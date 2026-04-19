@@ -1,0 +1,29 @@
+\chapter*{ABSTRACT}
+\addcontentsline{toc}{chapter}{Abstract}
+
+The rapid growth of e-commerce platforms has created unprecedented opportunities for
+data-driven competitive intelligence. This thesis presents a fully automated pipeline for
+monitoring and analyzing the Amazon consumer electronics marketplace, focusing on three
+high-competition categories: Gaming Keyboards, True Wireless Earbuds, and Portable
+Chargers.
+
+The system collects daily Top-50 category rankings, product-level metrics (Best Seller
+Rank, price, stock status, Buy Box ownership), and customer reviews for 30 watchlist
+ASINs over a 15-day period using the Apify web scraping platform and a Supabase
+PostgreSQL database. Image change detection is performed via perceptual hashing (pHash),
+and A+ content changes are tracked using MD5 fingerprinting.
+
+Four analytical modules are developed: (1) a K-Means price tiering model that segments
+products into entry, mid-range, and premium clusters; (2) a Listing Quality Score (LQS)
+composite metric evaluating content completeness; (3) a Brand Momentum Score (BMS)
+combining BSR velocity and review growth; and (4) a RoBERTa-based sentiment analysis
+pipeline on customer reviews with aspect-level breakdown. Additionally, a Prophet-based
+price trend forecasting model and a rule-based alert engine are implemented.
+
+Results demonstrate [to be completed after data collection]. All components are
+orchestrated via GitHub Actions for fully automated daily execution and visualized through
+an interactive Streamlit dashboard.
+
+\vspace{0.5cm}
+\noindent\textbf{Keywords:} Amazon marketplace, competitive intelligence, web scraping,
+price tiering, sentiment analysis, K-Means clustering, RoBERTa, market monitoring.

@@ -1,0 +1,108 @@
+\chapter{INTRODUCTION}
+
+\section{Background and Motivation}
+
+The global e-commerce market reached \$5.8 trillion in 2023 and is projected to exceed
+\$8 trillion by 2027 \cite{statista2024ecommerce}. Amazon, commanding approximately
+37.6\% of U.S. e-commerce market share \cite{emarketer2024}, has become the de facto
+competitive battleground for consumer electronics brands. Within this environment, the
+ability to systematically monitor competitor pricing, inventory status, content changes,
+and customer sentiment has become a critical capability for market participants.
+
+Traditional market research methods—periodic manual audits, syndicated reports, and
+point-in-time surveys—are insufficient for capturing the rapid dynamics of Amazon's
+marketplace, where prices can change multiple times per day, new entrants can displace
+established products within weeks, and consumer sentiment shifts in response to listing
+quality updates. There is therefore a significant need for automated, continuous, and
+data-driven competitive intelligence systems.
+
+This thesis addresses this gap by designing and implementing a fully automated pipeline
+that collects, stores, processes, and visualizes key competitive signals from Amazon's
+consumer electronics marketplace. The system integrates web scraping, computer vision,
+natural language processing, and machine learning techniques into a cohesive analytical
+framework, deployed with minimal operational overhead via cloud-based scheduling.
+
+\section{Research Objectives}
+
+This thesis pursues four primary objectives:
+
+\begin{enumerate}
+  \item \textbf{Build a scalable data collection pipeline} capable of tracking daily
+  Best Seller Rank, price, stock status, Buy Box ownership, listing content, and customer
+  reviews for target products on Amazon.com.
+
+  \item \textbf{Develop quantitative competitive metrics} including a Listing Quality
+  Score (LQS), Brand Momentum Score (BMS), and K-Means price tier classification to
+  enable systematic product benchmarking.
+
+  \item \textbf{Apply NLP techniques} — specifically a pre-trained RoBERTa model — to
+  extract sentiment signals from customer reviews at both the overall and aspect levels,
+  producing a time-series sentiment score per product.
+
+  \item \textbf{Deliver actionable outputs} through an automated alert engine and an
+  interactive Streamlit dashboard, enabling real-time competitive monitoring without
+  manual intervention.
+\end{enumerate}
+
+\section{Research Scope}
+
+\subsection{Market Coverage}
+The study focuses on \textbf{Amazon.com} (U.S. marketplace) across three consumer
+electronics sub-categories selected for their competitive intensity and data richness:
+\begin{itemize}
+  \item \textbf{Gaming Keyboards} — mature category with strong brand differentiation
+  \item \textbf{True Wireless Earbuds (TWS)} — high-growth category with frequent new entrants
+  \item \textbf{Portable Chargers} — commoditized category with significant price competition
+\end{itemize}
+
+\subsection{Data Scope}
+\begin{itemize}
+  \item \textbf{Category tracking:} Top 50 ranked ASINs per category, collected daily
+  \item \textbf{Product tracking:} 30 watchlist ASINs (10 per category), with daily
+  product-level snapshots
+  \item \textbf{Review tracking:} Up to 50 recent reviews per watchlist ASIN,
+  collected weekly
+  \item \textbf{Time period:} 15 consecutive days of data collection
+\end{itemize}
+
+\subsection{Exclusions}
+This study does not analyze Amazon advertising spend data, third-party seller performance
+metrics, or international marketplace variants. Price forecasting results should be
+interpreted as directional trend indicators rather than precise predictions, given the
+short data collection window.
+
+\section{Research Methodology Overview}
+
+The research adopts a \textbf{data engineering and applied machine learning} approach
+consisting of five phases:
+
+\begin{enumerate}
+  \item \textbf{Data Collection:} Automated scraping via Apify's Amazon crawler actors,
+  storing results in Supabase PostgreSQL with Supabase Storage for image assets.
+  \item \textbf{Feature Engineering:} Computation of derived metrics (BSR velocity,
+  review growth rate, discount percentage, content hash fingerprints).
+  \item \textbf{Machine Learning:} K-Means clustering for price segmentation, RoBERTa
+  for review sentiment, Facebook Prophet for price trend forecasting.
+  \item \textbf{Alert Generation:} Rule-based detection of significant competitive events
+  (price drops, stockouts, new entrants, content changes).
+  \item \textbf{Visualization:} Interactive Streamlit dashboard consolidating all metrics.
+\end{enumerate}
+
+\section{Thesis Structure}
+
+The remainder of this thesis is organized as follows:
+
+\textbf{Chapter 2} reviews the relevant literature on e-commerce intelligence, Amazon
+marketplace dynamics, web scraping methodologies, and the NLP and ML techniques applied.
+
+\textbf{Chapter 3} describes the data collection architecture, database schema, and
+collection methodology in detail.
+
+\textbf{Chapter 4} presents the analytical methodology for each module: price tiering,
+quality scoring, momentum scoring, sentiment analysis, and forecasting.
+
+\textbf{Chapter 5} presents and discusses the empirical results across all three product
+categories.
+
+\textbf{Chapter 6} concludes with a summary of findings, research limitations, and
+directions for future work.

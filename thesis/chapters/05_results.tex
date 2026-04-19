@@ -1,0 +1,212 @@
+\chapter{RESULTS AND DISCUSSION}
+
+\textit{Note: This chapter will be completed after the 15-day data collection period ends.
+The structure below outlines what will be reported.}
+
+\section{Descriptive Statistics}
+
+\subsection{Data Collection Summary}
+
+Over the [X]-day collection period, the pipeline successfully collected:
+\begin{itemize}
+  \item [X] category ranking snapshots across 3 categories
+  \item [X] product-level daily snapshots for 30 watchlist ASINs
+  \item [X] customer reviews for [X] unique ASINs
+  \item [X] image change events detected
+  \item [X] alert events generated
+\end{itemize}
+
+Table~\ref{tab:data_summary} presents the data collection summary.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrrr}
+    \toprule
+    \textbf{Metric} & \textbf{Gaming KB} & \textbf{TWS} & \textbf{Portable Charger} \\
+    \midrule
+    Total ASINs tracked      & 50 & 50 & 50 \\
+    Watchlist ASINs          & 10 & 10 & 10 \\
+    Avg. daily price (USD)   & [X] & [X] & [X] \\
+    Price range (USD)        & [X]--[X] & [X]--[X] & [X]--[X] \\
+    Avg. BSR                 & [X] & [X] & [X] \\
+    Avg. reviews count       & [X] & [X] & [X] \\
+    Sponsored slot share (\%)& [X] & [X] & [X] \\
+    \bottomrule
+  \end{tabular}
+  \caption{Descriptive statistics by category}
+  \label{tab:data_summary}
+\end{table}
+
+\section{Price Tier Analysis}
+
+K-Means clustering ($k=3$) identified three distinct price segments in each category.
+Figure~\ref{fig:price_tiers} shows the cluster distributions.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.85\textwidth}{\centering [Figure: Price Tier Distribution — 3 categories]}}
+  \caption{K-Means price tier distributions by category}
+  \label{fig:price_tiers}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{llrrr}
+    \toprule
+    \textbf{Category} & \textbf{Tier} & \textbf{Price Range} & \textbf{ASINs} & \textbf{Avg. BSR} \\
+    \midrule
+    Gaming KB & Entry   & \$[X]--\$[X] & [X] & [X] \\
+    Gaming KB & Mid     & \$[X]--\$[X] & [X] & [X] \\
+    Gaming KB & Premium & \$[X]--\$[X] & [X] & [X] \\
+    \midrule
+    TWS       & Entry   & \$[X]--\$[X] & [X] & [X] \\
+    TWS       & Mid     & \$[X]--\$[X] & [X] & [X] \\
+    TWS       & Premium & \$[X]--\$[X] & [X] & [X] \\
+    \midrule
+    Charger   & Entry   & \$[X]--\$[X] & [X] & [X] \\
+    Charger   & Mid     & \$[X]--\$[X] & [X] & [X] \\
+    Charger   & Premium & \$[X]--\$[X] & [X] & [X] \\
+    \bottomrule
+  \end{tabular}
+  \caption{Price tier cluster characteristics}
+  \label{tab:price_tiers}
+\end{table}
+
+\section{Listing Quality Score Results}
+
+\subsection{Score Distribution}
+
+Figure~\ref{fig:lqs_dist} presents the LQS distribution across all watchlist ASINs.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.85\textwidth}{\centering [Figure: LQS Score Distribution]}}
+  \caption{LQS score distribution by category}
+  \label{fig:lqs_dist}
+\end{figure}
+
+\subsection{Top and Bottom Performers}
+
+[Table of top 5 and bottom 5 ASINs by LQS with breakdown by component]
+
+\section{Brand Momentum Analysis}
+
+\subsection{BSR Velocity}
+
+Figure~\ref{fig:bsr_trend} shows the BSR trajectory for selected watchlist ASINs
+over the observation period.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.85\textwidth}{\centering [Figure: BSR Trend Lines — Top 5 Movers]}}
+  \caption{BSR trends for top-momentum ASINs}
+  \label{fig:bsr_trend}
+\end{figure}
+
+\subsection{BMS Rankings}
+
+Table~\ref{tab:bms} presents the top 10 ASINs by Brand Momentum Score on the final
+observation day.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{llrrrr}
+    \toprule
+    \textbf{Rank} & \textbf{ASIN} & \textbf{BSR Vel.} & \textbf{Rev. Vel.} & \textbf{Sentiment} & \textbf{BMS} \\
+    \midrule
+    [To be filled] & & & & & \\
+    \bottomrule
+  \end{tabular}
+  \caption{Top 10 ASINs by Brand Momentum Score}
+  \label{tab:bms}
+\end{table}
+
+\section{Sentiment Analysis Results}
+
+\subsection{Overall Sentiment Distribution}
+
+RoBERTa classified [X] reviews across [X] ASINs. Figure~\ref{fig:sentiment} shows
+the sentiment distribution.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.85\textwidth}{\centering [Figure: Sentiment Distribution by Category]}}
+  \caption{Review sentiment distribution}
+  \label{fig:sentiment}
+\end{figure}
+
+\subsection{Aspect-Level Findings}
+
+The most frequently mentioned positive aspects across categories were:
+[To be completed from aspect data]
+
+The most frequently mentioned negative aspects were:
+[To be completed from aspect data]
+
+\subsection{Sentiment vs. Star Rating Correlation}
+
+To validate the RoBERTa pipeline, we computed the Pearson correlation between
+the model's sentiment score and the reviewer's numeric star rating.
+[Result: $r = $ [X], $p < 0.001$], confirming that the model's classifications
+are consistent with the ground-truth rating signal.
+
+\section{Entrant and Exit Patterns}
+
+Over the observation period, [X] new entrant events and [X] exit events were
+detected across the three categories. Table~\ref{tab:entrants} summarizes the
+most significant entrant events (Top 10 entrants).
+
+[Table to be filled after data collection]
+
+\section{Alert Summary}
+
+The alert engine generated [X] alerts over the observation period.
+Table~\ref{tab:alert_summary} summarizes alerts by type and severity.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrrr}
+    \toprule
+    \textbf{Alert Type} & \textbf{Count} & \textbf{High} & \textbf{Medium/Low} \\
+    \midrule
+    Price drop     & [X] & [X] & [X] \\
+    Stockout       & [X] & [X] & [X] \\
+    BSR drop       & [X] & [X] & [X] \\
+    Image change   & [X] & [X] & [X] \\
+    New entrant    & [X] & [X] & [X] \\
+    Exit           & [X] & [X] & [X] \\
+    \midrule
+    \textbf{Total} & [X] & [X] & [X] \\
+    \bottomrule
+  \end{tabular}
+  \caption{Alert summary by type and severity}
+  \label{tab:alert_summary}
+\end{table}
+
+\section{Price Forecast Results}
+
+Prophet forecasts for the 7 days following the collection period are presented for
+three representative ASINs (one per category). [Figures to be added].
+
+As noted in the methodology, these forecasts should be interpreted as trend
+indicators rather than precise predictions given the limited observation window.
+
+\section{Discussion}
+
+\subsection{Competitive Dynamics Observed}
+
+[Key findings about competitive dynamics in each category — to be written after data]
+
+\subsection{Methodology Validation}
+
+The pipeline demonstrated [X]\% data collection success rate (ASINs with complete
+daily snapshots / total watchlist ASINs × days). The primary failure modes were:
+\begin{itemize}
+  \item ASIN resolution mismatches (search returning related ASIN): [X]\% of attempts
+  \item Actor timeouts: [X]\% of batch runs
+  \item Image download failures: [X]\% of ASINs
+\end{itemize}
+
+\subsection{Limitations}
+
+[Discuss limitations specific to the results — to be written after data]

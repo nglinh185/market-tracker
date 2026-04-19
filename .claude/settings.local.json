@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(extract-text \"market-tracker-workflow.docx\")",
+      "Bash(pandoc \"market-tracker-workflow.docx\" -t plain)",
+      "WebFetch(domain:apify.com)",
+      "WebSearch",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 scripts/seed_watchlist.py)",
+      "Bash(python scripts/ingest_watchlist.py)",
+      "Bash(findstr /V \"apify.Amazon\")",
+      "WebFetch(domain:wibuild.in)",
+      "Bash(pip install *)",
+      "Bash(powershell -Command \"Compress-Archive -Path thesis -DestinationPath thesis.zip -Force\")",
+      "Bash(python3)"
+    ]
+  }
+}

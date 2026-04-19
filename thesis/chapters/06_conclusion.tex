@@ -1,0 +1,99 @@
+\chapter{CONCLUSION}
+
+\section{Summary of Contributions}
+
+This thesis designed and implemented an end-to-end automated competitive intelligence
+pipeline for the Amazon consumer electronics marketplace. The key contributions are:
+
+\begin{enumerate}
+  \item \textbf{Data Engineering Framework:} A production-grade pipeline collecting
+  daily category rankings, product snapshots, and customer reviews for 3 product
+  categories and 30 watchlist ASINs, with zero-downtime automated scheduling via
+  GitHub Actions.
+
+  \item \textbf{Quantitative Competitive Metrics:} Two novel composite scores — the
+  Listing Quality Score (LQS) and Brand Momentum Score (BMS) — provide standardized
+  benchmarks for product competitiveness that practitioners can track longitudinally.
+
+  \item \textbf{Price Segmentation:} K-Means clustering reveals natural price tier
+  structures within competitive categories, enabling tier-specific strategic analysis.
+
+  \item \textbf{NLP-Based Sentiment Pipeline:} A RoBERTa inference pipeline produces
+  per-ASIN sentiment scores and aspect-level breakdowns from customer reviews,
+  providing a leading indicator of rating trajectory.
+
+  \item \textbf{Operational Alerting:} A rule-based alert engine translates metric
+  changes into actionable notifications, enabling competitive response without
+  manual monitoring.
+\end{enumerate}
+
+\section{Key Findings}
+
+[To be completed after data collection. Anticipated findings:]
+
+\begin{itemize}
+  \item Price tier membership is moderately stable over the observation period,
+  with most products remaining in the same tier, but price-based promotions cause
+  temporary tier migrations.
+
+  \item BSR velocity is the strongest single predictor of short-term ranking changes,
+  consistent with Amazon's sales-velocity-weighted algorithm.
+
+  \item Listing quality scores correlate positively with BSR (better listings rank
+  higher), supporting the hypothesis that content investment yields competitive returns.
+
+  \item Review sentiment as measured by RoBERTa is strongly correlated with star
+  ratings ($r > 0.85$), validating the pipeline's NLP component.
+\end{itemize}
+
+\section{Research Limitations}
+
+Several limitations should be acknowledged:
+
+\begin{enumerate}
+  \item \textbf{Observation window:} At 15 days, the data collection period is
+  insufficient for robust time series analysis or seasonal pattern detection.
+  Findings should be considered illustrative rather than statistically conclusive.
+
+  \item \textbf{Category scope:} Three product categories may not be representative
+  of Amazon's broader marketplace dynamics. Categories with different price structures
+  (e.g., luxury goods, consumables) may exhibit different competitive patterns.
+
+  \item \textbf{Data completeness:} Approximately [X]\% of watchlist ASINs had
+  incomplete daily coverage due to actor resolution mismatches. Complete panel data
+  would strengthen the longitudinal analyses.
+
+  \item \textbf{Sentiment model domain:} The RoBERTa model was fine-tuned on social
+  media text rather than product reviews. Domain-specific fine-tuning on Amazon review
+  data would likely improve classification accuracy.
+
+  \item \textbf{Causal inference:} All analyses in this thesis are correlational.
+  Claims about the relationship between listing quality, sentiment, and sales
+  performance cannot be interpreted causally without controlled experiments.
+\end{enumerate}
+
+\section{Future Work}
+
+Several directions would extend this research:
+
+\begin{itemize}
+  \item \textbf{Extended data collection:} Running the pipeline for 3–6 months would
+  enable meaningful seasonality analysis (Prime Day effects, holiday periods) and
+  improve forecasting accuracy.
+
+  \item \textbf{Domain-specific sentiment model:} Fine-tuning RoBERTa on Amazon
+  product review data across electronics categories would improve aspect-level
+  sentiment accuracy.
+
+  \item \textbf{Advertising integration:} Incorporating sponsored placement data
+  (Share of Voice) with organic ranking data would enable cross-channel competitive
+  analysis.
+
+  \item \textbf{Cross-marketplace comparison:} Extending the pipeline to additional
+  Amazon marketplaces (UK, Germany, Japan) would reveal geographic pricing and
+  positioning differences.
+
+  \item \textbf{Seller-level analysis:} Tracking third-party seller behavior at the
+  ASIN level (Buy Box rotation, fulfillment method) would provide a deeper view of
+  marketplace competition.
+\end{itemize}

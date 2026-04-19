@@ -1,0 +1,204 @@
+\chapter{METHODOLOGY}
+
+\section{Overview}
+
+The analytical framework comprises six modules, applied sequentially after each daily
+data collection cycle. Figure~\ref{fig:pipeline} illustrates the processing pipeline.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.85\textwidth}{\centering
+    [Figure: Analytics Pipeline]\\
+    Daily Snapshots $\rightarrow$ Entrant/Exit $\rightarrow$ Changes $\rightarrow$
+    Price Tier (K-Means) $\rightarrow$ LQS $\rightarrow$ BMS $\rightarrow$ Alerts
+  }}
+  \caption{Analytics processing pipeline}
+  \label{fig:pipeline}
+\end{figure}
+
+\section{Entrant and Exit Detection}
+
+New market entrants and products exiting the Top 50 are detected by comparing the
+set of ranked ASINs between consecutive daily snapshots:
+
+\begin{align}
+  \text{Entrants}_t &= \text{Rankings}_t \setminus \text{Rankings}_{t-1} \\
+  \text{Exits}_t    &= \text{Rankings}_{t-1} \setminus \text{Rankings}_t
+\end{align}
+
+Events are flagged as \textit{Top 10} entries or exits when the associated rank
+falls within the top 10 positions, as these represent commercially significant
+movements with greater impact on competing products' visibility.
+
+\section{Listing Quality Score (LQS)}
+
+The Listing Quality Score is a composite metric measuring the completeness and
+richness of an Amazon product listing. Inspired by Amazon's own content quality
+guidelines \cite{amazon2024listing}, the LQS is computed as a weighted sum of
+seven sub-components, each scored on a normalized scale:
+
+\begin{equation}
+  \text{LQS} = w_1 S_{\text{title}} + w_2 S_{\text{bullets}} + w_3 S_{\text{image}}
+             + w_4 S_{\text{aplus}} + w_5 S_{\text{rating}} + w_6 S_{\text{reviews}}
+             + w_7 S_{\text{sentiment}}
+\end{equation}
+
+Table~\ref{tab:lqs} defines each sub-component and its weight:
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{llcp{5cm}}
+    \toprule
+    \textbf{Component} & \textbf{Source Field} & \textbf{Max Score} & \textbf{Scoring Rule} \\
+    \midrule
+    Title completeness  & \texttt{product\_name}   & 10 & 1 pt/word, max 10 \\
+    Bullet points       & \texttt{bullet\_count}   & 15 & $\min(n/5 \times 15, 15)$ \\
+    Main image          & \texttt{image\_url}      & 15 & 15 if present, else 0 \\
+    A+ content          & \texttt{ebc\_html\_hash} & 15 & 15 if present, else 0 \\
+    Star rating         & \texttt{stars}           & 20 & $(s/5) \times 20$ \\
+    Review volume       & \texttt{reviews\_count}  & 15 & $\min(n/1000 \times 15, 15)$ \\
+    Review sentiment    & \texttt{avg\_sentiment}  & 10 & $(\hat{s}+1)/2 \times 10$ \\
+    \midrule
+    \textbf{Total}      &                          & \textbf{100} & \\
+    \bottomrule
+  \end{tabular}
+  \caption{LQS component definitions and weights}
+  \label{tab:lqs}
+\end{table}
+
+\section{Brand Momentum Score (BMS)}
+
+The Brand Momentum Score captures a product's competitive trajectory by combining
+three velocity signals:
+
+\begin{equation}
+  \text{BMS}_t = 0.5 \cdot \hat{v}_{\text{BSR}} + 0.3 \cdot \hat{v}_{\text{reviews}}
+               + 0.2 \cdot \hat{s}_{\text{sentiment}}
+\end{equation}
+
+where each component is normalized to $[0, 1]$:
+
+\begin{align}
+  v_{\text{BSR},t}     &= \frac{\text{BSR}_{t-1} - \text{BSR}_t}{\text{BSR}_{t-1}}
+  \quad \text{(positive = improving rank)} \\
+  v_{\text{reviews},t} &= \text{ReviewCount}_t - \text{ReviewCount}_{t-1} \\
+  s_{\text{sentiment}} &= \text{avg\_sentiment\_score} \in [-1, 1]
+\end{align}
+
+BSR velocity receives the highest weight (0.5) as it most directly reflects current
+sales momentum. Review velocity (0.3) captures medium-term organic growth. Sentiment
+(0.2) provides a leading indicator of future rating changes.
+
+\section{K-Means Price Tiering}
+
+Products within each category are segmented into three price tiers — \textit{entry},
+\textit{mid-range}, and \textit{premium} — using K-Means clustering applied
+independently per category per day.
+
+Given a set of product prices $\{p_1, p_2, \ldots, p_n\}$ within a category,
+K-Means minimizes the within-cluster sum of squares:
+
+\begin{equation}
+  \underset{C}{\arg\min} \sum_{k=1}^{K} \sum_{p_i \in C_k} (p_i - \mu_k)^2
+\end{equation}
+
+Prices are standardized using $z$-score normalization before clustering to ensure
+numerical stability. Cluster labels are assigned post-hoc by ranking cluster centroids:
+the lowest-centroid cluster is labeled \textit{entry}, the middle \textit{mid-range},
+and the highest \textit{premium}.
+
+The algorithm is initialized with $k=3$ and $n\_init=10$ random seeds to ensure
+convergence to a stable solution. When fewer than three distinct price points exist in
+a category (rare), $k$ is reduced accordingly.
+
+\section{Sentiment Analysis with RoBERTa}
+
+\subsection{Model Selection}
+
+We employ the \texttt{cardiffnlp/twitter-roberta-base-sentiment-latest} model, a
+RoBERTa-base architecture fine-tuned on approximately 124 million tweets and subsequently
+fine-tuned on a sentiment classification task \cite{loureiro2022timelms}. Despite being
+trained on social media text, this model has demonstrated strong transfer to product
+review domains due to the informal, opinionated nature of both text types.
+
+\subsection{Inference Pipeline}
+
+For each review, the \texttt{reviewText} field is truncated to 512 tokens (the model's
+maximum context length) and passed to the classification head, producing a probability
+distribution over three classes: \{positive, neutral, negative\}.
+
+A scalar sentiment score $s \in [-1, 1]$ is derived as:
+\begin{equation}
+  s = \text{confidence} \times
+  \begin{cases}
+    +1.0 & \text{if label = positive} \\
+     0.0 & \text{if label = neutral} \\
+    -1.0 & \text{if label = negative}
+  \end{cases}
+\end{equation}
+
+\subsection{Aggregation}
+
+Per-review scores are aggregated to the ASIN level:
+
+\begin{align}
+  \bar{s}_{\text{ASIN}} &= \frac{1}{N} \sum_{i=1}^{N} s_i \\
+  r_{\text{pos}}        &= \frac{|\{i : \text{label}_i = \text{positive}\}|}{N} \\
+  r_{\text{neg}}        &= \frac{|\{i : \text{label}_i = \text{negative}\}|}{N}
+\end{align}
+
+\subsection{Aspect-Level Analysis}
+
+The \texttt{web\_wanderer} actor additionally provides pre-computed aspect-level
+sentiment annotations, identifying sentiment polarity for specific product attributes
+(e.g., ``Quality'', ``Battery Life'', ``Sound'', ``Value''). These aspects serve as a
+complementary signal and validation benchmark for the RoBERTa-based classification.
+
+\section{Price Trend Forecasting with Prophet}
+
+\subsection{Model Specification}
+
+Facebook Prophet \cite{taylor2018forecasting} decomposes price time series as:
+
+\begin{equation}
+  y(t) = g(t) + s(t) + h(t) + \epsilon_t
+\end{equation}
+
+where $g(t)$ is the trend component, $s(t)$ captures seasonality (disabled given the
+short observation window), $h(t)$ represents holiday effects (not applicable), and
+$\epsilon_t$ is the error term.
+
+Given the 15-day collection window, we fit a linear trend model ($g(t) = k + at$)
+with no seasonality components. The model produces a 7-day ahead forecast with 80\%
+uncertainty intervals.
+
+\subsection{Limitations Acknowledgement}
+
+It is important to note that price forecasting with $n \approx 15$ observations is
+inherently limited in predictive accuracy. The primary value of the forecasting module
+in this study is \textbf{methodological demonstration} — establishing the pipeline
+for future deployment with longer data histories — rather than producing operationally
+reliable price predictions.
+
+\section{Alert Engine}
+
+A rule-based alert engine monitors daily snapshots and derived metrics to generate
+actionable notifications. Table~\ref{tab:alerts} defines the alert rules.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{llll}
+    \toprule
+    \textbf{Alert Type} & \textbf{Trigger Condition} & \textbf{Severity} & \textbf{Source} \\
+    \midrule
+    \texttt{price\_drop}   & Price decrease $\geq 15\%$ day-over-day  & Medium/High & daily\_snapshots \\
+    \texttt{stockout}      & \texttt{in\_stock} flips False              & High        & daily\_snapshots \\
+    \texttt{bsr\_drop}     & BSR worsens by $\geq 500$ positions        & Medium      & daily\_snapshots \\
+    \texttt{image\_change} & pHash Hamming distance $> 10$              & Low         & image\_change\_events \\
+    \texttt{new\_entrant}  & ASIN appears in rankings for first time    & Low/High    & entrant\_exit\_events \\
+    \texttt{exit}          & ASIN disappears from Top 50                & Medium      & entrant\_exit\_events \\
+    \bottomrule
+  \end{tabular}
+  \caption{Alert engine rule definitions}
+  \label{tab:alerts}
+\end{table}
