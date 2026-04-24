@@ -14,7 +14,7 @@
 - **Goal:** Daily intelligence on 30 watchlist ASINs across 3 categories (`gaming_keyboard`, `true_wireless_earbuds`, `portable_charger`), surfaced as a Telegram brief.
 - **Repo:** https://github.com/nglinh185/market-tracker
 - **CI:** GitHub Actions workflow `Daily Amazon Data Ingest` runs daily (Apify → Supabase).
-- **Runtime:** OpenClaw 2026.4.20 on VMware Workstation, model `openai/gpt-4o-mini` via `OPENAI_API_KEY`, Telegram channel active.
+- **Runtime:** OpenClaw 2026.4.20 on VMware Workstation, model `openai/gpt-4o-mini` via `OPENAI_API_KEY`. Telegram channel connected; Gateway runtime verified. **Project skill registration pending** — Telegram currently lists only default OpenClaw skills (healthcheck, node-connect, openai-whisper-api, skill-creator, taskflow, taskflow-inbox-triage, weather), not the market-tracker workspace skills.
 
 ---
 
@@ -32,7 +32,9 @@
 | Agentic layer     | **OpenClaw** (Gateway + Skills + SOUL) — see §4                      |
 | Delivery          | Telegram (native OpenClaw Channel — do NOT hand-roll a bot)          |
 
-Python deps: `requirements.txt`. Secrets: `.env` (`SUPABASE_URL`, `SUPABASE_KEY`, `APIFY_TOKEN`, `TELEGRAM_BOT_TOKEN`).
+Python deps: `requirements.txt`. Repo secrets: `.env` (`SUPABASE_URL`, `SUPABASE_KEY`, `APIFY_TOKEN`). Telegram pairing + LLM key (`OPENAI_API_KEY`) are owned by the OpenClaw Gateway, not this repo.
+
+> Keepa is **not** part of this architecture. All historical + current Amazon data flows through Apify.
 
 ---
 

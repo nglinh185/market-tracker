@@ -25,10 +25,11 @@
 | 4. OpenClaw workspace scaffold            | ✅ done    | `manifest.yaml`, `SOUL.md`, `AGENTS.md` in place        |
 | 5. Skills — 13 Python + 13 SKILL.md       | ✅ done    | see Skills audit below                                  |
 | 6. Agents — 3 SOUL.md                     | ✅ done    | see Souls audit below                                   |
-| 7. Gateway onboarding (`openclaw onboard`)| ✅ done    | OpenClaw 2026.4.20 installed in VMware Workstation; Telegram pairing approved; `/status` + `/start` verified |
-| 8. First live Telegram brief              | 🟡 partial | Telegram bot responds to basic commands; end-to-end market-intelligence brief content still needs validation |
-| 9. RoBERTa Colab integration              | 🟡 external | Notebook exists in Colab as an experiment. Repo already runs RoBERTa via `analyze_sentiment.py`; Colab code is separate and not currently ported |
-|10. Thesis write-up                        | ⏳ pending | LaTeX skeleton under `thesis/`                          |
+| 7. Gateway runtime + Telegram pairing     | ✅ done    | OpenClaw 2026.4.20 on VMware; Telegram channel connected; `/status` + `/start` verified |
+| 8. Project skill registration (Gateway)   | 🟡 partial | Telegram lists only default OpenClaw skills (healthcheck, node-connect, openai-whisper-api, skill-creator, taskflow, taskflow-inbox-triage, weather). Market-tracker workspace skills not yet visible to Gateway |
+| 9. First live Telegram market brief       | ⏳ pending | Blocked on phase 8 — bot is connected but project skills/agents are not active, so it cannot deliver Amazon market intelligence yet |
+|10. RoBERTa Colab integration              | 🟡 external | Notebook exists in Colab as an experiment. Repo already runs RoBERTa via `analyze_sentiment.py`; Colab code is separate and not currently ported |
+|11. Thesis write-up                        | ⏳ pending | LaTeX skeleton under `thesis/`                          |
 
 ---
 
@@ -77,9 +78,10 @@ Workspace-level defaults: `openclaw/SOUL.md` + `openclaw/AGENTS.md`.
 | Apify ingest                     | ✅ done     | Daily workflow collects Amazon data from Apify                              |
 | OpenClaw runtime                 | ✅ done     | Installed in VMware Workstation, version 2026.4.20, runtime = direct        |
 | OpenClaw model                   | ✅ done     | `openai/gpt-4o-mini` via `OPENAI_API_KEY`                                   |
-| Telegram pairing                 | ✅ done     | Pairing approved; `/status` returns Gateway status                          |
-| Telegram chat                    | ✅ done     | `/start` returns bot greeting                                               |
-| Market brief over Telegram       | 🟡 partial  | Bot connected; actual market-intelligence brief content not yet validated   |
+| Telegram channel connected       | ✅ done     | Pairing approved; `/status` returns Gateway status; `/start` returns greeting |
+| Gateway runtime verified         | ✅ done     | OpenClaw 2026.4.20, runtime = direct, LLM = `openai/gpt-4o-mini`            |
+| Project skill registration       | 🟡 partial  | Telegram shows default OpenClaw skills only; market-tracker workspace skills not visible — workspace not yet loaded into Gateway |
+| Market brief pending end-to-end  | ⏳ pending  | Blocked on project skill registration above                                 |
 | RoBERTa sentiment (repo)         | ✅ done     | `scripts/analyze_sentiment.py` uses `cardiffnlp/twitter-roberta-base-sentiment-latest` |
 | RoBERTa Colab notebook           | 🟡 external | Separate experimental notebook; not currently ported into repo pipeline     |
 
@@ -87,11 +89,31 @@ Workspace-level defaults: `openclaw/SOUL.md` + `openclaw/AGENTS.md`.
 
 ## Blockers / open questions
 
-1. **Skill invocation shape** — current skills use `CLI + JSON arg`. Still unverified against Gateway's actual Skill protocol (even though Telegram chat works, Skill routing has not been exercised end-to-end). 5-min rewrite across all 13 files if wrong.
-2. **Market brief content validation** — Telegram bot answers basic commands, but agent replies containing real market intelligence (BMS rankings, alerts, entrant/exit, etc.) have not been verified end-to-end.
+1. **Project skill registration (primary blocker).** Gateway is running and Telegram is paired, but market-tracker custom skills are not visible in Telegram — only default OpenClaw skills (healthcheck, node-connect, openai-whisper-api, skill-creator, taskflow, taskflow-inbox-triage, weather) are listed. Need to load/reload the project workspace, verify `openclaw/manifest.yaml`, skill paths, and which workspace the Gateway is serving.
+2. **Skill invocation shape** — current skills use `CLI + JSON arg`. Still unverified against Gateway's actual Skill protocol; Skill routing has not been exercised end-to-end. 5-min rewrite across all 13 files if wrong.
 3. **RoBERTa Colab ↔ repo alignment** — repo already runs RoBERTa offline; the Colab notebook duplicates this experiment. Decide: archive the Colab, or port any Colab-only improvements (e.g. aspect-level fine-tuning) back into `scripts/analyze_sentiment.py`.
 4. **Per-agent SOUL.md placement** — docs confirm workspace `SOUL.md`; per-agent placement under `agents/<name>/SOUL.md` is still an inference.
 5. **`migrations/005_openclaw_memory.sql`** — Gateway ships its own memory store, making this migration likely dead. Owner decision pending.
+
+---
+
+## Next actions — make project skills visible in Telegram
+
+In order; stop as soon as Telegram lists `query_*` skills.
+
+1. **Confirm Gateway workspace root.** Check which directory the Gateway is started from — should be the `market-tracker` repo root (where `openclaw/manifest.yaml` lives), not a default OpenClaw directory.
+2. **Inspect `openclaw/manifest.yaml`.** Verify the 13 skill paths resolve from the workspace root (e.g. `skills/market/query_bms.py`) and the 3 agents + triggers are declared.
+3. **Reload the workspace** from the market-tracker repo root:
+   ```bash
+   openclaw reload
+   ```
+4. **Re-check Telegram.** Ask the bot for available skills again; expect `query_bms`, `query_sentiment`, `query_alerts`, etc. to appear.
+5. **Sanity-test one skill directly** (does not need the Gateway):
+   ```bash
+   python openclaw/skills/market/query_bms.py '{"category":"gaming_keyboard","top_n":5}'
+   python openclaw/skills/market/query_bms.py --schema
+   ```
+6. **If CLI works but Telegram still hides project skills** — the issue is Gateway workspace registration, not the skill code. Investigate Gateway workspace config / manifest loader. Do **not** hand-roll a custom Telegram bot.
 
 ---
 
@@ -103,6 +125,11 @@ CLAUDE.md asks for auto-updates to this file on every task. Markdown cannot enfo
 
 ## Changelog
 
+- **2026-04-24** — Keepa cleanup + OpenClaw status correction:
+  - Removed Keepa from the active tree: deleted `backfill_keepa.py`, stripped the `KEEPA_KEY` block from `.env.example`. No Keepa imports, dependencies, or references remain in code; Apify is the sole Amazon data source.
+  - Corrected Telegram/OpenClaw status: Telegram bot verified with **default OpenClaw skills only** (healthcheck, node-connect, openai-whisper-api, skill-creator, taskflow, taskflow-inbox-triage, weather). Project-specific market-tracker skills still need registration/visibility validation.
+  - Replaced stale `TELEGRAM_BOT_TOKEN` reference in `CLAUDE.md §2` — Telegram pairing + LLM key are owned by the OpenClaw Gateway, not this repo's `.env`.
+  - Added explicit "Keepa is not part of this architecture" note in `CLAUDE.md §2`.
 - **2026-04-24** — Deployment + runtime milestone:
   - Code pushed to GitHub: https://github.com/nglinh185/market-tracker.
   - GitHub Actions `Daily Amazon Data Ingest` verified running successfully (daily Apify pull).
