@@ -1,6 +1,21 @@
-# Actor IDs
-ACTOR_CATEGORY = "BG3WDrGdteHgZgbPK"   # junglee/Amazon-crawler (category + product detail)
-ACTOR_REVIEWS  = ""                       # TODO: add review actor ID from Apify Store
+import os
+
+# Actor IDs — override trong .env neu can
+ACTOR_CATEGORY = os.getenv("ACTOR_CATEGORY", "BG3WDrGdteHgZgbPK")   # junglee/Amazon-crawler
+ACTOR_REVIEWS  = os.getenv("ACTOR_REVIEWS",  "gFtgG31RZJYlphznm")    # web_wanderer/amazon-reviews-extractor
+
+# Bat DEBUG=1 trong .env de in them log trong collectors
+DEBUG = os.getenv("DEBUG", "0") == "1"
+
+
+def require_env(keys: list[str]) -> None:
+    """Fail fast khi thieu env var can thiet. Goi o dau cac script collector."""
+    missing = [k for k in keys if not os.getenv(k)]
+    if missing:
+        raise RuntimeError(
+            f"Missing required env vars: {missing}. "
+            "Copy .env.example -> .env va dien cac gia tri nay."
+        )
 
 # 3 Electronics categories
 CATEGORIES = [

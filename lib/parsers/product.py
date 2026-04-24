@@ -40,7 +40,8 @@ def _parse_bsr(item: dict) -> int | None:
     return None
 
 
-def _parse_stock(item: dict) -> bool:
+def _parse_stock(item: dict) -> bool | None:
+    """Tra ve None khi actor khong co field stock (unknown, khong gia dinh in-stock)."""
     for field in ["availability", "inStock", "isAvailable"]:
         val = item.get(field)
         if val is None:
@@ -48,7 +49,7 @@ def _parse_stock(item: dict) -> bool:
         if isinstance(val, bool):
             return val
         return "in stock" in str(val).lower()
-    return True
+    return None
 
 
 def parse_item(item: dict, snapshot_date: str) -> dict:

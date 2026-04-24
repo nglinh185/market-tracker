@@ -1,6 +1,6 @@
 """
 Analytics orchestrator — chay sau ingest_category + ingest_watchlist.
-Thu tu: entrant_exit -> changes -> sponsored -> price_tier -> bms -> lqs -> alerts -> forecast
+Thu tu: entrant_exit -> changes -> sponsored -> price_tier -> sentiment -> bms -> lqs -> alerts -> forecast
 """
 import sys
 import subprocess
@@ -14,6 +14,8 @@ ANALYTICS = [
     "analyze_changes.py",
     "analyze_sponsored.py",
     "analyze_price_tier.py",
+    # sentiment phai chay truoc bms + lqs vi ca 2 doc tu review_sentiment_daily
+    "analyze_sentiment.py",
     "analyze_bms.py",
     "analyze_lqs.py",
     "analyze_alerts.py",

@@ -10,10 +10,12 @@ from datetime import date
 from dotenv import load_dotenv
 load_dotenv()
 
-from config import CATEGORIES, ACTOR_CATEGORY
+from config import CATEGORIES, ACTOR_CATEGORY, require_env
 from lib.apify import run_actor, fetch_dataset
 from lib.parsers.category import parse_item
 from lib.db import upsert
+
+require_env(["APIFY_TOKEN", "SUPABASE_URL", "SUPABASE_KEY"])
 
 
 def _run_for_category(cat: dict, today: str) -> None:

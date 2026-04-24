@@ -1,0 +1,79 @@
+workspace:
+  name: market-tracker
+  description: Amazon Market Intelligence — thesis project
+
+# ── Skills registry ──────────────────────────────────────────
+# Each entry points at a standalone Python script that:
+#   1. Exposes `SKILL` (dict) and `run(**kwargs)` at module level
+#   2. Accepts `python <path> '{"arg":"val"}'` → JSON on stdout
+#   3. Accepts `python <path> --schema` → input schema on stdout
+skills:
+  - id: query_sentiment
+    path: skills/sentiment/query_sentiment.py
+    group: sentiment
+  - id: query_reviews
+    path: skills/sentiment/query_reviews.py
+    group: sentiment
+  - id: query_aspects
+    path: skills/sentiment/query_aspects.py
+    group: sentiment
+
+  - id: query_bms
+    path: skills/market/query_bms.py
+    group: market
+  - id: query_price_tiers
+    path: skills/market/query_price_tiers.py
+    group: market
+  - id: query_rankings
+    path: skills/market/query_rankings.py
+    group: market
+  - id: query_entrant_exits
+    path: skills/market/query_entrant_exits.py
+    group: market
+  - id: query_sponsored_share
+    path: skills/market/query_sponsored_share.py
+    group: market
+  - id: query_price_forecast
+    path: skills/market/query_price_forecast.py
+    group: market
+
+  - id: query_lqs
+    path: skills/listing/query_lqs.py
+    group: listing
+  - id: query_image_changes
+    path: skills/listing/query_image_changes.py
+    group: listing
+  - id: query_snapshots
+    path: skills/listing/query_snapshots.py
+    group: listing
+
+  - id: query_alerts
+    path: skills/alerts/query_alerts.py
+    group: alerts
+
+# ── Agents registry ──────────────────────────────────────────
+# Each agent's personality lives in its SOUL.md. This block tells
+# the Gateway which skills each persona may invoke, and which
+# SOUL.md to load for which router intent.
+agents:
+  - id: sentiment_detective
+    soul: agents/sentiment_detective/SOUL.md
+    skills: [query_sentiment, query_reviews, query_aspects, query_snapshots]
+    triggers: [sentiment, review, complaint, praise, aspect, cảm xúc, đánh giá]
+
+  - id: competitor_spy
+    soul: agents/competitor_spy/SOUL.md
+    skills: [query_bms, query_rankings, query_entrant_exits, query_sponsored_share, query_price_tiers, query_image_changes]
+    triggers: [competitor, spy, entrant, rival, sponsored, ad, đối thủ, quảng cáo]
+
+  - id: momentum_strategist
+    soul: agents/momentum_strategist/SOUL.md
+    skills: [query_alerts, query_bms, query_price_forecast, query_lqs, query_sentiment]
+    triggers: [brief, strategy, forecast, action, week, chiến lược, tuần]
+    default: true
+
+# ── Scope ────────────────────────────────────────────────────
+categories:
+  - gaming_keyboard
+  - true_wireless_earbuds
+  - portable_charger

@@ -27,3 +27,7 @@ prophet==1.1.5
 # Dashboard
 streamlit==1.35.0
 plotly==5.22.0
+
+# OpenClaw workspace — manifest parsing only.
+# Agents / Telegram / LLM are provided by the OpenClaw Gateway itself (not Python).
+PyYAML==6.0.2

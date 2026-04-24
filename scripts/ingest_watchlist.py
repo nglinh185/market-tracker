@@ -12,11 +12,13 @@ from datetime import date, timedelta
 from dotenv import load_dotenv
 load_dotenv()
 
-from config import ACTOR_CATEGORY, WATCHLIST
+from config import ACTOR_CATEGORY, WATCHLIST, require_env
 from lib.apify import run_actor, fetch_dataset
 from lib.parsers.product import parse_item
 from lib.image_store import download_hash_store, get_yesterday_hash, is_image_changed, ensure_bucket
 from lib.db import upsert
+
+require_env(["APIFY_TOKEN", "SUPABASE_URL", "SUPABASE_KEY"])
 
 CACHE_DIR = Path(__file__).parent.parent / "data" / "raw"
 
