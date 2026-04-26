@@ -20,8 +20,6 @@ OUTPUT_DIR = Path(__file__).parent.parent / "data" / "forecasts"
 
 def main() -> None:
     try:
-        import cmdstanpy
-        cmdstanpy.set_cmdstan_path('/home/ubuntu/.cmdstan/cmdstan-2.38.0')
         from prophet import Prophet
     except ImportError:
         print("[Forecast] prophet not installed. Run: pip install prophet")
