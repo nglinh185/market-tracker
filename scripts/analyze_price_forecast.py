@@ -20,6 +20,8 @@ OUTPUT_DIR = Path(__file__).parent.parent / "data" / "forecasts"
 
 def main() -> None:
     try:
+        import cmdstanpy
+        cmdstanpy.set_cmdstan_path('/home/ubuntu/.cmdstan/cmdstan-2.38.0')
         from prophet import Prophet
     except ImportError:
         print("[Forecast] prophet not installed. Run: pip install prophet")
@@ -56,7 +58,8 @@ def main() -> None:
 
         try:
             m = Prophet(daily_seasonality=False, weekly_seasonality=False,
-                        yearly_seasonality=False, uncertainty_samples=100)
+                        yearly_seasonality=False, uncertainty_samples=100,
+                        stan_backend='CMDSTANPY')
             m.fit(df)
             future = m.make_future_dataframe(periods=7)
             forecast = m.predict(future)
