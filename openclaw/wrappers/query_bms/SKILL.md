@@ -36,7 +36,7 @@ bms = 0.5 × bsr_velocity_norm + 0.3 × review_velocity_norm + 0.2 × sentiment_
 ## Command
 
 ```bash
-python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py '<json-args>'
+/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py '<json-args>'
 ```
 
 ### Arguments (JSON)
@@ -50,13 +50,13 @@ python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py '<json-ar
 
 ```bash
 # Top 5 brand momentum in gaming keyboards today
-python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py '{"category":"gaming_keyboard","top_n":5}'
+/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py '{"category":"gaming_keyboard","top_n":5}'
 
 # Top 10 in earbuds for a specific date
-python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py '{"category":"true_wireless_earbuds","top_n":10,"snapshot_date":"2026-04-25"}'
+/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py '{"category":"true_wireless_earbuds","top_n":10,"snapshot_date":"2026-04-25"}'
 
 # Inspect input schema
-python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py --schema
+/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py --schema
 ```
 
 ## Output Shape
