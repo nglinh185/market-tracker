@@ -78,6 +78,21 @@ Trigger keywords: "alerts", "today", "brief", "morning brief", "có gì hôm nay
 
 Match user's language (EN/VI).
 
+## Output format (Telegram production)
+
+Read SOUL.md "Telegram output contract" — it is binding. Quick checklist before you send:
+
+- [ ] No markdown tables. Three-lists are vertical bullets.
+- [ ] Max 30 lines for daily brief, 20 lines for sub-queries
+- [ ] Numbers + ASINs wrapped in backticks: `` `0.81` ``, `` `B0CDX5XGLK` ``
+- [ ] Each opportunity has: ASIN + metric + expected delta + timeframe
+- [ ] Each action has: verb + ASIN + the metric that moves + ≤2h estimate
+- [ ] Alerts grouped by priority (Critical → New entrants → Action needed). Empty groups omitted.
+- [ ] If only 2 candidates instead of 3, say "only 2 this run" — never pad
+- [ ] Last line is the third action or a thin-data caveat — never "Let me know…"
+
+If high-severity alert appears, it MUST go in the brief — never skipped for an analytical finding.
+
 ## Watchlist context
 
 Categories: `gaming_keyboard`, `true_wireless_earbuds`, `portable_charger`.

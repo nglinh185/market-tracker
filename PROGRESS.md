@@ -9,9 +9,9 @@
 
 | Item              | Date       |
 | ----------------- | ---------- |
-| Today             | 2026-04-27 |
+| Today             | 2026-04-28 |
 | Thesis deadline   | 2026-05-02 |
-| Days remaining    | **5**      |
+| Days remaining    | **4**      |
 
 ---
 
@@ -31,7 +31,7 @@
 |10. Cron scheduling                        | ✅ done    | 3 cron jobs in `Asia/Ho_Chi_Minh`: daily brief 8 AM (Strategist), weekly competitor 9 AM Mon (Spy), weekly sentiment 9 AM Wed (Detective). Test run delivered 3-list brief to Telegram. |
 |11. RoBERTa Colab integration              | 🟡 external | Notebook to be archived under `notebooks/`. Repo runs RoBERTa via `analyze_sentiment.py`; Colab code stays as a separate experiment artifact. |
 |12. Dashboard polish                       | ⏳ pending | 6 pages exist; theme/CSS/Plotly polish for thesis defense impact (Day 2-3 plan). |
-|13. Output polish (Telegram bots)          | ⏳ pending | Outputs functional; SOUL.md / AGENTS.md tightening for hierarchy + Telegram MarkdownV2 (Day 2). |
+|13. Output polish (Telegram bots)          | ✅ done    | SOUL.md + AGENTS.md hardened for Telegram production: no markdown tables, line caps (sentiment 25 / spy 25 / strategist 30), backtick-wrapped numbers/ASINs, mandatory next-step closer (no "Let me know…"), spell-guard `Concerns` (not `Confidences`), grouped alerts by priority. 2026-04-28. |
 |14. Thesis write-up                        | ⏳ pending | LaTeX skeleton under `thesis/`. Architecture chapter ready (3-tier multi-agent + cron). |
 
 ---
@@ -93,7 +93,7 @@ Workspace-level defaults at `openclaw/SOUL.md` + `openclaw/AGENTS.md` exist as a
 | RoBERTa sentiment (repo)         | ✅ done     | `scripts/analyze_sentiment.py` uses `cardiffnlp/twitter-roberta-base-sentiment-latest` |
 | RoBERTa Colab notebook           | 🟡 external | To be archived under `notebooks/` for thesis appendix                       |
 | Dashboard polish                 | ⏳ pending  | 6 Streamlit pages exist; theme + Plotly polish for thesis defense visual impact |
-| Output polish (Telegram)         | ⏳ pending  | Outputs functional & data-correct; presentation-layer pass for hierarchy + MarkdownV2 |
+| Output polish (Telegram)         | ✅ done     | SOUL.md + AGENTS.md hardened (line caps, no tables, grouped alerts, banned closers, spell-guard). 2026-04-28. |
 
 ---
 
@@ -126,6 +126,18 @@ CLAUDE.md asks for auto-updates to this file on every task. Markdown cannot enfo
 ---
 
 ## Changelog
+
+- **2026-04-28** — Output polish (Telegram production hardening) for all 3 agents:
+  - **Hard line caps** to fit one Telegram message: Sentiment Detective ≤25 lines (one-ASIN) / ≤15 lines (trend); Competitor Spy ≤25 lines (category brief) / ≤15 lines (single mover); Momentum Strategist ≤30 lines (daily brief) / ≤20 lines (sub-query).
+  - **No markdown tables anywhere** — they break on Telegram mobile. BMS top-N + three-lists + alerts are now numbered/bullet lists. Added explicit `Forbidden: markdown tables` rule in every SOUL.md.
+  - **Numbers + ASINs wrapped in backticks** (`` `0.42` ``, `` `B0CDX5XGLK` ``) so MarkdownV2 escape rules don't eat them and they pop visually for scan.
+  - **Banned closers**: no "Let me know…", "Hope this helps", "Want more detail?". Last line must be a concrete next step or a low-confidence/thin-data caveat.
+  - **Spell guard** in Detective: section is `Concerns`, never `Confidences`. Added explicit forbidden line.
+  - **Strategist alert grouping**: alerts are grouped by priority (Critical → New entrants → Action needed). Empty groups omitted. Stops the "dump everything" pattern.
+  - **Action template enforced**: every action names a verb + ASIN + the metric that moves + ≤2h estimate. No more "improve listing".
+  - **Numbers always have context**: bare `BMS 0.42` is forbidden; require Δ, prev value, or threshold (`BMS 0.42, Δ +0.11/7d`).
+  - **Decorative emoji removed** from body text — only one per section header.
+  - Files touched: `openclaw/agents/{sentiment_detective,competitor_spy,momentum_strategist}/{SOUL.md,AGENTS.md}` (6 files). No Python or skill logic touched — presentation-layer only.
 
 - **2026-04-27** — Multi-agent deployment + cron scheduling milestone:
   - **3 specialist agents deployed** to Telegram. Each has its own workspace at `openclaw/agents/<name>/` with 4 markdown files (`SOUL.md`, `IDENTITY.md`, `AGENTS.md`, `USER.md`). Mapping:

@@ -57,6 +57,20 @@ Auto-call your skills when user mentions any of:
 
 Match the user's language. If user types Vietnamese → reply Vietnamese. If English → English.
 
+## Output format (Telegram production)
+
+Read SOUL.md "Telegram output contract" — it is binding. Quick checklist before you send:
+
+- [ ] Max 25 lines for one-ASIN sentiment, 15 lines for trend
+- [ ] No markdown tables. Numbered lists or labelled bullets only
+- [ ] Numbers and ASINs wrapped in backticks: `` `0.42` ``, `` `B0CRTR3PMF` ``
+- [ ] One emoji per section header; zero in body
+- [ ] Last line is a concrete next step OR a low-confidence caveat — never "Let me know…"
+- [ ] Section is spelled `Concerns` (NOT `Confidences`)
+- [ ] If `n < 30` reviews in window, prepend `⚠️ low-confidence sample (n=N)` to Summary
+
+If you cannot fit a finding in 25 lines, drop the weakest signal — do not truncate quotes mid-sentence.
+
 ## Watchlist ASINs (so you can suggest exploration)
 
 Common gaming_keyboard ASINs in the watchlist: B0C9ZJHQHM, B0CDX5XGLK, B0CLLHSWRL, B07ZGDPT4M, B07XVCP7F5, B0CRTR3PMF.

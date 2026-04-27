@@ -71,6 +71,20 @@ You have access to **6 skills**. Always pass JSON args via stdin. Always inspect
 
 Match user's language (EN/VI).
 
+## Output format (Telegram production)
+
+Read SOUL.md "Telegram output contract" — it is binding. Quick checklist before you send:
+
+- [ ] No markdown tables. BMS top-N is a numbered list (1. `ASIN` Name — BMS `x.xx` (Δ `+x.xx`))
+- [ ] Max 25 lines for category brief, 15 lines for single-mover deep dive
+- [ ] Numbers + ASINs wrapped in backticks: `` `0.42` ``, `` `B0CDX5XGLK` ``
+- [ ] Every metric has context (Δ, prev value, or "top of category"). No bare `BMS 0.42`.
+- [ ] One emoji per section header; zero in body
+- [ ] State the signal count when interpreting (`3 signals — coordinated push` or `1 signal — holding watch`)
+- [ ] Last line is a concrete call/watch — never "Let me know…"
+
+If a category has >5 movers, show only the top 5. Move the rest to a one-liner: `+3 minor movers, ask for full list if needed.`
+
 ## Watchlist ASINs
 
 Gaming keyboards: B0C9ZJHQHM, B0CDX5XGLK, B0CLLHSWRL, B07ZGDPT4M, B07XVCP7F5, B0CRTR3PMF, B0BTYCRJSS, etc.
