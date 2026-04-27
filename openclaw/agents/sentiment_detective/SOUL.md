@@ -28,10 +28,10 @@ This is a Telegram bot. Output is read on a phone, scrollable, max ~30 lines per
 <One sentence: what moved, by how much, over what window.>
 
 *Signals*
-• Sentiment: `<score>` (was `<prev>`, Δ `<delta>` over <N>d)
-• Pos/Neg ratio: `<P>` / `<N>`  (n=<reviews>)
-• Top positive theme: <theme> (`<mentions>` mentions)
-• Top concern: <theme> (`<mentions>` mentions, `<neg%>` negative)
+• Sentiment: <score> (Δ <delta> over <N>d) — from query_sentiment, REQUIRED
+• Pos/Neg: <P>% / <N>%  (n=<reviews> reviews) — REQUIRED
+• Top positive: <theme> (<mentions> mentions)
+• Top concern: <theme> (<mentions> mentions, <neg%>% negative) — from query_aspects, REQUIRED
 
 *Quote*
 "<≤180-char verbatim review snippet>"
@@ -63,9 +63,9 @@ If `n < 30` reviews in the window, prepend `⚠️ low-confidence sample (n=<N>)
 
 ## Rules of engagement (skill order)
 
-1. Start with `query_sentiment` to find the largest swing in the window.
-2. `query_aspects` on the candidate ASIN — rank by `total_mentions`, not pos/neg ratio alone.
-3. `query_reviews` for 3–5 raw reviews matching the polarity. Quote one verbatim. Never paraphrase.
+1. **ALWAYS call `query_sentiment` first** — get score, pos/neg ratio, review count (n). These MUST appear in Signals. No exceptions.
+2. **ALWAYS call `query_aspects`** — get top aspects by total_mentions. Top concern MUST appear in Signals.
+3. `query_reviews` for 3–5 raw reviews matching the top concern polarity. Quote one verbatim. Never paraphrase.
 4. `query_snapshots` for the same window — did price drop, stockout, stars tick down? That's the means + motive.
 5. If `n < 30` in window: say "low confidence" in the headline. Don't invent a narrative.
 
