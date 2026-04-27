@@ -9,9 +9,9 @@
 
 | Item              | Date       |
 | ----------------- | ---------- |
-| Today             | 2026-04-24 |
+| Today             | 2026-04-27 |
 | Thesis deadline   | 2026-05-02 |
-| Days remaining    | **8**      |
+| Days remaining    | **5**      |
 
 ---
 
@@ -26,46 +26,53 @@
 | 5. Skills — 13 Python + 13 SKILL.md       | ✅ done    | see Skills audit below                                  |
 | 6. Agents — 3 SOUL.md                     | ✅ done    | see Souls audit below                                   |
 | 7. Gateway runtime + Telegram pairing     | ✅ done    | OpenClaw 2026.4.20 on VMware; Telegram channel connected; `/status` + `/start` verified |
-| 8. Project skill registration (Gateway)   | 🟡 partial | Telegram lists only default OpenClaw skills (healthcheck, node-connect, openai-whisper-api, skill-creator, taskflow, taskflow-inbox-triage, weather). Market-tracker workspace skills not yet visible to Gateway |
-| 9. First live Telegram market brief       | ⏳ pending | Blocked on phase 8 — bot is connected but project skills/agents are not active, so it cannot deliver Amazon market intelligence yet |
-|10. RoBERTa Colab integration              | 🟡 external | Notebook exists in Colab as an experiment. Repo already runs RoBERTa via `analyze_sentiment.py`; Colab code is separate and not currently ported |
-|11. Thesis write-up                        | ⏳ pending | LaTeX skeleton under `thesis/`                          |
+| 8. Project skill registration (Gateway)   | ✅ done    | 13/13 skills loaded as `openclaw-extra` via `skills.load.extraDirs = openclaw/wrappers/`. Each wrapper has YAML-frontmatter SKILL.md mapping to the Python CLI under venv. |
+| 9. Multi-agent deployment (3 bots)        | ✅ done    | 3 specialist agents: `competitor_spy` (`@babyspyyy_bot`), `sentiment_detective` (`@babydetective_bot`), `momentum_strategist` (`@babystrategist_bot`). Each agent has SOUL/IDENTITY/AGENTS/USER markdown. 1:1 channel binding. End-to-end verified with real Supabase data. |
+|10. Cron scheduling                        | ✅ done    | 3 cron jobs in `Asia/Ho_Chi_Minh`: daily brief 8 AM (Strategist), weekly competitor 9 AM Mon (Spy), weekly sentiment 9 AM Wed (Detective). Test run delivered 3-list brief to Telegram. |
+|11. RoBERTa Colab integration              | 🟡 external | Notebook to be archived under `notebooks/`. Repo runs RoBERTa via `analyze_sentiment.py`; Colab code stays as a separate experiment artifact. |
+|12. Dashboard polish                       | ⏳ pending | 6 pages exist; theme/CSS/Plotly polish for thesis defense impact (Day 2-3 plan). |
+|13. Output polish (Telegram bots)          | ⏳ pending | Outputs functional; SOUL.md / AGENTS.md tightening for hierarchy + Telegram MarkdownV2 (Day 2). |
+|14. Thesis write-up                        | ⏳ pending | LaTeX skeleton under `thesis/`. Architecture chapter ready (3-tier multi-agent + cron). |
 
 ---
 
 ## Skills audit (13/13)
 
-| # | Skill id                | Group     | `.py` | `.md` | Schema dict | CLI tested |
-|---|-------------------------|-----------|:-----:|:-----:|:-----------:|:----------:|
-| 1 | `query_sentiment`       | sentiment |  ✅   |  ✅   |     ✅      |     ⏳     |
-| 2 | `query_reviews`         | sentiment |  ✅   |  ✅   |     ✅      |     ⏳     |
-| 3 | `query_aspects`         | sentiment |  ✅   |  ✅   |     ✅      |     ⏳     |
-| 4 | `query_bms`             | market    |  ✅   |  ✅   |     ✅      |     ⏳     |
-| 5 | `query_rankings`        | market    |  ✅   |  ✅   |     ✅      |     ⏳     |
-| 6 | `query_entrant_exits`   | market    |  ✅   |  ✅   |     ✅      |     ⏳     |
-| 7 | `query_sponsored_share` | market    |  ✅   |  ✅   |     ✅      |     ⏳     |
-| 8 | `query_price_tiers`     | market    |  ✅   |  ✅   |     ✅      |     ⏳     |
-| 9 | `query_price_forecast`  | market    |  ✅   |  ✅   |     ✅      |     ⏳     |
-|10 | `query_snapshots`       | listing   |  ✅   |  ✅   |     ✅      |     ⏳     |
-|11 | `query_image_changes`   | listing   |  ✅   |  ✅   |     ✅      |     ⏳     |
-|12 | `query_lqs`             | listing   |  ✅   |  ✅   |     ✅      |     ⏳     |
-|13 | `query_alerts`          | alerts    |  ✅   |  ✅   |     ✅      |     ⏳     |
+All skills have a Python CLI (`scripts/skill.py`), a sidecar `.md` doc under `openclaw/skills/<group>/`, and an OpenClaw AgentSkill wrapper at `openclaw/wrappers/<skill>/SKILL.md` (YAML-frontmatter format) registered via `skills.load.extraDirs`.
 
-Test command template: `python openclaw/skills/<group>/<skill>.py '<json-args>'`
+| # | Skill id                | Group     | `.py` | sidecar `.md` | wrapper `SKILL.md` | CLI tested |
+|---|-------------------------|-----------|:-----:|:-------------:|:------------------:|:----------:|
+| 1 | `query_sentiment`       | sentiment |  ✅   |      ✅       |        ✅          |     ✅     |
+| 2 | `query_reviews`         | sentiment |  ✅   |      ✅       |        ✅          |     ✅     |
+| 3 | `query_aspects`         | sentiment |  ✅   |      ✅       |        ✅          |     ✅ (bug fix 2026-04-27 — see Changelog) |
+| 4 | `query_bms`             | market    |  ✅   |      ✅       |        ✅          |     ✅     |
+| 5 | `query_rankings`        | market    |  ✅   |      ✅       |        ✅          |     ✅     |
+| 6 | `query_entrant_exits`   | market    |  ✅   |      ✅       |        ✅          |     ✅     |
+| 7 | `query_sponsored_share` | market    |  ✅   |      ✅       |        ✅          |     ✅     |
+| 8 | `query_price_tiers`     | market    |  ✅   |      ✅       |        ✅          |     ✅     |
+| 9 | `query_price_forecast`  | market    |  ✅   |      ✅       |        ✅          |     ✅     |
+|10 | `query_snapshots`       | listing   |  ✅   |      ✅       |        ✅          |     ✅     |
+|11 | `query_image_changes`   | listing   |  ✅   |      ✅       |        ✅          |     ✅     |
+|12 | `query_lqs`             | listing   |  ✅   |      ✅       |        ✅          |     ✅     |
+|13 | `query_alerts`          | alerts    |  ✅   |      ✅       |        ✅          |     ✅     |
+
+Test command template (in VM): `/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/<group>/<skill>.py '<json-args>'`
 
 ---
 
 ## Souls audit (3/3)
 
-| Agent                   | `SOUL.md` | Skills wired                                                                                       | Default |
-|-------------------------|:---------:|----------------------------------------------------------------------------------------------------|:-------:|
-| `sentiment_detective`   |    ✅     | query_sentiment, query_reviews, query_aspects, query_snapshots                                     |         |
-| `competitor_spy`        |    ✅     | query_bms, query_rankings, query_entrant_exits, query_sponsored_share, query_price_tiers, query_image_changes |  |
-| `momentum_strategist`   |    ✅     | query_alerts, query_bms, query_price_forecast, query_lqs, query_sentiment                          |   ⭐    |
+Each agent's workspace lives at `openclaw/agents/<name>/` with **four files**: `SOUL.md` (voice + rules), `IDENTITY.md` (display name + emoji + vibe), `AGENTS.md` (skill list with JSON arg examples + trigger keywords + forbidden actions), `USER.md` (DS student context, EN/VI preference, watchlist ASINs).
 
-All three have `SOUL.md` with: Rules of engagement · Forbidden · Shape of a good output · Skills you may call.
+| Agent                   | All 4 MD files | Skills wired                                                                                                  | Telegram bot                |
+|-------------------------|:--------------:|---------------------------------------------------------------------------------------------------------------|------------------------------|
+| `sentiment_detective`   |       ✅       | query_sentiment, query_reviews, query_aspects, query_snapshots                                                | 🔍 `@babydetective_bot`      |
+| `competitor_spy`        |       ✅       | query_bms, query_rankings, query_entrant_exits, query_sponsored_share, query_price_tiers, query_image_changes | 🕵️ `@babyspyyy_bot`          |
+| `momentum_strategist`   |       ✅       | query_alerts, query_bms, query_price_forecast, query_lqs, query_sentiment                                     | 🎯 `@babystrategist_bot`     |
 
-Workspace-level defaults: `openclaw/SOUL.md` + `openclaw/AGENTS.md`.
+All three are registered as OpenClaw agents (`agents add`) with explicit `agents bind` to a dedicated Telegram account. End-to-end tested with real Supabase data on 2026-04-27.
+
+Workspace-level defaults at `openclaw/SOUL.md` + `openclaw/AGENTS.md` exist as a fallback but are not used for the deployed agents (each specialist has its own workspace under `openclaw/agents/<name>/`).
 
 ---
 
@@ -74,46 +81,41 @@ Workspace-level defaults: `openclaw/SOUL.md` + `openclaw/AGENTS.md`.
 | Component                        | Status      | Evidence / Notes                                                           |
 |----------------------------------|:-----------:|-----------------------------------------------------------------------------|
 | GitHub repo                      | ✅ done     | Pushed to https://github.com/nglinh185/market-tracker                       |
-| GitHub Actions — Daily Ingest    | ✅ done     | Workflow `Daily Amazon Data Ingest` has successful recent runs              |
-| Apify ingest                     | ✅ done     | Daily workflow collects Amazon data from Apify                              |
-| OpenClaw runtime                 | ✅ done     | Installed in VMware Workstation, version 2026.4.20, runtime = direct        |
-| OpenClaw model                   | ✅ done     | `openai/gpt-4o-mini` via `OPENAI_API_KEY`                                   |
-| Telegram channel connected       | ✅ done     | Pairing approved; `/status` returns Gateway status; `/start` returns greeting |
-| Gateway runtime verified         | ✅ done     | OpenClaw 2026.4.20, runtime = direct, LLM = `openai/gpt-4o-mini`            |
-| Project skill registration       | 🟡 partial  | Telegram shows default OpenClaw skills only; market-tracker workspace skills not visible — workspace not yet loaded into Gateway |
-| Market brief pending end-to-end  | ⏳ pending  | Blocked on project skill registration above                                 |
+| GitHub Actions — Daily Ingest    | ✅ done     | Workflow `Daily Amazon Data Ingest` runs daily at 13:00 ICT                 |
+| Apify ingest                     | ✅ done     | junglee/Amazon-crawler + web_wanderer/amazon-reviews-extractor              |
+| OpenClaw runtime                 | ✅ done     | Installed in VMware Ubuntu 24.04, version 2026.4.20, runtime = direct       |
+| OpenClaw model (per agent)       | ✅ done     | `openai/gpt-4o-mini` via `OPENAI_API_KEY` (in OpenClaw config, not repo)    |
+| Telegram channels (×3)           | ✅ done     | 3 bots: `@babyspyyy_bot` (default→Spy), `@babydetective_bot`, `@babystrategist_bot`. All paired. |
+| Project skills registration      | ✅ done     | 13/13 wrappers under `openclaw/wrappers/`, registered via `skills.load.extraDirs`. Source = `openclaw-extra`. |
+| Multi-agent deployment           | ✅ done     | 3 agents added (`agents add`), each bound 1:1 to its Telegram account (`agents bind`). |
+| End-to-end Telegram brief        | ✅ done     | Verified 2026-04-27: each bot returns real Supabase data on natural-language queries. Cron `daily-brief-strategist` test run delivered full 3-list brief. |
+| Cron schedules (×3)              | ✅ done     | daily 8 AM (Strategist), Mon 9 AM (Spy), Wed 9 AM (Detective). All `Asia/Ho_Chi_Minh`. |
 | RoBERTa sentiment (repo)         | ✅ done     | `scripts/analyze_sentiment.py` uses `cardiffnlp/twitter-roberta-base-sentiment-latest` |
-| RoBERTa Colab notebook           | 🟡 external | Separate experimental notebook; not currently ported into repo pipeline     |
+| RoBERTa Colab notebook           | 🟡 external | To be archived under `notebooks/` for thesis appendix                       |
+| Dashboard polish                 | ⏳ pending  | 6 Streamlit pages exist; theme + Plotly polish for thesis defense visual impact |
+| Output polish (Telegram)         | ⏳ pending  | Outputs functional & data-correct; presentation-layer pass for hierarchy + MarkdownV2 |
 
 ---
 
 ## Blockers / open questions
 
-1. **Project skill registration (primary blocker).** Gateway is running and Telegram is paired, but market-tracker custom skills are not visible in Telegram — only default OpenClaw skills (healthcheck, node-connect, openai-whisper-api, skill-creator, taskflow, taskflow-inbox-triage, weather) are listed. Need to load/reload the project workspace, verify `openclaw/manifest.yaml`, skill paths, and which workspace the Gateway is serving.
-2. **Skill invocation shape** — current skills use `CLI + JSON arg`. Still unverified against Gateway's actual Skill protocol; Skill routing has not been exercised end-to-end. 5-min rewrite across all 13 files if wrong.
-3. **RoBERTa Colab ↔ repo alignment** — repo already runs RoBERTa offline; the Colab notebook duplicates this experiment. Decide: archive the Colab, or port any Colab-only improvements (e.g. aspect-level fine-tuning) back into `scripts/analyze_sentiment.py`.
-4. **Per-agent SOUL.md placement** — docs confirm workspace `SOUL.md`; per-agent placement under `agents/<name>/SOUL.md` is still an inference.
-5. **`migrations/005_openclaw_memory.sql`** — Gateway ships its own memory store, making this migration likely dead. Owner decision pending.
+1. **Telegram polling network instability.** VM occasionally hits `Network request for 'getUpdates' failed!` — bots reconnect automatically but messages can lag 30–60s. Workaround: VMware NAT restart fixes it. Defense risk: low, but mention in limitations.
+2. **`migrations/005_openclaw_memory.sql`** — Gateway ships its own memory store; this migration is dead. Drop it before defense.
+3. **`9router-openai/cx/gpt-5.5` proxy was set up but currently unreachable** (`localhost:20128` not listening). Agents fall back to `openai/gpt-4o-mini` which works correctly. Document the failover behavior in thesis "Limitations" section.
+4. **RoBERTa Colab archive** — file `notebooks/sentiment_roberta_experiment.ipynb` not yet committed. Pull from Colab and add before defense.
 
 ---
 
-## Next actions — make project skills visible in Telegram
+## Next actions — Day 2 (2026-04-28)
 
-In order; stop as soon as Telegram lists `query_*` skills.
+1. **Output polish (Telegram bots)** — tighten SOUL.md / AGENTS.md so output uses Telegram MarkdownV2 (`*bold*`, `_italic_`), clearer section breaks, ASIN/numbers visually highlighted. ~2-3 hours.
+2. **Dashboard polish** — Streamlit theme, st.metric cards, consistent Plotly color palette, header/breadcrumb, loading states across the 6 pages. ~6-10 hours (spans Day 2 PM + Day 3).
 
-1. **Confirm Gateway workspace root.** Check which directory the Gateway is started from — should be the `market-tracker` repo root (where `openclaw/manifest.yaml` lives), not a default OpenClaw directory.
-2. **Inspect `openclaw/manifest.yaml`.** Verify the 13 skill paths resolve from the workspace root (e.g. `skills/market/query_bms.py`) and the 3 agents + triggers are declared.
-3. **Reload the workspace** from the market-tracker repo root:
-   ```bash
-   openclaw reload
-   ```
-4. **Re-check Telegram.** Ask the bot for available skills again; expect `query_bms`, `query_sentiment`, `query_alerts`, etc. to appear.
-5. **Sanity-test one skill directly** (does not need the Gateway):
-   ```bash
-   python openclaw/skills/market/query_bms.py '{"category":"gaming_keyboard","top_n":5}'
-   python openclaw/skills/market/query_bms.py --schema
-   ```
-6. **If CLI works but Telegram still hides project skills** — the issue is Gateway workspace registration, not the skill code. Investigate Gateway workspace config / manifest loader. Do **not** hand-roll a custom Telegram bot.
+## Day 3-7
+
+3. Thesis writeup — architecture chapter (3-tier multi-agent + cron), results chapter (sample briefs + screenshots).
+4. Demo rehearsal — record a 2–3 min video demo of all 3 bots + dashboard pages.
+5. Buffer for fix-bugs-as-they-arise.
 
 ---
 
@@ -125,6 +127,20 @@ CLAUDE.md asks for auto-updates to this file on every task. Markdown cannot enfo
 
 ## Changelog
 
+- **2026-04-27** — Multi-agent deployment + cron scheduling milestone:
+  - **3 specialist agents deployed** to Telegram. Each has its own workspace at `openclaw/agents/<name>/` with 4 markdown files (`SOUL.md`, `IDENTITY.md`, `AGENTS.md`, `USER.md`). Mapping:
+    - 🕵️ `competitor_spy` ← `@babyspyyy_bot` (default account, repurposed Linny's bot)
+    - 🔍 `sentiment_detective` ← `@babydetective_bot` (new)
+    - 🎯 `momentum_strategist` ← `@babystrategist_bot` (new)
+  - **OpenClaw skills registration**: 13 wrappers under `openclaw/wrappers/<skill>/SKILL.md` with YAML frontmatter, registered via `skills.load.extraDirs`. Source = `openclaw-extra`.
+  - **3 cron jobs** scheduled in `Asia/Ho_Chi_Minh`:
+    - `daily-brief-strategist` — 8 AM daily (Strategist)
+    - `weekly-competitor-spy` — 9 AM Mon (Spy)
+    - `weekly-sentiment-detective` — 9 AM Wed (Detective)
+  - **End-to-end verified**: each bot returns real Supabase data; cron `daily-brief-strategist` test run delivered full 3-list brief to Telegram.
+  - **Bug fix — `query_aspects.py`**: was SUMming Amazon's pre-aggregated product-level aspect summary across N reviews → inflated `total_mentions` by `N×` (e.g., 655K instead of 3.7K). Fixed to read the most recent non-null row only. Skill description updated to reflect that data is product-level, not per-review aggregation.
+  - **Wrappers `python` → venv path**: all wrappers point to `/home/ubuntu/market-tracker/venv/bin/python` so OpenClaw agent runtime can find Supabase + dotenv deps.
+  - **Cron requires elevated device scope** (`operator.admin`, `operator.write`, etc.) — approved via `devices approve <requestId>`.
 - **2026-04-24** — Keepa cleanup + OpenClaw status correction:
   - Removed Keepa from the active tree: deleted `backfill_keepa.py`, stripped the `KEEPA_KEY` block from `.env.example`. No Keepa imports, dependencies, or references remain in code; Apify is the sole Amazon data source.
   - Corrected Telegram/OpenClaw status: Telegram bot verified with **default OpenClaw skills only** (healthcheck, node-connect, openai-whisper-api, skill-creator, taskflow, taskflow-inbox-triage, weather). Project-specific market-tracker skills still need registration/visibility validation.

@@ -14,7 +14,12 @@
 - **Goal:** Daily intelligence on 30 watchlist ASINs across 3 categories (`gaming_keyboard`, `true_wireless_earbuds`, `portable_charger`), surfaced as a Telegram brief.
 - **Repo:** https://github.com/nglinh185/market-tracker
 - **CI:** GitHub Actions workflow `Daily Amazon Data Ingest` runs daily (Apify → Supabase).
-- **Runtime:** OpenClaw 2026.4.20 on VMware Workstation, model `openai/gpt-4o-mini` via `OPENAI_API_KEY`. Telegram channel connected; Gateway runtime verified. **Project skill registration pending** — Telegram currently lists only default OpenClaw skills (healthcheck, node-connect, openai-whisper-api, skill-creator, taskflow, taskflow-inbox-triage, weather), not the market-tracker workspace skills.
+- **Runtime:** OpenClaw 2026.4.20 on VMware Ubuntu 24.04, model `openai/gpt-4o-mini` via `OPENAI_API_KEY` (owned by the OpenClaw Gateway, not this repo).
+- **Multi-agent deployment** (3 specialist Telegram bots, 1:1 channel binding):
+  - 🕵️ **Competitor Spy** (`@babyspyyy_bot`) — competitor moves: BMS, rankings, ad share, image redesigns
+  - 🔍 **Sentiment Detective** (`@babydetective_bot`) — customer voice: sentiment trends, aspects, raw quotes
+  - 🎯 **Momentum Strategist** (`@babystrategist_bot`) — synthesizer: alerts, forecast, LQS → 3-list weekly brief
+- **Cron schedules** (Asia/Ho_Chi_Minh): daily 8 AM brief (Strategist), Mon 9 AM competitor recap (Spy), Wed 9 AM sentiment digest (Detective).
 
 ---
 
@@ -60,19 +65,29 @@ market-tracker/
 ├── dashboard/                ← Streamlit pages
 ├── data/forecasts/           ← Prophet outputs
 └── openclaw/                 ← agentic workspace
-    ├── SOUL.md               ← workspace default voice
+    ├── SOUL.md               ← workspace default voice (fallback only — deployed agents have their own)
     ├── AGENTS.md             ← workspace rules (Skill contract, routing, safety)
     ├── manifest.yaml         ← Gateway registry (skills, agents, triggers)
-    ├── skills/
+    ├── skills/               ← Python CLIs (read-only data access)
     │   ├── sentiment/        ← 3 skills: sentiment, reviews, aspects
     │   ├── market/           ← 6 skills: bms, rankings, entrant_exits,
     │   │                        sponsored_share, price_tiers, price_forecast
     │   ├── listing/          ← 3 skills: snapshots, image_changes, lqs
     │   └── alerts/           ← 1 skill: alerts
-    └── agents/
-        ├── sentiment_detective/SOUL.md
-        ├── competitor_spy/SOUL.md
-        └── momentum_strategist/SOUL.md    ← default agent
+    ├── wrappers/             ← OpenClaw AgentSkill wrappers (YAML-frontmatter SKILL.md per skill)
+    │   ├── query_bms/SKILL.md
+    │   ├── query_sentiment/SKILL.md
+    │   └── …                  ← 13 total, registered via skills.load.extraDirs
+    └── agents/               ← per-agent isolated workspaces
+        ├── sentiment_detective/        ← bound to @babydetective_bot
+        │   ├── SOUL.md         ← voice + rules
+        │   ├── IDENTITY.md     ← name, emoji, vibe
+        │   ├── AGENTS.md       ← skill list with JSON examples + triggers
+        │   └── USER.md         ← DS student context, EN/VI preferences
+        ├── competitor_spy/             ← bound to @babyspyyy_bot
+        │   └── (same 4 files)
+        └── momentum_strategist/        ← bound to @babystrategist_bot
+            └── (same 4 files)
 ```
 
 ---
@@ -80,32 +95,37 @@ market-tracker/
 ## 4. Gateway + Skills Architecture
 
 ```
- ┌─────────────┐   Telegram message    ┌──────────────────┐
- │   Phone     │ ────────────────────▶ │  OpenClaw        │
- │  Telegram   │                       │  Gateway         │
- └─────────────┘ ◀──────────────────── │  (native channel)│
-                    brief / answer     └──────┬───────────┘
-                                              │ routes by triggers
-                                              ▼
-                                     ┌────────────────────┐
-                                     │  Agent (SOUL.md)   │
-                                     │  sentiment_detect. │
-                                     │  competitor_spy    │
-                                     │  momentum_strateg. │
-                                     └──────┬─────────────┘
-                                            │ calls Skills
-                                            ▼
-                                     ┌────────────────────┐
-                                     │ Skill (Python CLI) │
-                                     │ stdin: JSON args   │
-                                     │ stdout: JSON data  │
-                                     └──────┬─────────────┘
-                                            │ read-only
-                                            ▼
-                                     ┌────────────────────┐
-                                     │ Supabase (Postgres)│
-                                     │ via lib/db.py      │
-                                     └────────────────────┘
+  ┌─────────────────┐ ┌─────────────────┐ ┌──────────────────┐
+  │ @babyspyyy_bot  │ │@babydetective…  │ │@babystrategist…  │
+  │   (Telegram)    │ │    (Telegram)   │ │   (Telegram)     │
+  └────────┬────────┘ └────────┬────────┘ └────────┬─────────┘
+           │ telegram:default  │ telegram:detective│ telegram:strategist
+           ▼                   ▼                   ▼
+     ┌──────────────────────────────────────────────────────┐
+     │           OpenClaw Gateway  (1:1 channel binding)    │
+     └──────┬───────────────────┬───────────────────┬───────┘
+            ▼                   ▼                   ▼
+     ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐
+     │ competitor_ │    │ sentiment_  │    │ momentum_       │
+     │ spy         │    │ detective   │    │ strategist      │
+     │ (SOUL.md)   │    │ (SOUL.md)   │    │ (SOUL.md)       │
+     │ 6 skills    │    │ 4 skills    │    │ 5 skills        │
+     └──────┬──────┘    └──────┬──────┘    └────────┬────────┘
+            │                  │                    │
+            └──────────────────┴────────────────────┘
+                               │  agent runtime calls Python CLI
+                               ▼
+                     ┌──────────────────────┐
+                     │  Skill (Python CLI)  │
+                     │  stdin: JSON args    │
+                     │  stdout: JSON data   │
+                     └──────────┬───────────┘
+                                │ read-only
+                                ▼
+                     ┌──────────────────────┐
+                     │  Supabase (Postgres) │
+                     │  via lib/db.py       │
+                     └──────────────────────┘
 ```
 
 **Contract for every Skill** (enforced in `openclaw/AGENTS.md`):
@@ -113,54 +133,58 @@ market-tracker/
 1. `SKILL = {...}` dict at module top (name, group, description, input_schema)
 2. `run(**kwargs)` returns JSON-serializable `list[dict] | dict`
 3. CLI: `python path/to/skill.py '<json-args>'` → JSON stdout; `--schema` prints the SKILL dict.
+4. **OpenClaw wrapper:** each skill also has a YAML-frontmatter `openclaw/wrappers/<skill>/SKILL.md` that points to the venv Python invocation. Registered via `skills.load.extraDirs` in `~/.openclaw/openclaw.json`.
 
 Skills are **read-only**. Mutations belong in `scripts/`.
 
-**Agent routing** is keyword-based via `manifest.yaml.agents[].triggers` (EN + VI). Default agent: `momentum_strategist`.
+**Agent routing** is **per-channel** (no keyword routing): each Telegram bot account binds 1:1 to a single agent via `agents bind --bind telegram:<accountId>`. Each agent's workspace contains a separate `AGENTS.md` listing trigger keywords (EN + VI) that the LLM uses to decide which skill to call.
 
 ---
 
 ## 5. Development Commands
 
-### OpenClaw Gateway
+### OpenClaw Gateway (run from `~/Documents/openclaw` in the VM)
 
 ```bash
-# First-time setup (creates local Gateway daemon + pairs Telegram)
-openclaw onboard
+# Service control (systemd-backed)
+node openclaw.mjs gateway status
+node openclaw.mjs gateway restart
 
-# Start the Gateway (long-running; serves Telegram + local CLI)
-openclaw gateway
+# Channels (3 Telegram accounts: default, detective, strategist)
+node openclaw.mjs channels list
+node openclaw.mjs channels add --channel telegram --account <id> --token "$TOKEN" --name "..."
 
-# Manage Telegram pairing
-openclaw pairing list
-openclaw pairing approve telegram <chat_id>
+# Agents (3 specialists)
+node openclaw.mjs agents list
+node openclaw.mjs agents bindings
 
-# Send a message to a subscriber (useful for scheduled briefs)
-openclaw message send --channel telegram --to <chat_id> --text "..."
+# Skills (13 wrappers, source = openclaw-extra)
+node openclaw.mjs skills list
 
-# Reload workspace after editing manifest/SOUL
-openclaw reload
+# Cron (3 jobs in Asia/Ho_Chi_Minh)
+node openclaw.mjs cron list
+node openclaw.mjs cron run <jobId>
+
+# Pairing (per-bot, when /start gives a pairing code)
+node openclaw.mjs pairing list
+node openclaw.mjs pairing approve telegram <code>
+
+# Device scope upgrade (CLI sometimes needs admin scope for cron/agents add)
+node openclaw.mjs devices list
+node openclaw.mjs devices approve <requestId>
 ```
 
-### Skills — direct execution (for testing)
+### Skills — direct execution (for testing, in VM with venv)
 
 ```bash
 # Run any skill directly with JSON args
-python openclaw/skills/market/query_bms.py '{"category":"gaming_keyboard","top_n":10}'
+/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py '{"category":"gaming_keyboard","top_n":10}'
 
 # Inspect a skill's input schema
-python openclaw/skills/market/query_bms.py --schema
+/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/market/query_bms.py --schema
 
 # Run the full daily pipeline (before agent queries)
-python scripts/fetch_apify.py
-python scripts/analyze_bms.py
-python scripts/analyze_sentiment.py
-python scripts/analyze_aspects.py
-python scripts/analyze_price_tiers.py
-python scripts/analyze_price_forecast.py
-python scripts/analyze_changes.py
-python scripts/analyze_lqs.py
-python scripts/analyze_alerts.py
+python scripts/run_analytics.py        # orchestrates all 9 analytics in correct order
 ```
 
 ### Dashboard
@@ -189,8 +213,11 @@ Every task completion or logic change should trigger an update to **PROGRESS.md*
 
 ---
 
-## 8. Known Unknowns
+## 8. Known Limitations (defendable in thesis)
 
-- Exact Skill invocation shape the Gateway uses (stdin stream? HTTP? CLI-with-JSON?). Current assumption: CLI-with-JSON. Easy 5-min rewrite across all 13 skills if wrong.
-- Per-agent SOUL.md placement — docs confirm workspace SOUL.md only; per-agent placement under `agents/<name>/SOUL.md` is a best guess.
-- `migrations/005_openclaw_memory.sql` — Gateway has its own memory store, so this migration is likely dead. Awaiting owner decision to delete.
+- **Telegram polling occasionally stalls** (`getUpdates failed` errors in logs). VMware NAT instability; auto-recovers but messages can lag 30–60s. Mention as a deployment limitation.
+- **9router `gpt-5.5` proxy** at `localhost:20128` was originally configured as primary model but is currently down — agents fall back to `openai/gpt-4o-mini` which works correctly. Document the failover behavior.
+- **`migrations/005_openclaw_memory.sql`** — Gateway has its own memory store, this migration is dead. Drop before defense.
+- **No keyword routing inside one Telegram bot.** OpenClaw bindings are 1:1 channel-to-agent only. We use 3 separate bots instead — see §4 architecture diagram.
+- **Prophet 7-day forecast on n=14 days of data** has limited accuracy — used for trend direction, not absolute price prediction. Disclosed in `analyze_price_forecast.py` docstring and `query_price_forecast` SKILL.md.
+- **`query_aspects` returns Amazon's pre-aggregated product summary** (not per-review aggregation by us). Earlier bug double-aggregated; fixed 2026-04-27.
