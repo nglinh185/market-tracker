@@ -29,6 +29,13 @@ def main() -> None:
         print("[Sponsored] No data today.")
         return
 
+    # Build ASIN → brand fallback map from organic entries (Apify often omits brand on sponsored rows)
+    asin_brand: dict[str, str] = {
+        r["asin"]: r["brand"]
+        for r in rankings
+        if r.get("asin") and r.get("brand")
+    }
+
     node_map = {c["id"]: c["name"] for c in CATEGORIES}
 
     by_node: dict[str, list] = defaultdict(list)
@@ -43,7 +50,7 @@ def main() -> None:
         brand_sponsored: dict[str, int] = defaultdict(int)
         brand_organic:   dict[str, int] = defaultdict(int)
         for r in items:
-            brand = r.get("brand") or "Unknown"
+            brand = r.get("brand") or asin_brand.get(r.get("asin")) or "Unknown"
             if r.get("is_sponsored"):
                 brand_sponsored[brand] += 1
             else:
