@@ -18,7 +18,8 @@ SKILL = {
     "name": "query_aspects",
     "group": "sentiment",
     "description": (
-        "Aggregate aspect-level sentiment across all reviews for an ASIN. "
+        "Return Amazon's product-level aspect summary for an ASIN "
+        "(already pre-aggregated by Amazon across the full review base). "
         "Returns [{name, sentiment, total_mentions, positive, negative, summary}] "
         "ranked by total_mentions. Use to identify what customers love vs hate."
     ),
@@ -34,47 +35,39 @@ SKILL = {
 
 
 def run(asin: str, top_n: int = 10) -> list[dict]:
+    # aspects_json from Apify is Amazon's PRODUCT-LEVEL summary (same for every review row).
+    # Take the most recent non-null row instead of aggregating, to avoid n-times inflation.
     rows = (supabase.table("reviews_raw")
-            .select("aspects_json")
+            .select("aspects_json,review_date")
             .eq("asin", asin)
             .not_.is_("aspects_json", "null")
-            .limit(2000)
+            .order("review_date", desc=True)
+            .limit(1)
             .execute()).data or []
 
-    agg: dict[str, dict] = defaultdict(lambda: {
-        "name": "", "total_mentions": 0, "positive": 0, "negative": 0,
-        "summaries": [], "sentiments": []
-    })
-    for r in rows:
-        for a in (r.get("aspects_json") or []):
-            name = (a.get("name") or "").lower().strip()
-            if not name:
-                continue
-            slot = agg[name]
-            slot["name"] = name
-            slot["total_mentions"] += int(a.get("mentions") or 1)
-            slot["positive"]       += int(a.get("positive") or 0)
-            slot["negative"]       += int(a.get("negative") or 0)
-            if a.get("sentiment"):
-                slot["sentiments"].append(a["sentiment"])
-            if a.get("summary") and len(slot["summaries"]) < 3:
-                slot["summaries"].append(a["summary"])
+    if not rows:
+        return []
 
+    aspects = rows[0].get("aspects_json") or []
     out = []
-    for slot in agg.values():
-        pos, neg = slot["positive"], slot["negative"]
+    for a in aspects:
+        name = (a.get("name") or "").strip()
+        if not name:
+            continue
+        pos = int(a.get("positive") or 0)
+        neg = int(a.get("negative") or 0)
         tot = pos + neg
         if tot == 0:
-            polarity = max(set(slot["sentiments"]), key=slot["sentiments"].count) if slot["sentiments"] else "neutral"
+            polarity = a.get("sentiment") or "neutral"
         else:
             polarity = "positive" if pos/tot >= 0.65 else "negative" if neg/tot >= 0.65 else "mixed"
         out.append({
-            "name":           slot["name"],
+            "name":           name.lower(),
             "sentiment":      polarity,
-            "total_mentions": slot["total_mentions"],
+            "total_mentions": int(a.get("mentions") or 0),
             "positive":       pos,
             "negative":       neg,
-            "summary":        slot["summaries"][0] if slot["summaries"] else None,
+            "summary":        a.get("summary"),
         })
     out.sort(key=lambda x: x["total_mentions"], reverse=True)
     return out[:top_n]

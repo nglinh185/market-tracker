@@ -1,6 +1,6 @@
 ---
 name: query_aspects
-description: "Return aspect-level sentiment breakdown for an Amazon ASIN — what specific product features (battery, sound, build quality, etc.) customers praise vs complain about, ranked by mention count. Use when user asks about product strengths/weaknesses, what features customers care about, or aspect-level analysis. NOT for: overall sentiment scores (use query_sentiment), or raw quotes (use query_reviews)."
+description: "Return Amazon's product-level aspect summary (pre-aggregated by Amazon across all reviews) for an ASIN — what specific product features (battery, sound, build quality, etc.) customers praise vs complain about, ranked by mention count. Use when user asks about product strengths/weaknesses, what features customers care about, or aspect-level analysis. NOT for: overall sentiment scores (use query_sentiment), or raw quotes (use query_reviews)."
 metadata:
   {
     "openclaw":
