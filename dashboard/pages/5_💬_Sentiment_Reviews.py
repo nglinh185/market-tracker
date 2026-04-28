@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from utils.db import fetch, latest_snapshot_date, get_asins_with_metadata, supabase
+from utils.db import fetch, latest_snapshot_date, get_asins_with_metadata
 
 st.set_page_config(page_title="Sentiment & Reviews", page_icon="💬", layout="wide")
 

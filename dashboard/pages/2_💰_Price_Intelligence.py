@@ -30,13 +30,20 @@ if tiers and rankings:
     df_r = pd.DataFrame(rankings)[["asin", "rank", "reviews_count", "stars", "brand"]]
     df = df_t.merge(df_r, on="asin", how="left")
 
-    fig = px.scatter(df, x="price", y="rank", color="cluster_name",
-                     size="reviews_count", hover_data=["asin", "brand", "stars"],
-                     color_discrete_map={"entry": "#22c55e", "mid": "#f59e0b", "premium": "#ef4444"},
-                     title="Price vs Rank — bubble size = reviews count",
-                     labels={"rank": "Category Rank (lower = better)"})
-    fig.update_yaxes(autorange="reversed")
-    st.plotly_chart(fig, use_container_width=True)
+    # Plotly scatter rejects NaN/None in `size`. Drop rows missing required columns.
+    df_plot = df.dropna(subset=["price", "rank", "reviews_count", "cluster_name"]).copy()
+    df_plot["reviews_count"] = df_plot["reviews_count"].clip(lower=1)  # avoid size=0
+
+    if not df_plot.empty:
+        fig = px.scatter(df_plot, x="price", y="rank", color="cluster_name",
+                         size="reviews_count", hover_data=["asin", "brand", "stars"],
+                         color_discrete_map={"entry": "#22c55e", "mid": "#f59e0b", "premium": "#ef4444"},
+                         title="Price vs Rank — bubble size = reviews count",
+                         labels={"rank": "Category Rank (lower = better)"})
+        fig.update_yaxes(autorange="reversed")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("Chưa đủ dữ liệu để vẽ scatter (cần price + rank + reviews_count).")
 
     # Summary per tier
     col1, col2, col3 = st.columns(3)
