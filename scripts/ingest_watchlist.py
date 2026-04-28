@@ -15,8 +15,9 @@ load_dotenv()
 from config import ACTOR_CATEGORY, WATCHLIST, require_env
 from lib.apify import run_actor, fetch_dataset
 from lib.parsers.product import parse_item
+from lib.parsers.brand_extract import resolve_brand
 from lib.image_store import download_hash_store, get_yesterday_hash, is_image_changed, ensure_bucket
-from lib.db import upsert
+from lib.db import supabase, upsert
 
 require_env(["APIFY_TOKEN", "SUPABASE_URL", "SUPABASE_KEY"])
 
@@ -77,6 +78,7 @@ def main() -> None:
 
     items = all_raw_items
     rows  = []
+    asin_brand_updates = []
 
     for item in items:
         if not item.get("asin"):
@@ -84,6 +86,13 @@ def main() -> None:
 
         row  = parse_item(item, today)
         asin = row["asin"]
+
+        # Refresh brand on `asins` table — Apify product detail may include
+        # `brand`; otherwise fall back to product_name pattern match.
+        brand = resolve_brand(item.get("brand"), item.get("title"))
+        if brand:
+            asin_brand_updates.append({"asin": asin, "brand": brand,
+                                       "product_name": item.get("title")})
 
         # _main_image_url là internal field từ parser, lấy ra rồi xoá
         image_url = row.pop("_main_image_url", None)
@@ -110,6 +119,16 @@ def main() -> None:
 
     n = upsert("daily_snapshots", rows, "asin,snapshot_date")
     print(f"\n[Watchlist] Done. {n} rows upserted.")
+
+    # Update asins.brand (and product_name when missing) for the watchlist
+    if asin_brand_updates:
+        kept = [u for u in asin_brand_updates if u["asin"] in watchlist_set]
+        for u in kept:
+            payload = {"brand": u["brand"]}
+            if u.get("product_name"):
+                payload["product_name"] = u["product_name"]
+            supabase.table("asins").update(payload).eq("asin", u["asin"]).execute()
+        print(f"[Watchlist] Refreshed brand on {len(kept)} ASINs in asins table.")
 
 
 if __name__ == "__main__":

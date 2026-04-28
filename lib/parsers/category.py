@@ -1,3 +1,6 @@
+from lib.parsers.brand_extract import resolve_brand
+
+
 def _parse_price(val) -> float | None:
     if val is None:
         return None
@@ -24,6 +27,9 @@ def parse_item(
       imageUrl, isSponsored, position, reviewsCount, stars, price{value,currency}
     """
     asin = item.get("asin")
+    title = item.get("title")
+    # Resolve brand: Apify direct field → fallback pattern-match on title
+    brand = resolve_brand(item.get("brand"), title)
 
     # Dùng position từ actor nếu có, fallback về rank argument
     effective_rank = item.get("position") or rank
@@ -33,8 +39,8 @@ def parse_item(
         "browse_node":   category_id,
         "rank":          effective_rank,
         "asin":          asin,
-        "title":         item.get("title"),
-        "brand":         item.get("brand"),          # None nếu actor không trả về
+        "title":         title,
+        "brand":         brand,
         "price":         _parse_price(item.get("price")),
         "stars":         item.get("stars"),
         "reviews_count": item.get("reviewsCount"),
@@ -44,8 +50,8 @@ def parse_item(
 
     asin_row = {
         "asin":         asin,
-        "product_name": item.get("title"),
-        "brand":        item.get("brand"),
+        "product_name": title,
+        "brand":        brand,
         "category":     category_id,
     }
 
