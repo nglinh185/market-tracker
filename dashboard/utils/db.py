@@ -21,12 +21,19 @@ def get_client():
     return create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 
-supabase = get_client()
+# Lazy module-level access: `from utils.db import supabase` returns a proxy
+# that calls get_client() on first attribute access. This avoids triggering
+# Streamlit runtime during import (which would conflict with st.set_page_config).
+def __getattr__(name):
+    if name == "supabase":
+        return get_client()
+    raise AttributeError(f"module 'utils.db' has no attribute {name!r}")
 
 
 def fetch(table: str, columns: str = "*", filters: dict | None = None,
           order_col: str | None = None, desc: bool = True, limit: int = 10000) -> list[dict]:
     """Query helper với cache 60s."""
+    supabase = get_client()
     q = supabase.table(table).select(columns)
     if filters:
         for col, val in filters.items():
@@ -43,6 +50,7 @@ def fetch(table: str, columns: str = "*", filters: dict | None = None,
 
 def query(sql: str, params=None):
     """Placeholder — prefer fetch() above. SQL fallback via RPC (cần tạo function)."""
+    supabase = get_client()
     # Since supabase-py không support raw SQL, mô phỏng bằng count
     if "COUNT(DISTINCT asin)" in sql and "asins" in sql:
         rows = supabase.table("asins").select("asin").execute().data
@@ -60,6 +68,7 @@ def query(sql: str, params=None):
 @st.cache_data(ttl=60)
 def latest_snapshot_date() -> str:
     """Ngày mới nhất trong daily_snapshots."""
+    supabase = get_client()
     rows = supabase.table("daily_snapshots").select("snapshot_date").order(
         "snapshot_date", desc=True).limit(1).execute().data
     return rows[0]["snapshot_date"] if rows else "N/A"
@@ -68,5 +77,6 @@ def latest_snapshot_date() -> str:
 @st.cache_data(ttl=60)
 def get_asins_with_metadata() -> dict:
     """Map asin → {product_name, brand, category}"""
+    supabase = get_client()
     rows = supabase.table("asins").select("asin,product_name,brand,category").execute().data
     return {r["asin"]: r for r in rows}
