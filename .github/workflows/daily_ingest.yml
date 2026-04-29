@@ -31,16 +31,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Cache CmdStan
-        id: cache-cmdstan
-        uses: actions/cache@v4
-        with:
-          path: ~/.cmdstan
-          key: ${{ runner.os }}-cmdstan-2.33.1
-
       - name: Install CmdStan
-        if: steps.cache-cmdstan.outputs.cache-hit != 'true'
-        run: python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.33.1', cores=2)"
+        run: python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.33.1', overwrite=True, cores=2)"
 
       - name: Configure CmdStan path
         run: echo "CMDSTAN=$HOME/.cmdstan/cmdstan-2.33.1" >> "$GITHUB_ENV"

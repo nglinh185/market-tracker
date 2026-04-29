@@ -63,13 +63,13 @@ def _mape(y_true: list[float], y_pred: list[float]) -> float:
 
 
 def main() -> None:
+    _configure_cmdstan()
+
     try:
         from prophet import Prophet
     except ImportError:
         print("[Eval-Forecast] prophet not installed. Skip.")
         return
-
-    _configure_cmdstan()
 
     import pandas as pd
 

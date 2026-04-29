@@ -37,13 +37,13 @@ def _configure_cmdstan() -> None:
 
 
 def main() -> None:
+    _configure_cmdstan()
+
     try:
         from prophet import Prophet
     except ImportError:
         print("[Forecast] prophet not installed. Run: pip install prophet")
         return
-
-    _configure_cmdstan()
 
     import pandas as pd
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
