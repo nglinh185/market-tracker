@@ -12,12 +12,27 @@ st.caption("RoBERTa sentiment (HuggingFace) + Amazon aspect-based summaries")
 
 asins_meta = get_asins_with_metadata()
 
-# --- ASIN selector ---
-asin_opts = {f"{m.get('product_name', a)[:60]} ({a})": a for a, m in asins_meta.items() if m.get("category")}
+# --- ASIN selector — only show ASINs that actually have review data ---
+@st.cache_data(ttl=300)
+def _asins_with_reviews() -> set[str]:
+    rows = fetch("reviews_raw", columns="asin", limit=50000)
+    return {r["asin"] for r in rows if r.get("asin")}
+
+reviewed = _asins_with_reviews()
+asin_opts = {
+    f"{m.get('product_name', a)[:60]} ({a})": a
+    for a, m in asins_meta.items()
+    if m.get("category") and a in reviewed
+}
+
 if not asin_opts:
-    st.warning("Chưa có ASIN nào trong hệ thống.")
+    st.warning(
+        "Chưa có ASIN nào có review data. "
+        "Chạy `python scripts/ingest_reviews.py` để pull reviews cho watchlist ASINs."
+    )
     st.stop()
 
+st.caption(f"📦 {len(asin_opts)} ASIN có review data (watchlist).")
 selected_label = st.selectbox("Select product", options=list(asin_opts.keys()))
 selected_asin = asin_opts[selected_label]
 

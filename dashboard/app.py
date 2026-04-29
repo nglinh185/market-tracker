@@ -5,12 +5,21 @@ Run: streamlit run dashboard/app.py
 import streamlit as st
 from datetime import date
 from utils.db import query, latest_snapshot_date
+from utils.theme import apply_plotly_theme
 
 st.set_page_config(
     page_title="Amazon Market Tracker",
     page_icon="📊",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
+apply_plotly_theme()
+
+# --- Sidebar branding ---
+with st.sidebar:
+    st.markdown("### 📊 Market Tracker")
+    st.caption("Amazon Intelligence · Thesis 2026")
+    st.divider()
 
 st.title("📊 Amazon Market Tracker")
 st.caption("E-Commerce Intelligence Platform — Thesis Dashboard")
