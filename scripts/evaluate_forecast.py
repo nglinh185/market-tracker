@@ -46,8 +46,6 @@ def _mape(y_true: list[float], y_pred: list[float]) -> float:
 
 def main() -> None:
     try:
-        import os, cmdstanpy
-        os.environ.setdefault("CMDSTAN", cmdstanpy.cmdstan_path())
         from prophet import Prophet
     except ImportError:
         print("[Eval-Forecast] prophet not installed. Skip.")

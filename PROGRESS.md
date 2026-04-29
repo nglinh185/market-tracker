@@ -9,9 +9,9 @@
 
 | Item              | Date       |
 | ----------------- | ---------- |
-| Today             | 2026-04-28 |
+| Today             | 2026-04-29 |
 | Thesis deadline   | 2026-05-02 |
-| Days remaining    | **4**      |
+| Days remaining    | **3**      |
 
 ---
 
@@ -127,6 +127,11 @@ CLAUDE.md asks for auto-updates to this file on every task. Markdown cannot enfo
 ---
 
 ## Changelog
+
+- **2026-04-29** - PR merge + forecast migration applied:
+  - GitHub PR branch `claude/vigorous-jang-82408f` was merged and deleted by the owner. Local `main` fast-forwarded to `0fe0021` (`audit: pre-defense stabilization`); the existing local dashboard/SOUL/AGENTS working-tree edits were preserved untouched.
+  - Supabase migration `005_price_forecast.sql` was applied successfully in SQL Editor. `price_forecast_daily` now exists, unblocking `analyze_price_forecast.py` upserts and the `query_price_forecast` skill's Supabase-first read path.
+  - Manual GitHub Actions run `#14` reached `analyze_price_forecast.py` but failed because the script called `cmdstanpy.cmdstan_path()` before Prophet could configure its bundled CmdStan backend. Removed the eager `CMDSTAN` setup from both `analyze_price_forecast.py` and `evaluate_forecast.py`; next run should let Prophet initialize the backend normally and proceed to the Supabase upsert.
 
 - **2026-04-29** — Pre-defense engineering audit and stabilization pass:
   - **GitHub Actions reviews job was dead.** `daily_ingest.yml` had a single `0 6 * * *` cron and the reviews job's `if` checked for `0 6 * * 1` — never matched, so reviews + sentiment never ran on schedule. Added a second cron (`0 7 * * 1`), guarded both jobs by `github.event.schedule`, and disallowed the reviews job on `workflow_dispatch` so manual dispatches don't accidentally burn Apify credits.
