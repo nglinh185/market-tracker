@@ -5,6 +5,16 @@ on:
     - cron: '0 6 * * *'   # daily 6:00 UTC = 13:00 Asia/Ho_Chi_Minh — ingest + analytics
     - cron: '0 7 * * 1'   # weekly Mon 7:00 UTC — also collect reviews + run sentiment
   workflow_dispatch:
+    inputs:
+      run_mode:
+        description: "full | analytics_only | forecast_only"
+        required: false
+        default: "full"
+        type: choice
+        options:
+          - full
+          - analytics_only
+          - forecast_only
 
 jobs:
   ingest:
@@ -13,7 +23,9 @@ jobs:
     # Run on the daily 06:00 UTC schedule and on manual dispatch only.
     # The Monday 07:00 UTC cron is reserved for the reviews job — we don't
     # want to re-ingest twice on Mondays.
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '0 6 * * *')
+    if: |
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.run_mode == 'full') ||
+      (github.event_name == 'schedule' && github.event.schedule == '0 6 * * *')
 
     env:
       APIFY_TOKEN:  ${{ secrets.APIFY_TOKEN }}
@@ -48,6 +60,15 @@ jobs:
           cmdstanpy.set_cmdstan_path(str(p))
           print(f"CMDSTAN_OK={cmdstanpy.cmdstan_path()}")
           PY
+
+      - name: Wire CmdStan into Prophet's bundled path
+        run: |
+          PROPHET_STAN_DIR=$(python -c "import prophet, os; print(os.path.join(os.path.dirname(prophet.__file__), 'stan_model'))")
+          mkdir -p "$PROPHET_STAN_DIR"
+          rm -rf "$PROPHET_STAN_DIR/cmdstan-2.33.1"
+          ln -s "$HOME/.cmdstan/cmdstan-2.33.1" "$PROPHET_STAN_DIR/cmdstan-2.33.1"
+          test -f "$PROPHET_STAN_DIR/cmdstan-2.33.1/makefile"
+          echo "Prophet CmdStan link OK at $PROPHET_STAN_DIR/cmdstan-2.33.1"
 
       - name: Ingest category rankings
         run: python scripts/ingest_category.py
@@ -91,3 +112,104 @@ jobs:
 
       - name: Run sentiment analysis
         run: python scripts/analyze_sentiment.py
+
+  analytics_only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_mode == 'analytics_only'
+
+    env:
+      APIFY_TOKEN:  ${{ secrets.APIFY_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install CmdStan
+        run: python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.33.1', overwrite=True, cores=2)"
+
+      - name: Configure CmdStan path
+        run: echo "CMDSTAN=$HOME/.cmdstan/cmdstan-2.33.1" >> "$GITHUB_ENV"
+
+      - name: Verify CmdStan installation
+        run: |
+          test -f "$HOME/.cmdstan/cmdstan-2.33.1/makefile"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import cmdstanpy
+          p = Path(os.environ["CMDSTAN"])
+          cmdstanpy.set_cmdstan_path(str(p))
+          print(f"CMDSTAN_OK={cmdstanpy.cmdstan_path()}")
+          PY
+
+      - name: Wire CmdStan into Prophet's bundled path
+        run: |
+          PROPHET_STAN_DIR=$(python -c "import prophet, os; print(os.path.join(os.path.dirname(prophet.__file__), 'stan_model'))")
+          mkdir -p "$PROPHET_STAN_DIR"
+          rm -rf "$PROPHET_STAN_DIR/cmdstan-2.33.1"
+          ln -s "$HOME/.cmdstan/cmdstan-2.33.1" "$PROPHET_STAN_DIR/cmdstan-2.33.1"
+          test -f "$PROPHET_STAN_DIR/cmdstan-2.33.1/makefile"
+          echo "Prophet CmdStan link OK at $PROPHET_STAN_DIR/cmdstan-2.33.1"
+
+      - name: Run analytics pipeline (no Apify re-scrape)
+        run: python scripts/run_analytics.py
+
+  forecast_only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_mode == 'forecast_only'
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install CmdStan
+        run: python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.33.1', overwrite=True, cores=2)"
+
+      - name: Configure CmdStan path
+        run: echo "CMDSTAN=$HOME/.cmdstan/cmdstan-2.33.1" >> "$GITHUB_ENV"
+
+      - name: Verify CmdStan installation
+        run: |
+          test -f "$HOME/.cmdstan/cmdstan-2.33.1/makefile"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import cmdstanpy
+          p = Path(os.environ["CMDSTAN"])
+          cmdstanpy.set_cmdstan_path(str(p))
+          print(f"CMDSTAN_OK={cmdstanpy.cmdstan_path()}")
+          PY
+
+      - name: Wire CmdStan into Prophet's bundled path
+        run: |
+          PROPHET_STAN_DIR=$(python -c "import prophet, os; print(os.path.join(os.path.dirname(prophet.__file__), 'stan_model'))")
+          mkdir -p "$PROPHET_STAN_DIR"
+          rm -rf "$PROPHET_STAN_DIR/cmdstan-2.33.1"
+          ln -s "$HOME/.cmdstan/cmdstan-2.33.1" "$PROPHET_STAN_DIR/cmdstan-2.33.1"
+          test -f "$PROPHET_STAN_DIR/cmdstan-2.33.1/makefile"
+          echo "Prophet CmdStan link OK at $PROPHET_STAN_DIR/cmdstan-2.33.1"
+
+      - name: Run forecast only
+        run: python scripts/analyze_price_forecast.py

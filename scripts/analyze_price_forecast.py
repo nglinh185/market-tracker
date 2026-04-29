@@ -36,14 +36,46 @@ def _configure_cmdstan() -> None:
         print(f"[Forecast] Failed to configure CMDSTAN path {cmdstan_home}: {e}")
 
 
+def _wire_prophet_cmdstan() -> None:
+    """
+    Prophet 1.1.5 looks for cmdstan inside its own package
+    (`site-packages/prophet/stan_model/cmdstan-2.33.1`) rather than honoring
+    cmdstanpy's path. If we have a valid cmdstan elsewhere (CI installs it to
+    ~/.cmdstan), symlink it into Prophet's expected location so Prophet can
+    find a real makefile + binaries.
+    """
+    cmdstan_home = os.getenv("CMDSTAN")
+    if not cmdstan_home or not (Path(cmdstan_home) / "makefile").exists():
+        return
+    try:
+        import prophet
+    except ImportError:
+        return
+    prophet_stan_dir = Path(prophet.__file__).parent / "stan_model"
+    expected = prophet_stan_dir / Path(cmdstan_home).name
+    try:
+        if expected.is_symlink() or expected.exists():
+            if expected.is_symlink():
+                expected.unlink()
+            elif expected.is_dir():
+                import shutil
+                shutil.rmtree(expected)
+        prophet_stan_dir.mkdir(parents=True, exist_ok=True)
+        os.symlink(cmdstan_home, expected)
+        print(f"[Forecast] Linked {cmdstan_home} -> {expected}")
+    except Exception as e:
+        print(f"[Forecast] Failed to wire Prophet cmdstan path: {e}")
+
+
 def main() -> None:
     _configure_cmdstan()
+    _wire_prophet_cmdstan()
 
     try:
         from prophet import Prophet
     except ImportError:
         print("[Forecast] prophet not installed. Run: pip install prophet")
-        return
+        sys.exit(1)
 
     import pandas as pd
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -65,9 +97,13 @@ def main() -> None:
     for r in all_snaps:
         by_asin[r["asin"]].append(r)
 
-    results = {}
+    results: dict[str, list[dict]] = {}
+    skipped_short: list[str] = []
+    failed: list[str] = []
+
     for asin, rows in by_asin.items():
         if len(rows) < 3:
+            skipped_short.append(asin)
             continue
         df = pd.DataFrame([
             {"ds": r["snapshot_date"], "y": float(r["price"])} for r in rows
@@ -84,14 +120,19 @@ def main() -> None:
             tail = forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(7)
             results[asin] = tail.to_dict("records")
         except Exception as e:
-            print(f"  [WARN] {asin}: {e}")
+            print(f"  [WARN] {asin}: Prophet failed ({e})")
+            failed.append(asin)
 
     out_file = OUTPUT_DIR / f"price_forecast_{today}.json"
     out_file.write_text(json.dumps(
         {k: [{**r, "ds": str(r["ds"])} for r in v] for k, v in results.items()},
         indent=2
     ))
-    print(f"[Forecast] {len(results)} ASINs forecast -> {out_file}")
+    total = len(by_asin)
+    print(f"[Forecast] success={len(results)} failed={len(failed)} "
+          f"skipped_short_history={len(skipped_short)} (of {total} ASINs) -> {out_file}")
+    if failed:
+        print(f"[Forecast] failed ASINs: {', '.join(failed)}")
 
     # Persist to Supabase so the OpenClaw VM (different machine than CI) can
     # read the forecasts via query_price_forecast skill. Falls back silently
@@ -113,6 +154,10 @@ def main() -> None:
             print(f"[Forecast] {len(db_rows)} forecast points upserted to price_forecast_daily.")
         except Exception as e:
             print(f"[Forecast] price_forecast_daily upsert failed (run migration 005?): {e}")
+
+    if not results:
+        print("[Forecast] No forecasts produced — failing job to surface CmdStan/Prophet issue.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
