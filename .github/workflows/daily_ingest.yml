@@ -2,13 +2,18 @@ name: Daily Amazon Data Ingest
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # 6:00 AM UTC = 1PM Vietnam time
+    - cron: '0 6 * * *'   # daily 6:00 UTC = 13:00 Asia/Ho_Chi_Minh — ingest + analytics
+    - cron: '0 7 * * 1'   # weekly Mon 7:00 UTC — also collect reviews + run sentiment
   workflow_dispatch:
 
 jobs:
   ingest:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    # Run on the daily 06:00 UTC schedule and on manual dispatch only.
+    # The Monday 07:00 UTC cron is reserved for the reviews job — we don't
+    # want to re-ingest twice on Mondays.
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '0 6 * * *')
 
     env:
       APIFY_TOKEN:  ${{ secrets.APIFY_TOKEN }}
@@ -42,8 +47,10 @@ jobs:
   reviews:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    # Chay thu 2 hang tuan de cap nhat reviews moi
-    if: github.event_name == 'schedule' && startsWith(github.event.schedule, '0 6 * * 1')
+    # Run only on the weekly Monday cron (07:00 UTC). Manual dispatch will NOT
+    # collect reviews — to force a one-off, run `python scripts/ingest_reviews.py`
+    # locally or temporarily change this guard. Reason: each run costs Apify credits.
+    if: github.event_name == 'schedule' && github.event.schedule == '0 7 * * 1'
 
     env:
       APIFY_TOKEN:  ${{ secrets.APIFY_TOKEN }}

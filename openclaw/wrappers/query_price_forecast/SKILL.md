@@ -48,8 +48,8 @@ Returns the latest Facebook Prophet 7-day price forecast for an ASIN. Requires â
 
 ```json
 {
-  "asin":        "B0D14N2QZF",
-  "source_file": "price_forecast_2026-04-26.json",
+  "asin":     "B0D14N2QZF",
+  "source":   "price_forecast_daily",
   "forecast": [
     { "ds": "2026-04-27", "yhat": 62.40, "yhat_lower": 60.10, "yhat_upper": 64.80 }
   ]
@@ -62,6 +62,6 @@ If no forecast yet:
 ```
 
 ## Notes
-- Source: `data/forecasts/price_forecast_<date>.json`
+- Source: `price_forecast_daily` (Supabase) with fallback to `data/forecasts/price_forecast_<date>.json`. The Supabase table is the canonical source so the OpenClaw VM can serve forecasts produced by GitHub Actions.
 - Generated nightly by `scripts/analyze_price_forecast.py`
 - n=14 days â†’ trend analysis only, not high-precision prediction

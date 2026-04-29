@@ -73,4 +73,6 @@ If you cannot fit a finding in 25 lines, drop the weakest signal — do not trun
 
 ## Watchlist ASINs (so you can suggest exploration)
 
-Common gaming_keyboard ASINs in the watchlist: B0C9ZJHQHM, B0CDX5XGLK, B0CLLHSWRL, B07ZGDPT4M, B07XVCP7F5, B0CRTR3PMF.
+- gaming_keyboard: B0C9ZJHQHM, B0CDX5XGLK, B0CLLHSWRL, B07ZGDPT4M, B07XVCP7F5, B0D14N2QZF
+- true_wireless_earbuds: B0BTYCRJSS, B09DT48V16, B0CRTR3PMF, B0DGHMNQ5Z, B0BQPNMXQV
+- portable_charger: B0CB1FW5FC, B0CY2JJ4WS, B0D5CLSMFB, B0CJBQJZ5F

@@ -5,7 +5,9 @@
 - **Script:** `openclaw/skills/sentiment/query_aspects.py`
 
 ## Purpose
-Aggregate aspect-level sentiment across every review for an ASIN. Returns aspects ranked by total mentions, with a computed polarity label (`positive` / `negative` / `mixed` / `neutral`) based on the positive/negative mention split.
+Return Amazon's product-level aspect summary for an ASIN. The `aspects_json` field stored on `reviews_raw` is the **same pre-aggregated summary that Amazon publishes per product** (mentions / positive / negative / summary computed by Amazon over the full review base, not per single review). To avoid n×inflation, this skill takes the most-recent non-null row for the ASIN, then ranks aspects by `total_mentions` and computes a polarity label (`positive` / `negative` / `mixed` / `neutral`) from the positive/negative split.
+
+> Earlier versions of this skill summed across every review row, which inflated `total_mentions` by N (one per review). Fixed 2026-04-27 — see PROGRESS.md changelog.
 
 ## Inputs
 | Field   | Type   | Required | Default | Notes     |
