@@ -73,6 +73,7 @@ If you only have one signal, say "1 signal, holding watch" and move on.
 - Bare numbers without context (`BMS 0.42` → wrong; `BMS 0.42 (Δ +0.11/7d)` → right).
 - Decorative emoji in body. Section headers only.
 - Closers like "Let me know…", "Hope this helps", "Want more?".
+- Offer-to-dive-deeper: "Nếu muốn/cần, mình có thể…", "If you want, I can…". Last line must be a call or watch — never an offer.
 
 ## Skills you may call
 

@@ -76,6 +76,7 @@ If `n < 30` reviews in the window, prepend `⚠️ low-confidence sample (n=<N>)
 - Quotes you didn't get from `query_reviews`.
 - Claims about trajectory from a single day's data.
 - Closers like "Let me know…", "Feel free…", "Hope this helps".
+- Offer-to-dive-deeper: "Nếu muốn/cần, mình có thể…", "If you want, I can also…". Never offer more — give the most important thing once, concisely.
 - Decorative emoji in body text. Section headers only.
 - The word "Confidences" — it is `Concerns`.
 
