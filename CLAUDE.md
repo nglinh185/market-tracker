@@ -51,17 +51,24 @@ market-tracker/
 ├── PROGRESS.md               ← live status log (update after every task)
 ├── lib/
 │   └── db.py                 ← Supabase client (ALL DB access goes through here)
-├── scripts/                  ← analytics pipeline (run daily)
-│   ├── fetch_apify.py
+├── scripts/                  ← ingest + analytics pipeline (run daily / weekly)
+│   ├── ingest_category.py    ← daily: 3 categories → category_rankings + asins
+│   ├── ingest_watchlist.py   ← daily: 30 ASINs → daily_snapshots + pHash
+│   ├── ingest_reviews.py     ← weekly: reviews_raw via web_wanderer actor
+│   ├── seed_watchlist.py     ← one-off: mark watchlist ASINs in asins table
+│   ├── run_analytics.py      ← orchestrates the analytics chain (below)
+│   ├── analyze_entrant_exit.py
+│   ├── analyze_changes.py    ← pHash image diff + content diff
+│   ├── analyze_sponsored.py
+│   ├── analyze_price_tier.py
+│   ├── analyze_sentiment.py  ← RoBERTa
 │   ├── analyze_bms.py
-│   ├── analyze_sentiment.py
-│   ├── analyze_aspects.py
-│   ├── analyze_price_tiers.py
-│   ├── analyze_price_forecast.py
-│   ├── analyze_changes.py    ← pHash image diff
 │   ├── analyze_lqs.py
-│   └── analyze_alerts.py
-├── migrations/               ← SQL schema (001–004 active; 005 pending deletion)
+│   ├── analyze_alerts.py
+│   ├── analyze_price_forecast.py
+│   ├── evaluate_sentiment.py ← stars-as-ground-truth eval (thesis appendix)
+│   └── evaluate_forecast.py  ← walk-forward Prophet backtest
+├── migrations/               ← SQL schema (001–005 active)
 ├── dashboard/                ← Streamlit pages
 ├── data/forecasts/           ← Prophet outputs
 └── openclaw/                 ← agentic workspace
@@ -190,7 +197,7 @@ python scripts/run_analytics.py        # orchestrates all 9 analytics in correct
 ### Dashboard
 
 ```bash
-streamlit run dashboard/Home.py
+streamlit run dashboard/app.py
 ```
 
 ---
@@ -217,7 +224,7 @@ Every task completion or logic change should trigger an update to **PROGRESS.md*
 
 - **Telegram polling occasionally stalls** (`getUpdates failed` errors in logs). VMware NAT instability; auto-recovers but messages can lag 30–60s. Mention as a deployment limitation.
 - **9router `gpt-5.5` proxy** at `localhost:20128` was originally configured as primary model but is currently down — agents fall back to `openai/gpt-4o-mini` which works correctly. Document the failover behavior.
-- **`migrations/005_openclaw_memory.sql`** — Gateway has its own memory store, this migration is dead. Drop before defense.
+- **Migration 005** is now `005_price_forecast.sql` — adds `price_forecast_daily` so the OpenClaw VM can serve forecasts produced by GitHub Actions (file-based forecasts on the CI runner are ephemeral and unreachable from the VM). The earlier `005_openclaw_memory.sql` was dead (Gateway has its own memory store) and was removed.
 - **No keyword routing inside one Telegram bot.** OpenClaw bindings are 1:1 channel-to-agent only. We use 3 separate bots instead — see §4 architecture diagram.
 - **Prophet 7-day forecast on n=14 days of data** has limited accuracy — used for trend direction, not absolute price prediction. Disclosed in `analyze_price_forecast.py` docstring and `query_price_forecast` SKILL.md.
 - **`query_aspects` returns Amazon's pre-aggregated product summary** (not per-review aggregation by us). Earlier bug double-aggregated; fixed 2026-04-27.

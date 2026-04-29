@@ -1,6 +1,6 @@
 """
 Price trend + short-term forecast dung Facebook Prophet.
-In ra forecast + luu vao file data/forecasts/ASIN_date.json
+Persists forecast to Supabase (price_forecast_daily) AND data/forecasts/ JSON.
 Acknowledge: n=14 days -> forecast accuracy han che, dung de trend analysis.
 """
 import sys
@@ -12,7 +12,7 @@ from datetime import date
 from dotenv import load_dotenv
 load_dotenv()
 
-from lib.db import supabase
+from lib.db import supabase, upsert
 from config import WATCHLIST
 
 OUTPUT_DIR = Path(__file__).parent.parent / "data" / "forecasts"
@@ -74,6 +74,27 @@ def main() -> None:
         indent=2
     ))
     print(f"[Forecast] {len(results)} ASINs forecast -> {out_file}")
+
+    # Persist to Supabase so the OpenClaw VM (different machine than CI) can
+    # read the forecasts via query_price_forecast skill. Falls back silently
+    # if the price_forecast_daily table hasn't been migrated yet.
+    db_rows = []
+    for asin, points in results.items():
+        for p in points:
+            db_rows.append({
+                "snapshot_date": today,
+                "asin":          asin,
+                "ds":            str(p["ds"])[:10],
+                "yhat":          round(float(p["yhat"]), 2),
+                "yhat_lower":    round(float(p["yhat_lower"]), 2),
+                "yhat_upper":    round(float(p["yhat_upper"]), 2),
+            })
+    if db_rows:
+        try:
+            upsert("price_forecast_daily", db_rows, "snapshot_date,asin,ds")
+            print(f"[Forecast] {len(db_rows)} forecast points upserted to price_forecast_daily.")
+        except Exception as e:
+            print(f"[Forecast] price_forecast_daily upsert failed (run migration 005?): {e}")
 
 
 if __name__ == "__main__":

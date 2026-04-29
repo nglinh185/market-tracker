@@ -18,10 +18,16 @@ BSR_SPIKE_THRESHOLD  = 500  # BSR got worse by this much
 STOCKOUT_AFTER_DAYS  = 1    # flag if out of stock
 
 
-def _insert_alerts(alerts: list[dict]) -> None:
-    if not alerts:
-        return
-    supabase.table("alerts").insert(alerts).execute()
+def _insert_alerts(alerts: list[dict], snapshot_date: str) -> None:
+    # Pragmatic idempotency for the current pipeline: clear today's alerts
+    # then insert. Lets CI retries / manual re-runs avoid duplicate rows
+    # without a schema change. Not fully production-safe — the delete can
+    # succeed and the insert can fail, leaving today empty until the next
+    # run. Acceptable for thesis/demo; revisit with a transactional RPC or
+    # a UNIQUE constraint + on_conflict if this is hardened for production.
+    supabase.table("alerts").delete().eq("snapshot_date", snapshot_date).execute()
+    if alerts:
+        supabase.table("alerts").insert(alerts).execute()
 
 
 def main() -> None:
@@ -46,7 +52,7 @@ def main() -> None:
     }
     entrants = (
         supabase.table("entrant_exit_events")
-        .select("asin,browse_node,event_type,rank_today,is_top10")
+        .select("asin,browse_node,event_type,rank_today,rank_yesterday,is_top10")
         .eq("snapshot_date", today)
         .execute()
     ).data
@@ -114,16 +120,19 @@ def main() -> None:
                 "metadata_json": {"rank": e["rank_today"]},
             })
         else:
+            # Exit events have rank_today=None (the ASIN is no longer ranked);
+            # report the previous rank to make the alert message meaningful.
+            prev_rank = e.get("rank_yesterday")
             alerts.append({
                 "snapshot_date": today,
                 "asin": e["asin"], "browse_node": e["browse_node"],
                 "alert_type": "exit",
                 "severity": "medium",
-                "message": f"ASIN exited Top 50 (was rank #{e['rank_today']})",
-                "metadata_json": {},
+                "message": f"ASIN exited Top 50 (was rank #{prev_rank})" if prev_rank else "ASIN exited Top 50",
+                "metadata_json": {"rank_yesterday": prev_rank},
             })
 
-    _insert_alerts(alerts)
+    _insert_alerts(alerts, today)
     print(f"[Alerts] {len(alerts)} alerts generated.")
     for a in alerts:
         print(f"  [{a['severity'].upper()}] {a['asin']} - {a['alert_type']}: {a['message']}")
