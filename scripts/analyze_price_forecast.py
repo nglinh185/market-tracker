@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import json
+import os
 from datetime import date
 from dotenv import load_dotenv
 load_dotenv()
@@ -18,12 +19,31 @@ from config import WATCHLIST
 OUTPUT_DIR = Path(__file__).parent.parent / "data" / "forecasts"
 
 
+def _configure_cmdstan() -> None:
+    """Prefer explicit CMDSTAN path from CI/local env when valid."""
+    cmdstan_home = os.getenv("CMDSTAN")
+    if not cmdstan_home:
+        return
+    makefile = Path(cmdstan_home) / "makefile"
+    if not makefile.exists():
+        print(f"[Forecast] CMDSTAN is set but invalid (missing makefile): {cmdstan_home}")
+        return
+    try:
+        import cmdstanpy
+        cmdstanpy.set_cmdstan_path(str(Path(cmdstan_home)))
+        print(f"[Forecast] Using CMDSTAN at {cmdstan_home}")
+    except Exception as e:
+        print(f"[Forecast] Failed to configure CMDSTAN path {cmdstan_home}: {e}")
+
+
 def main() -> None:
     try:
         from prophet import Prophet
     except ImportError:
         print("[Forecast] prophet not installed. Run: pip install prophet")
         return
+
+    _configure_cmdstan()
 
     import pandas as pd
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -57,7 +77,7 @@ def main() -> None:
         try:
             m = Prophet(daily_seasonality=False, weekly_seasonality=False,
                         yearly_seasonality=False, uncertainty_samples=100,
-                        stan_backend='CMDSTANPY')
+                        stan_backend="CMDSTANPY")
             m.fit(df)
             future = m.make_future_dataframe(periods=7)
             forecast = m.predict(future)

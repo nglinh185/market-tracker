@@ -23,6 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import json
+import os
 from datetime import date
 from dotenv import load_dotenv
 load_dotenv()
@@ -34,6 +35,23 @@ from config import WATCHLIST
 OUT_DIR = Path(__file__).parent.parent / "data" / "eval"
 MIN_HISTORY = 7      # need at least this many days to bother fitting
 HOLDOUT     = 3      # forecast horizon for backtest
+
+
+def _configure_cmdstan() -> None:
+    """Prefer explicit CMDSTAN path from CI/local env when valid."""
+    cmdstan_home = os.getenv("CMDSTAN")
+    if not cmdstan_home:
+        return
+    makefile = Path(cmdstan_home) / "makefile"
+    if not makefile.exists():
+        print(f"[Eval-Forecast] CMDSTAN is set but invalid (missing makefile): {cmdstan_home}")
+        return
+    try:
+        import cmdstanpy
+        cmdstanpy.set_cmdstan_path(str(Path(cmdstan_home)))
+        print(f"[Eval-Forecast] Using CMDSTAN at {cmdstan_home}")
+    except Exception as e:
+        print(f"[Eval-Forecast] Failed to configure CMDSTAN path {cmdstan_home}: {e}")
 
 
 def _mae(y_true: list[float], y_pred: list[float]) -> float:
@@ -50,6 +68,8 @@ def main() -> None:
     except ImportError:
         print("[Eval-Forecast] prophet not installed. Skip.")
         return
+
+    _configure_cmdstan()
 
     import pandas as pd
 

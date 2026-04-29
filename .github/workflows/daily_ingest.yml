@@ -45,6 +45,18 @@ jobs:
       - name: Configure CmdStan path
         run: echo "CMDSTAN=$HOME/.cmdstan/cmdstan-2.33.1" >> "$GITHUB_ENV"
 
+      - name: Verify CmdStan installation
+        run: |
+          test -f "$HOME/.cmdstan/cmdstan-2.33.1/makefile"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import cmdstanpy
+          p = Path(os.environ["CMDSTAN"])
+          cmdstanpy.set_cmdstan_path(str(p))
+          print(f"CMDSTAN_OK={cmdstanpy.cmdstan_path()}")
+          PY
+
       - name: Ingest category rankings
         run: python scripts/ingest_category.py
 

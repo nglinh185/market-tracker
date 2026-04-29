@@ -24,6 +24,7 @@ ANALYTICS = [
 
 
 def main() -> None:
+    failed = []
     for script in ANALYTICS:
         path = SCRIPTS_DIR / script
         print(f"\n{'='*50}")
@@ -31,6 +32,14 @@ def main() -> None:
         result = subprocess.run([PYTHON, str(path)], capture_output=False)
         if result.returncode != 0:
             print(f"  [ERROR] {script} failed with code {result.returncode}")
+            failed.append(script)
+            break
+
+    if failed:
+        print(f"\n[run_analytics] FAILED at {failed[0]}. Stopping pipeline.")
+        sys.exit(1)
+
+    print("\n[run_analytics] Completed successfully.")
 
 
 if __name__ == "__main__":
