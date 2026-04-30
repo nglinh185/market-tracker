@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Intelligence — Amazon Tracker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="style.css">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#0a0e1a', card: '#0f1729', border: '#1e293b',
+          muted: '#64748b', fg: '#e2e8f0',
+          accent: '#06b6d4', accent2: '#a855f7',
+          good: '#22c55e', bad: '#ef4444', warn: '#f59e0b',
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-bg text-fg min-h-screen font-sans">
+
+<!-- ========== HEADER ========== -->
+<header class="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-accent to-accent2 flex items-center justify-center text-bg font-bold">⚡</div>
+      <div>
+        <h1 class="text-sm font-bold tracking-[0.2em] text-accent">MARKET INTELLIGENCE</h1>
+        <p class="text-xs text-muted">Amazon Tracker · Thesis 2026</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 text-xs text-muted">
+      <span id="last-updated">Loading...</span>
+      <span class="px-3 py-1.5 rounded-full bg-card border border-border">3 categories · 30 ASINs</span>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+  <!-- ========== ROW 1 — TODAY'S PULSE (4 cards) ========== -->
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="kpi-card kpi-good" id="kpi-winner">
+      <div class="kpi-label">🚀 BIGGEST WINNER</div>
+      <div class="kpi-value">--</div>
+      <div class="kpi-sub">--</div>
+    </div>
+    <div class="kpi-card kpi-bad" id="kpi-risk">
+      <div class="kpi-label">📉 BIGGEST RISK</div>
+      <div class="kpi-value">--</div>
+      <div class="kpi-sub">--</div>
+    </div>
+    <div class="kpi-card kpi-warn" id="kpi-deal">
+      <div class="kpi-label">💰 BEST DEAL TODAY</div>
+      <div class="kpi-value">--</div>
+      <div class="kpi-sub">--</div>
+    </div>
+    <div class="kpi-card kpi-accent" id="kpi-alerts">
+      <div class="kpi-label">🚨 ACTIVE ALERTS</div>
+      <div class="kpi-value">--</div>
+      <div class="kpi-sub">--</div>
+    </div>
+  </section>
+
+  <!-- ========== ROW 2 — CHARTS ========== -->
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="chart-card lg:col-span-2">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-fg">📈 BSR Movement — Watchlist Top 5</h2>
+        <span class="text-xs text-muted">Last 14 days · lower = better rank</span>
+      </div>
+      <div id="chart-bsr" class="h-[280px]"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-fg">💬 Sentiment by Category</h2>
+        <span class="text-xs text-muted">Avg score</span>
+      </div>
+      <div id="chart-sentiment" class="h-[280px]"></div>
+    </div>
+  </section>
+
+  <!-- ========== ROW 3 — OPPORTUNITIES & RISKS ========== -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="chart-card">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-fg">🔥 Top Opportunities</h2>
+        <span class="text-xs text-muted">High BMS + positive sentiment</span>
+      </div>
+      <div id="opps-list" class="space-y-2 mt-2">
+        <div class="text-xs text-muted py-4 text-center">Loading...</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-fg">⚠️ Risks Worth Watching</h2>
+        <span class="text-xs text-muted">High-severity alerts</span>
+      </div>
+      <div id="risks-list" class="space-y-2 mt-2">
+        <div class="text-xs text-muted py-4 text-center">Loading...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== ROW 4 — RECENT EVENTS FEED ========== -->
+  <section class="chart-card">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-semibold text-fg">📋 Recent Events</h2>
+      <span class="text-xs text-muted">Last 7 days</span>
+    </div>
+    <div id="events-feed" class="space-y-2">
+      <div class="text-xs text-muted py-4 text-center">Loading...</div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="text-center text-xs text-muted py-6 border-t border-border">
+    <p>Built with ECharts + Tailwind + Supabase · Data via Apify daily ingest</p>
+    <p class="mt-1 opacity-60">Amazon Market Intelligence Thesis · 2026</p>
+  </footer>
+
+</main>
+
+<script>
+  window.APP_CONFIG = {
+    SUPABASE_URL: "https://thkihemcslwbtnlruono.supabase.co",
+    SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoa2loZW1jc2x3YnRubHJ1b25vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjU4MjMsImV4cCI6MjA5MTk0MTgyM30.irTq6n2WpvOlcaR_hMEiQxuPU5bPZRvZcFQgYG6sKh4",
+  };
+</script>
+<script src="app.js"></script>
+
+</body>
+</html>

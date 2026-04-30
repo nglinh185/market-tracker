@@ -293,7 +293,7 @@ function renderSentimentChart() {
       textStyle: { color: '#e2e8f0', fontSize: 12 },
       formatter: p => `${p[0].name}<br/><b>${p[0].value.toFixed(3)}</b>`,
     },
-    grid: { left: 110, right: 30, top: 20, bottom: 30 },
+    grid: { left: 150, right: 50, top: 20, bottom: 30 },
     xAxis: {
       type: 'value', min: -1, max: 1,
       splitLine: { lineStyle: { color: '#1e293b', type: 'dashed' } },
@@ -307,7 +307,7 @@ function renderSentimentChart() {
     series: [{
       type: 'bar',
       data: avgs.map((v, i) => ({ value: v, itemStyle: { color: colors[i], borderRadius: 4 } })),
-      label: { show: true, position: 'right', color: '#e2e8f0', fontSize: 11, formatter: '{c}' },
+      label: { show: true, position: 'right', color: '#e2e8f0', fontSize: 11, formatter: p => p.value.toFixed(2) },
       barWidth: 22,
     }],
   });
