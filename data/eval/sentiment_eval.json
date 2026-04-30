@@ -1,0 +1,51 @@
+{
+  "as_of": "2026-04-29",
+  "n": 3851,
+  "accuracy": 0.8117,
+  "macro_f1": 0.5936,
+  "per_class": {
+    "negative": {
+      "precision": 0.6578,
+      "recall": 0.7822,
+      "f1": 0.7147
+    },
+    "neutral": {
+      "precision": 0.1588,
+      "recall": 0.1572,
+      "f1": 0.158
+    },
+    "positive": {
+      "precision": 0.9295,
+      "recall": 0.8875,
+      "f1": 0.908
+    }
+  },
+  "confusion": {
+    "negative": {
+      "negative": 546,
+      "neutral": 76,
+      "positive": 76
+    },
+    "neutral": {
+      "negative": 136,
+      "neutral": 47,
+      "positive": 116
+    },
+    "positive": {
+      "negative": 148,
+      "neutral": 173,
+      "positive": 2533
+    }
+  },
+  "label_dist_ground_truth": {
+    "positive": 2854,
+    "negative": 698,
+    "neutral": 299
+  },
+  "label_dist_predicted": {
+    "positive": 2725,
+    "negative": 830,
+    "neutral": 296
+  },
+  "notes": "Ground truth = star rating mapping. Noisy proxy; see eval script docstring."
+}
