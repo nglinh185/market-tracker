@@ -24,7 +24,7 @@ framework, deployed with minimal operational overhead via cloud-based scheduling
 
 \section{Research Objectives}
 
-This thesis pursues four primary objectives:
+This thesis pursues five primary objectives:
 
 \begin{enumerate}
   \item \textbf{Build a scalable data collection pipeline} capable of tracking daily
@@ -35,13 +35,22 @@ This thesis pursues four primary objectives:
   Score (LQS), Brand Momentum Score (BMS), and K-Means price tier classification to
   enable systematic product benchmarking.
 
-  \item \textbf{Apply NLP techniques} — specifically a pre-trained RoBERTa model — to
-  extract sentiment signals from customer reviews at both the overall and aspect levels,
-  producing a time-series sentiment score per product.
+  \item \textbf{Apply NLP and time-series ML} --- specifically a pre-trained
+  RoBERTa model for review sentiment and a Facebook Prophet forecaster for
+  price trend --- and \textbf{evaluate} both under defensible protocols
+  (distant supervision against star ratings, walk-forward backtest with a
+  naive baseline) so that the analytics chain is empirically validated and
+  not just architecturally connected.
 
-  \item \textbf{Deliver actionable outputs} through an automated alert engine and an
-  interactive Streamlit dashboard, enabling real-time competitive monitoring without
-  manual intervention.
+  \item \textbf{Deliver actionable outputs} through (a) a rule-based alert
+  engine, (b) an interactive Streamlit dashboard, and (c) a multi-agent
+  delivery layer of three specialist Telegram bots backed by the OpenClaw
+  runtime, so that the same intelligence is available both as a
+  pull-mode dashboard and as push-mode conversational briefs.
+
+  \item \textbf{Operate end-to-end without manual intervention} via GitHub
+  Actions cron for ingest and analytics, and OpenClaw Gateway cron for the
+  daily and weekly Telegram briefs.
 \end{enumerate}
 
 \section{Research Scope}
@@ -62,7 +71,8 @@ electronics sub-categories selected for their competitive intensity and data ric
   product-level snapshots
   \item \textbf{Review tracking:} Up to 50 recent reviews per watchlist ASIN,
   collected weekly
-  \item \textbf{Time period:} 15 consecutive days of data collection
+  \item \textbf{Time period:} 13 consecutive days of data collection
+  (2026-04-17 to 2026-04-29)
 \end{itemize}
 
 \subsection{Exclusions}
@@ -74,7 +84,7 @@ short data collection window.
 \section{Research Methodology Overview}
 
 The research adopts a \textbf{data engineering and applied machine learning} approach
-consisting of five phases:
+consisting of six phases:
 
 \begin{enumerate}
   \item \textbf{Data Collection:} Automated scraping via Apify's Amazon crawler actors,
@@ -83,9 +93,13 @@ consisting of five phases:
   review growth rate, discount percentage, content hash fingerprints).
   \item \textbf{Machine Learning:} K-Means clustering for price segmentation, RoBERTa
   for review sentiment, Facebook Prophet for price trend forecasting.
+  \item \textbf{Evaluation:} Distant-supervision benchmark of the sentiment
+  classifier against star ratings and walk-forward Prophet backtest against
+  a naive last-value baseline.
   \item \textbf{Alert Generation:} Rule-based detection of significant competitive events
   (price drops, stockouts, new entrants, content changes).
-  \item \textbf{Visualization:} Interactive Streamlit dashboard consolidating all metrics.
+  \item \textbf{Delivery:} Interactive Streamlit dashboard for ad-hoc exploration
+  and a multi-agent OpenClaw / Telegram layer for push-mode briefs.
 \end{enumerate}
 
 \section{Thesis Structure}

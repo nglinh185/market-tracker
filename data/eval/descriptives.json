@@ -1,0 +1,408 @@
+{
+  "as_of": "2026-04-30",
+  "snapshot_dates": {
+    "rankings": "2026-04-29",
+    "snapshots": "2026-04-29",
+    "lqs": "2026-04-29",
+    "bms": "2026-04-29",
+    "price_tier": "2026-04-29",
+    "sentiment": "2026-04-29"
+  },
+  "collection": {
+    "rankings_days": 13,
+    "rankings_date_range": [
+      "2026-04-17",
+      "2026-04-29"
+    ],
+    "snapshots_days": 13,
+    "snapshots_date_range": [
+      "2026-04-17",
+      "2026-04-29"
+    ],
+    "total_category_ranking_rows": 1756,
+    "total_daily_snapshot_rows": 409,
+    "total_reviews": 3986,
+    "asins_with_reviews": 30,
+    "total_image_change_rows": 0,
+    "total_image_change_actual": 0,
+    "total_alerts": 1248,
+    "total_entrant_exit_events": 1060
+  },
+  "watchlist": {
+    "total_watchlist": 379,
+    "by_category": {
+      "gaming_keyboard": 105,
+      "true_wireless_earbuds": 125,
+      "portable_charger": 145
+    }
+  },
+  "per_category": [
+    {
+      "category": "gaming_keyboard",
+      "category_label": "Gaming Keyboards",
+      "asins_ranked": 50,
+      "price_min": 15.99,
+      "price_max": 169.99,
+      "price_mean": 65.31,
+      "price_median": 59.99,
+      "stars_mean": 4.52,
+      "reviews_mean": 4578.0,
+      "reviews_median": 1918.0,
+      "sponsored_share_pct": 4.0,
+      "watchlist_bsr_mean": 309.0,
+      "watchlist_bsr_median": 206.0,
+      "watchlist_bsr_n": 10
+    },
+    {
+      "category": "true_wireless_earbuds",
+      "category_label": "True Wireless Earbuds",
+      "asins_ranked": 50,
+      "price_min": 11.99,
+      "price_max": 298.0,
+      "price_mean": 86.61,
+      "price_median": 45.98,
+      "stars_mean": 4.33,
+      "reviews_mean": 21921.0,
+      "reviews_median": 6954.0,
+      "sponsored_share_pct": 4.0,
+      "watchlist_bsr_mean": 436.0,
+      "watchlist_bsr_median": 62.0,
+      "watchlist_bsr_n": 8
+    },
+    {
+      "category": "portable_charger",
+      "category_label": "Portable Chargers",
+      "asins_ranked": 50,
+      "price_min": 12.34,
+      "price_max": 199.99,
+      "price_mean": 28.85,
+      "price_median": 25.98,
+      "stars_mean": 4.48,
+      "reviews_mean": 6949.0,
+      "reviews_median": 2458.0,
+      "sponsored_share_pct": 4.0,
+      "watchlist_bsr_mean": 260.0,
+      "watchlist_bsr_median": 126.0,
+      "watchlist_bsr_n": 10
+    }
+  ],
+  "price_tiers": [
+    {
+      "category": "gaming_keyboard",
+      "category_label": "Gaming Keyboards",
+      "tier": "entry",
+      "n_asins": 42,
+      "price_min": 14.99,
+      "price_max": 69.99,
+      "price_mean": 39.76
+    },
+    {
+      "category": "gaming_keyboard",
+      "category_label": "Gaming Keyboards",
+      "tier": "mid",
+      "n_asins": 27,
+      "price_min": 54.99,
+      "price_max": 154.95,
+      "price_mean": 78.43
+    },
+    {
+      "category": "gaming_keyboard",
+      "category_label": "Gaming Keyboards",
+      "tier": "premium",
+      "n_asins": 6,
+      "price_min": 129.99,
+      "price_max": 349.99,
+      "price_mean": 201.66
+    },
+    {
+      "category": "true_wireless_earbuds",
+      "category_label": "True Wireless Earbuds",
+      "tier": "entry",
+      "n_asins": 39,
+      "price_min": 9.99,
+      "price_max": 54.99,
+      "price_mean": 28.04
+    },
+    {
+      "category": "true_wireless_earbuds",
+      "category_label": "True Wireless Earbuds",
+      "tier": "mid",
+      "n_asins": 16,
+      "price_min": 69.99,
+      "price_max": 149.0,
+      "price_mean": 101.1
+    },
+    {
+      "category": "true_wireless_earbuds",
+      "category_label": "True Wireless Earbuds",
+      "tier": "premium",
+      "n_asins": 12,
+      "price_min": 169.95,
+      "price_max": 298.0,
+      "price_mean": 230.66
+    },
+    {
+      "category": "portable_charger",
+      "category_label": "Portable Chargers",
+      "tier": "entry",
+      "n_asins": 37,
+      "price_min": 12.34,
+      "price_max": 25.99,
+      "price_mean": 20.46
+    },
+    {
+      "category": "portable_charger",
+      "category_label": "Portable Chargers",
+      "tier": "mid",
+      "n_asins": 32,
+      "price_min": 24.98,
+      "price_max": 49.99,
+      "price_mean": 31.0
+    },
+    {
+      "category": "portable_charger",
+      "category_label": "Portable Chargers",
+      "tier": "premium",
+      "n_asins": 1,
+      "price_min": 199.99,
+      "price_max": 199.99,
+      "price_mean": 199.99
+    }
+  ],
+  "bms_top10": [
+    {
+      "asin": "B0CB1FW5FC",
+      "category": "portable_charger",
+      "bms_score": 0.752,
+      "bsr_velocity": 0.125,
+      "review_velocity": 116.0,
+      "sentiment_score": 0.71
+    },
+    {
+      "asin": "B0CRTR3PMF",
+      "category": "true_wireless_earbuds",
+      "bms_score": 0.739,
+      "bsr_velocity": 0.015,
+      "review_velocity": 142.0,
+      "sentiment_score": 0.849
+    },
+    {
+      "asin": "B09DT48V16",
+      "category": "true_wireless_earbuds",
+      "bms_score": 0.735,
+      "bsr_velocity": 0.087,
+      "review_velocity": 59.0,
+      "sentiment_score": 0.629
+    },
+    {
+      "asin": "B0DGHMNQ5Z",
+      "category": "true_wireless_earbuds",
+      "bms_score": 0.715,
+      "bsr_velocity": null,
+      "review_velocity": 73.0,
+      "sentiment_score": 0.654
+    },
+    {
+      "asin": "B0DD41G2NZ",
+      "category": "true_wireless_earbuds",
+      "bms_score": 0.71,
+      "bsr_velocity": 0.186,
+      "review_velocity": 42.0,
+      "sentiment_score": 0.613
+    },
+    {
+      "asin": "B0BQPNMXQV",
+      "category": "true_wireless_earbuds",
+      "bms_score": 0.709,
+      "bsr_velocity": 0.0,
+      "review_velocity": 64.0,
+      "sentiment_score": 0.588
+    },
+    {
+      "asin": "B07XVCP7F5",
+      "category": "gaming_keyboard",
+      "bms_score": 0.697,
+      "bsr_velocity": -0.054,
+      "review_velocity": 274.0,
+      "sentiment_score": 0.605
+    },
+    {
+      "asin": "B0FQFB8FMG",
+      "category": "true_wireless_earbuds",
+      "bms_score": 0.68,
+      "bsr_velocity": null,
+      "review_velocity": 78.0,
+      "sentiment_score": 0.301
+    },
+    {
+      "asin": "B0BTYCRJSS",
+      "category": "true_wireless_earbuds",
+      "bms_score": 0.676,
+      "bsr_velocity": -0.179,
+      "review_velocity": 183.0,
+      "sentiment_score": 0.704
+    },
+    {
+      "asin": "B0CY2JJ4WS",
+      "category": "portable_charger",
+      "bms_score": 0.605,
+      "bsr_velocity": 0.0,
+      "review_velocity": 40.0,
+      "sentiment_score": 0.145
+    }
+  ],
+  "lqs": {
+    "as_of": "2026-04-29",
+    "n_asins": 30,
+    "overall_mean": 93.4,
+    "overall_median": 94.2,
+    "overall_min": 79.5,
+    "overall_max": 96.9,
+    "by_category": {
+      "gaming_keyboard": {
+        "n": 10,
+        "mean": 95.5
+      },
+      "true_wireless_earbuds": {
+        "n": 10,
+        "mean": 91.5
+      },
+      "portable_charger": {
+        "n": 10,
+        "mean": 93.1
+      }
+    },
+    "top5": [
+      {
+        "asin": "B0C9ZJHQHM",
+        "category": "gaming_keyboard",
+        "lqs": 96.9
+      },
+      {
+        "asin": "B0CRTR3PMF",
+        "category": "true_wireless_earbuds",
+        "lqs": 96.8
+      },
+      {
+        "asin": "B0CDX5XGLK",
+        "category": "gaming_keyboard",
+        "lqs": 96.7
+      },
+      {
+        "asin": "B0CLLHSWRL",
+        "category": "gaming_keyboard",
+        "lqs": 96.7
+      },
+      {
+        "asin": "B0CB1FW5FC",
+        "category": "portable_charger",
+        "lqs": 96.6
+      }
+    ],
+    "bottom5": [
+      {
+        "asin": "B0CFHHCMNS",
+        "category": "portable_charger",
+        "lqs": 91.4
+      },
+      {
+        "asin": "B0DCZ56QNL",
+        "category": "portable_charger",
+        "lqs": 90.2
+      },
+      {
+        "asin": "B0G1PJLWLZ",
+        "category": "true_wireless_earbuds",
+        "lqs": 88.3
+      },
+      {
+        "asin": "B0DGHMNQ5Z",
+        "category": "true_wireless_earbuds",
+        "lqs": 81.7
+      },
+      {
+        "asin": "B0FQFB8FMG",
+        "category": "true_wireless_earbuds",
+        "lqs": 79.5
+      }
+    ]
+  },
+  "sentiment_per_category": [
+    {
+      "category": "gaming_keyboard",
+      "category_label": "Gaming Keyboards",
+      "n_asins": 10,
+      "avg_sentiment_score": 0.49,
+      "avg_positive_ratio": 0.713,
+      "avg_negative_ratio": 0.211
+    },
+    {
+      "category": "true_wireless_earbuds",
+      "category_label": "True Wireless Earbuds",
+      "n_asins": 10,
+      "avg_sentiment_score": 0.564,
+      "avg_positive_ratio": 0.773,
+      "avg_negative_ratio": 0.175
+    },
+    {
+      "category": "portable_charger",
+      "category_label": "Portable Chargers",
+      "n_asins": 5,
+      "avg_sentiment_score": 0.294,
+      "avg_positive_ratio": 0.47,
+      "avg_negative_ratio": 0.165
+    }
+  ],
+  "alerts": {
+    "total": 1248,
+    "by_type": {
+      "new_entrant": 593,
+      "exit": 648,
+      "price_drop": 6,
+      "stockout": 1
+    },
+    "by_severity": {
+      "low": 542,
+      "high": 55,
+      "medium": 651
+    },
+    "by_type_severity": {
+      "new_entrant": {
+        "low": 542,
+        "high": 51
+      },
+      "exit": {
+        "medium": 648
+      },
+      "price_drop": {
+        "high": 3,
+        "medium": 3
+      },
+      "stockout": {
+        "high": 1
+      }
+    }
+  },
+  "entrant_exit": {
+    "total_events": 1060,
+    "by_type": {
+      "entrant": 528,
+      "exit": 532
+    },
+    "top10_events": 99,
+    "by_category": {
+      "gaming_keyboard": {
+        "entrant": 171,
+        "exit": 183
+      },
+      "portable_charger": {
+        "entrant": 204,
+        "exit": 201
+      },
+      "true_wireless_earbuds": {
+        "entrant": 153,
+        "exit": 148
+      }
+    }
+  }
+}

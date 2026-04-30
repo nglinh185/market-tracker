@@ -14,12 +14,20 @@ Figure~\ref{fig:architecture} illustrates the overall system design.
   \label{fig:architecture}
 \end{figure}
 
-The pipeline consists of four layers:
+The pipeline consists of five layers:
 \begin{enumerate}
-  \item \textbf{Orchestration Layer:} GitHub Actions cron job (06:00 UTC daily) triggers the pipeline
+  \item \textbf{Orchestration Layer:} GitHub Actions cron job (06:00 UTC daily) triggers the ingest
+  \& analytics pipeline. A second weekly cron (07:00 UTC Monday) runs the
+  reviews + sentiment pipeline.
   \item \textbf{Collection Layer:} Apify cloud actors perform web scraping with managed proxies
   \item \textbf{Processing Layer:} Python scripts parse, validate, and enrich raw data
   \item \textbf{Storage Layer:} Supabase PostgreSQL stores structured data; Supabase Storage holds product images
+  \item \textbf{Delivery Layer:} A Streamlit dashboard exposes the warehouse
+  for ad-hoc exploration. In parallel, the self-hosted OpenClaw runtime
+  exposes thirteen read-only Python skills to three specialist Telegram bots,
+  delivering both interactive replies and three scheduled cron briefs
+  (daily Strategist, weekly Spy, weekly Detective). The delivery layer is
+  described in detail in Chapter~4.
 \end{enumerate}
 
 \section{Data Sources and Collection Actors}
@@ -153,6 +161,7 @@ values. These are stored as \texttt{NULL} and excluded from velocity calculation
 avoid triggering Amazon's rate limiting mechanisms, which can result in empty
 datasets for larger batch sizes.
 
-\textbf{Collection window:} The 15-day data collection window limits the statistical
-power of time-series analyses. Findings should be treated as illustrative of the
-methodology rather than definitive market conclusions.
+\textbf{Collection window:} The 13-day data collection window
+(2026-04-17 to 2026-04-29) limits the statistical power of time-series
+analyses. Findings should be treated as illustrative of the methodology
+rather than definitive market conclusions.
