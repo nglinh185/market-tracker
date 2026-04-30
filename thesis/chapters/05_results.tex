@@ -102,6 +102,15 @@ characteristics on 2026-04-29.
   \label{tab:price_tiers}
 \end{table}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{figures/price_tier_distribution.png}
+  \caption{K-Means price-tier distribution by category (snapshot 2026-04-29).
+  Boxes show the inter-quartile range; whiskers are 1.5$\times$IQR; black
+  dots are individual products.}
+  \label{fig:price_tiers}
+\end{figure}
+
 The clusters confirm the hypothesised tier structure for two of the three
 categories: Gaming Keyboards and TWS show the textbook entry / mid / premium
 shape, with cluster centroids well-separated by roughly $2\times$ price
@@ -175,6 +184,15 @@ tail rather than the head of the distribution.
   \label{tab:lqs_extremes}
 \end{table}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{figures/lqs_distribution.png}
+  \caption{LQS distribution across the 30 watchlist ASINs (2026-04-29),
+  sorted ascending. Bar colour encodes category. The dashed vertical line
+  marks the overall mean.}
+  \label{fig:lqs_dist}
+\end{figure}
+
 The bottom-performing ASINs in the TWS category (Apple AirPods Pro 3,
 Apple AirPods 4, Samsung Galaxy Buds 4 Pro) are all very recently launched
 flagship products. Their relatively low LQS reflects modest cumulative
@@ -213,6 +231,15 @@ Score on 2026-04-29.
   null BSR (newly launched ASINs without an established BSR window).}
   \label{tab:bms}
 \end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{figures/bsr_trend.png}
+  \caption{BSR trajectory over the 13-day window for the top-5 BMS movers
+  on 2026-04-29. The y-axis is inverted so that upward movement on the
+  chart corresponds to improving rank.}
+  \label{fig:bsr_trend}
+\end{figure}
 
 True Wireless Earbuds dominate the leaderboard (7 of the top 10 entries),
 which is consistent with the category's substantially higher absolute review
@@ -259,6 +286,15 @@ confidence-weighted polarity defined in the methodology chapter; a value of
   next weekly review-ingest cycle.}
   \label{tab:sentiment_cat}
 \end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/sentiment_distribution.png}
+  \caption{RoBERTa positive / neutral / negative review-share distribution
+  by category (snapshot 2026-04-29). Neutral is computed as
+  $1 - \text{positive\_ratio} - \text{negative\_ratio}$.}
+  \label{fig:sentiment_dist}
+\end{figure}
 
 The clear ordering --- TWS (0.564) > Gaming KB (0.490) > Charger (0.294) ---
 mirrors the star-rating mean from Table~\ref{tab:data_summary} only at the
@@ -415,6 +451,13 @@ category.
   \label{tab:entrants_summary}
 \end{table}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{figures/entrant_exit_by_category.png}
+  \caption{Entrant and exit events by category over the 13-day window}
+  \label{fig:entrant_exit}
+\end{figure}
+
 Portable Chargers exhibits the highest churn (405 events / $50 \times 13 =
 650$ ASIN-days $\approx 62\%$ daily turnover at the rank level), consistent
 with the commoditised nature of the category. True Wireless Earbuds is the
@@ -447,6 +490,14 @@ by type and severity.
   \caption{Alert summary by type and severity (full window)}
   \label{tab:alert_summary}
 \end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/alerts_breakdown.png}
+  \caption{Alert engine output by type and severity over the 13-day window.
+  Counts above each bar are absolute alert counts.}
+  \label{fig:alerts_breakdown}
+\end{figure}
 
 The dominant alert types are entrant and exit events ($\approx$ 99\% of all
 alerts), which reflects the high background turnover in the category top-50
