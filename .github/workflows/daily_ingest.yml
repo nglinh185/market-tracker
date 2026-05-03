@@ -3,7 +3,6 @@ name: Daily Amazon Data Ingest
 on:
   schedule:
     - cron: '0 6 * * *'   # daily 6:00 UTC = 13:00 Asia/Ho_Chi_Minh — ingest + analytics
-    - cron: '0 7 * * 1'   # weekly Mon 7:00 UTC — also collect reviews + run sentiment
   workflow_dispatch:
     inputs:
       run_mode:
@@ -25,7 +24,7 @@ jobs:
     # want to re-ingest twice on Mondays.
     if: |
       (github.event_name == 'workflow_dispatch' && github.event.inputs.run_mode == 'full') ||
-      (github.event_name == 'schedule' && github.event.schedule == '0 6 * * *')
+      github.event_name == 'schedule'
 
     env:
       APIFY_TOKEN:  ${{ secrets.APIFY_TOKEN }}
@@ -82,36 +81,6 @@ jobs:
       - name: Notify on failure
         if: failure()
         run: echo "Pipeline failed on $(date). Check logs."
-
-  reviews:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    # Run only on the weekly Monday cron (07:00 UTC). Manual dispatch will NOT
-    # collect reviews — to force a one-off, run `python scripts/ingest_reviews.py`
-    # locally or temporarily change this guard. Reason: each run costs Apify credits.
-    if: github.event_name == 'schedule' && github.event.schedule == '0 7 * * 1'
-
-    env:
-      APIFY_TOKEN:  ${{ secrets.APIFY_TOKEN }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Collect reviews
-        run: python scripts/ingest_reviews.py
-
-      - name: Run sentiment analysis
-        run: python scripts/analyze_sentiment.py
 
   analytics_only:
     runs-on: ubuntu-latest

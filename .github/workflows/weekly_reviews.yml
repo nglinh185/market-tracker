@@ -1,0 +1,37 @@
+name: Weekly Review Collection
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'   # Monday 07:00 UTC = 14:00 Asia/Ho_Chi_Minh
+  workflow_dispatch:       # manual trigger from GitHub UI anytime
+
+jobs:
+  reviews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      APIFY_TOKEN:  ${{ secrets.APIFY_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Collect reviews
+        run: python scripts/ingest_reviews.py
+
+      - name: Run sentiment analysis
+        run: python scripts/analyze_sentiment.py
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "Weekly reviews job failed on $(date). Check logs."
