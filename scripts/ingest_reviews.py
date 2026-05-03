@@ -16,7 +16,7 @@ from lib.apify import run_actor, fetch_dataset
 from lib.parsers.review import parse_review, extract_product_summary, _validate_batch
 from lib.db import upsert
 
-PAGES_PER_PRODUCT = 2   # 2 pages × ~30 reviews = ~60 reviews/ASIN, tiết kiệm ~60% cost
+PAGES_PER_PRODUCT = 5   # actor requires ≥5 pages; 2 pages returns 0 items
 
 
 def _build_run_input(asins: list[str]) -> dict:

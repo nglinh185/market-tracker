@@ -29,7 +29,7 @@ def run_actor(actor_id: str, run_input: dict, timeout_min: int = 30) -> str:
     if status != "SUCCEEDED":
         raise RuntimeError(f"Actor run ended with status: {status}")
     if item_count == 0:
-        raise ValueError("Actor returned 0 items — possible block or bad input")
+        print("  [Apify] WARNING: Actor returned 0 items — possible Amazon block. Skipping upsert.")
 
     return dataset_id
 
