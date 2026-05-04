@@ -1,19 +1,24 @@
 """
-Forecast evaluation: walk-forward backtest of the Prophet price model.
+Forecast evaluation: walk-forward backtest comparing 5 models.
 
 For each watchlist ASIN with >= MIN_HISTORY days of price history:
   - Hold out the last HOLDOUT days.
-  - Fit Prophet on the remaining days.
+  - Fit each model on the remaining days.
   - Predict HOLDOUT steps ahead.
-  - Compute MAE, MAPE, and naive-baseline (last-observed-carry-forward) MAE.
+  - Compute MAE, MAPE per model + naive-baseline (last-observed-carry-forward).
 
-We also report % of held-out points that fall within the 80% prediction
-interval (yhat_lower, yhat_upper) — a coverage check on uncertainty.
+Models compared:
+  1. Naive          — last observed price carried forward
+  2. Trend (OLS)    — linear regression extrapolated
+  3. ETS            — Exponential Smoothing (trend only, no seasonality)
+  4. ARIMA(1,1,0)   — simple differenced AR model
+  5. Prophet        — Facebook Prophet (uncertainty intervals included)
 
-Limitation (already in methodology chapter): with only ~15 days of history,
-this is a sanity check, not a definitive measure of model accuracy. The point
-is to show we *can* quantify error and that the forecast adds value over the
-naive baseline (or, if it doesn't, to disclose that honestly).
+We also report % of held-out points within Prophet's 80% prediction interval.
+
+Limitation: with only ~15 days of history this is a sanity check, not a
+definitive accuracy measure. Results reflect data constraints rather than
+model quality.
 
 Output: data/eval/forecast_eval.json + console summary.
 """
@@ -74,6 +79,32 @@ def _linear_trend_forecast(prices: list[float], horizon: int) -> list[float]:
     return [round(intercept + slope * (n + h), 4) for h in range(horizon)]
 
 
+def _ets_forecast(prices: list[float], horizon: int) -> list[float]:
+    """Exponential Smoothing with additive trend, no seasonality (Holt's method)."""
+    try:
+        from statsmodels.tsa.holtwinters import ExponentialSmoothing
+        import numpy as np
+        model = ExponentialSmoothing(
+            np.array(prices, dtype=float),
+            trend="add",
+            seasonal=None,
+        ).fit(optimized=True)
+        return [round(float(v), 4) for v in model.forecast(horizon)]
+    except Exception:
+        return [round(prices[-1], 4)] * horizon  # fallback to naive
+
+
+def _arima_forecast(prices: list[float], horizon: int) -> list[float]:
+    """ARIMA(1,1,0) — simple differenced autoregressive model."""
+    try:
+        from statsmodels.tsa.arima.model import ARIMA
+        import numpy as np
+        model = ARIMA(np.array(prices, dtype=float), order=(1, 1, 0)).fit()
+        return [round(float(v), 4) for v in model.forecast(horizon)]
+    except Exception:
+        return [round(prices[-1], 4)] * horizon  # fallback to naive
+
+
 def main() -> None:
     _configure_cmdstan()
 
@@ -100,6 +131,7 @@ def main() -> None:
 
     per_asin = []
     pooled_true, pooled_pred, pooled_naive, pooled_trend = [], [], [], []
+    pooled_ets, pooled_arima = [], []
     pooled_in_band = 0
 
     for asin, rows in by_asin.items():
@@ -131,6 +163,8 @@ def main() -> None:
         y_naive = [last_train_price] * HOLDOUT
         train_prices = [float(r["price"]) for r in train]
         y_trend = _linear_trend_forecast(train_prices, HOLDOUT)
+        y_ets   = _ets_forecast(train_prices, HOLDOUT)
+        y_arima = _arima_forecast(train_prices, HOLDOUT)
 
         in_band = sum(1 for yt, lo, hi in zip(y_true, y_lo, y_hi) if lo <= yt <= hi)
 
@@ -138,16 +172,20 @@ def main() -> None:
             "asin":       asin,
             "n_train":    len(train),
             "horizon":    HOLDOUT,
-            "mae":        round(_mae(y_true, y_pred), 3),
+            "prophet_mae": round(_mae(y_true, y_pred), 3),
             "mape_pct":   round(_mape(y_true, y_pred), 2),
             "naive_mae":  round(_mae(y_true, y_naive), 3),
             "trend_mae":  round(_mae(y_true, y_trend), 3),
+            "ets_mae":    round(_mae(y_true, y_ets), 3),
+            "arima_mae":  round(_mae(y_true, y_arima), 3),
             "in_80_band": in_band,
         })
         pooled_true.extend(y_true)
         pooled_pred.extend(y_pred)
         pooled_naive.extend(y_naive)
         pooled_trend.extend(y_trend)
+        pooled_ets.extend(y_ets)
+        pooled_arima.extend(y_arima)
         pooled_in_band += in_band
 
     if not per_asin:
@@ -159,10 +197,12 @@ def main() -> None:
         "asins_evaluated":    len(per_asin),
         "horizon_days":       HOLDOUT,
         "min_history":        MIN_HISTORY,
-        "pooled_mae":         round(_mae(pooled_true, pooled_pred), 3),
+        "pooled_prophet_mae": round(_mae(pooled_true, pooled_pred), 3),
         "pooled_mape_pct":    round(_mape(pooled_true, pooled_pred), 2),
         "pooled_naive_mae":   round(_mae(pooled_true, pooled_naive), 3),
         "pooled_trend_mae":   round(_mae(pooled_true, pooled_trend), 3),
+        "pooled_ets_mae":     round(_mae(pooled_true, pooled_ets), 3),
+        "pooled_arima_mae":   round(_mae(pooled_true, pooled_arima), 3),
         "pi_coverage_pct":    round(pooled_in_band / len(pooled_true) * 100, 1),
         "per_asin":           sorted(per_asin, key=lambda x: x["mape_pct"]),
     }
@@ -170,10 +210,17 @@ def main() -> None:
     out_file = OUT_DIR / "forecast_eval.json"
     out_file.write_text(json.dumps(summary, indent=2))
 
-    print(f"[Eval-Forecast] {summary['asins_evaluated']} ASINs | "
-          f"Prophet MAE={summary['pooled_mae']} | MAPE={summary['pooled_mape_pct']}% | "
-          f"Naive MAE={summary['pooled_naive_mae']} | Trend MAE={summary['pooled_trend_mae']} | "
-          f"80% PI coverage={summary['pi_coverage_pct']}%")
+    maes = {
+        "Naive":   summary["pooled_naive_mae"],
+        "ETS":     summary["pooled_ets_mae"],
+        "ARIMA":   summary["pooled_arima_mae"],
+        "Trend":   summary["pooled_trend_mae"],
+        "Prophet": summary["pooled_prophet_mae"],
+    }
+    ranked = sorted(maes.items(), key=lambda x: x[1])
+    ranking_str = " < ".join(f"{k}={v}" for k, v in ranked)
+    print(f"[Eval-Forecast] {summary['asins_evaluated']} ASINs | MAE ranking: {ranking_str}")
+    print(f"[Eval-Forecast] Prophet MAPE={summary['pooled_mape_pct']}% | 80% PI coverage={summary['pi_coverage_pct']}%")
     print(f"[Eval-Forecast] Written -> {out_file}")
 
 
