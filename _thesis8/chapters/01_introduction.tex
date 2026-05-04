@@ -1,0 +1,194 @@
+\chapter{INTRODUCTION}
+\label{chap:introduction}
+
+\section{Background of the study}
+
+The rapid expansion of marketplace-based e-commerce has significantly
+changed the nature of retail competition. On platforms such as Amazon,
+sellers and brand operators compete not only through product quality and
+price, but also through organic ranking, advertising visibility, stock
+availability, listing presentation, and customer review sentiment. These
+signals change continuously and are distributed across multiple parts of
+the marketplace interface, making manual monitoring increasingly
+inefficient for small sellers and individual analysts.
+
+At the same time, digital marketplaces generate a large volume of
+structured and semi-structured data. Category rankings reveal shifts in
+competitive visibility; product snapshots contain price, stock, review,
+image, and listing-quality signals; and customer reviews provide
+unstructured evidence of user satisfaction and dissatisfaction. In
+principle, these data sources can support more informed competitive
+decisions. In practice, however, their value depends on whether they can
+be collected reliably, stored consistently, transformed into defensible
+analytical indicators, and delivered to decision-makers in a timely and
+interpretable format.
+
+Therefore, the central challenge addressed in this thesis is not merely
+data availability, but the conversion of dispersed marketplace
+observations into actionable intelligence. This requires an integrated
+system that combines scheduled data ingestion, a relational analytical
+warehouse, machine-learning and rule-based signal extraction, dashboard
+visualisation, and push-based intelligence delivery.
+
+\section{Problem statement}
+
+Despite the growing importance of data-driven competitive intelligence,
+many monitoring workflows remain heavily dependent on static Business
+Intelligence (BI) dashboards. Such dashboards are useful for exploration,
+but they usually follow a pull-based operating model: analysts must open
+the interface, select filters, inspect charts, and manually infer which
+market events deserve attention. This workflow creates cognitive
+friction, particularly when the analyst must monitor many products,
+metrics, and categories at the same time.
+
+For Amazon sellers, the operational risk lies in the delay between an
+event and its interpretation. A competitor may enter the Top 50 ranking,
+increase sponsored visibility, reduce price, lose stock availability, or
+modify a product image. Each signal may appear small in isolation, yet
+their combination can indicate a meaningful competitive move. Without an
+automated mechanism for collecting these signals and synthesising them
+into concise alerts, important changes may be detected too late or missed
+entirely.
+
+This thesis addresses that practical gap by developing a lightweight
+Amazon market-intelligence framework. The implemented system uses Apify
+actors for scheduled Amazon data acquisition, stores raw and derived data
+in Supabase PostgreSQL tables, runs Python analytical modules through
+GitHub Actions, and exposes the resulting intelligence through both
+dashboards and Telegram-based OpenClaw agents. Rather than claiming
+real-time streaming surveillance, the project focuses on scheduled daily
+and weekly monitoring that is technically feasible, cost-aware, and
+appropriate for a thesis-scale pilot deployment.
+
+\section{Objectives of the study}
+
+The primary objective of this study is to design, implement, and evaluate
+an automated Amazon Marketplace Intelligence Framework for scheduled
+competitive monitoring. The framework aims to transform raw marketplace
+observations into structured analytical signals, dashboard views, and
+concise Telegram briefs.
+
+To achieve this objective, the study pursues the following specific
+sub-objectives:
+\begin{enumerate}
+    \item \textbf{Data acquisition and warehousing:} To build an
+    automated Apify-to-Supabase pipeline for collecting Amazon category
+    rankings, product-level watchlist snapshots, product images, stock
+    status, price information, listing metadata, and customer reviews.
+    In the codebase, this objective is primarily implemented through
+    \texttt{scripts/ingest\_category.py},
+    \texttt{scripts/ingest\_watchlist.py},
+    \texttt{scripts/ingest\_reviews.py}, the parser modules under
+    \texttt{lib/parsers/}, and the central Supabase client in
+    \texttt{lib/db.py}.
+
+    \item \textbf{Analytical and machine-learning components:} To
+    implement and evaluate a sequence of analytical modules for
+    extracting competitive signals from the collected data. These
+    modules include entrant/exit detection, listing and image-change
+    detection, sponsored share-of-voice estimation, K-Means price-tier
+    clustering, RoBERTa-based review sentiment classification, Brand
+    Momentum Score (BMS), Listing Quality Score (LQS), rule-based alerts,
+    and Prophet-based short-term price forecasting. In the codebase, this
+    objective is implemented through \texttt{scripts/run\_analytics.py}
+    and the individual \texttt{scripts/analyze\_*.py} modules, with
+    model evaluation supported by \texttt{scripts/evaluate\_sentiment.py}
+    and \texttt{scripts/evaluate\_forecast.py}.
+
+    \item \textbf{Multi-channel intelligence delivery:} To deliver the
+    computed intelligence through complementary interfaces: a Streamlit
+    analytical dashboard for internal exploration, a lightweight
+    Vercel-deployable web dashboard for compact market overviews, and an
+    OpenClaw-powered Telegram layer for push-based briefs. The agentic
+    layer consists of thirteen read-only Python skills under
+    \texttt{openclaw/skills/}, corresponding OpenClaw wrappers under
+    \texttt{openclaw/wrappers/}, and three Telegram-bound specialist
+    agents: Competitor Spy, Sentiment Detective, and Momentum Strategist.
+\end{enumerate}
+
+\section{Research questions}
+
+Guided by the objectives above, this thesis addresses the following
+research questions:
+\begin{enumerate}
+    \item How can an actor-based data ingestion architecture be designed
+    to collect and persist Amazon marketplace data reliably under the
+    practical constraints of scheduled scraping, API cost, and schema
+    consistency?
+
+    \item To what extent can RoBERTa sentiment classification, Prophet
+    price forecasting, K-Means price-tier clustering, perceptual hashing,
+    and rule-based market metrics produce defensible competitive
+    intelligence signals from short-window e-commerce data?
+
+    \item How can a tool-using multi-agent delivery layer built on
+    OpenClaw reduce the cognitive friction of dashboard-only monitoring
+    by pushing concise, role-specific market briefs to Telegram?
+\end{enumerate}
+
+\section{Scope of the study}
+
+The empirical scope of this thesis is limited to a 13-day pilot
+deployment from April 17, 2026, to April 29, 2026. The market scope is
+restricted to three Amazon consumer-electronics categories:
+\textit{Gaming Keyboards}, \textit{True Wireless Earbuds}, and
+\textit{Portable Chargers}. The system collects daily Top-50 category
+rankings and detailed snapshots for a predefined watchlist of 30 ASINs,
+while review ingestion is scheduled weekly because review extraction
+consumes additional Apify credits. During the pilot window, the dataset
+contains approximately 379 distinct ASINs observed across category
+rankings and the fixed watchlist.
+
+The technical scope includes the following implemented components:
+\begin{itemize}
+    \item an Apify-based acquisition layer using Amazon category and
+    review actors;
+    \item a Supabase PostgreSQL warehouse defined through
+    version-controlled SQL migrations;
+    \item Supabase Storage for product-image persistence and
+    pHash-based image-change detection;
+    \item Python ingestion, analytics, and evaluation scripts under
+    \texttt{scripts/};
+    \item GitHub Actions workflows for scheduled daily ingestion,
+    weekly review collection, analytics-only reruns, and forecast-only
+    reruns;
+    \item a Streamlit dashboard under \texttt{dashboard/};
+    \item a lightweight static web dashboard under
+    \texttt{web-dashboard/}; and
+    \item an OpenClaw delivery layer with thirteen read-only Python
+    skills and three Telegram-bound specialist agents.
+\end{itemize}
+
+The study does not attempt to monitor the entire Amazon marketplace,
+generalise findings to all product categories, or replace enterprise
+commercial intelligence platforms. It also does not implement a custom
+browser scraper, LangChain-based agent framework, Power BI dashboard, or
+real-time streaming data system. All current Amazon data collection in
+the implemented architecture flows through Apify, while all project
+database access is centralised through \texttt{lib/db.py}.
+
+\section{Structure of the thesis}
+
+The remainder of this thesis is organised as follows:
+\begin{itemize}
+    \item \textbf{Chapter 2: Literature Review} reviews the literature
+    on e-commerce data acquisition, competitive intelligence systems,
+    machine-learning applications in retail analytics, dashboard-based
+    decision support, and LLM-enabled multi-agent delivery systems.
+
+    \item \textbf{Chapter 3: Methodology} presents the technical design
+    of the proposed framework, including the data acquisition pipeline,
+    database schema, analytical modules, machine-learning components,
+    OpenClaw skill architecture, and evaluation methodology.
+
+    \item \textbf{Chapter 4: Experimental Results} reports the empirical
+    findings from the pilot deployment, including descriptive statistics,
+    sentiment and forecasting evaluation, market-intelligence findings,
+    alert-generation results, and operational observations from the
+    multi-agent delivery layer.
+
+    \item \textbf{Chapter 5: Conclusion and Future Work} summarises the
+    main contributions, discusses the limitations of the current pilot
+    implementation, and outlines future directions for longer-term data
+    collection, richer modelling, and more advanced agentic delivery.
+\end{itemize}

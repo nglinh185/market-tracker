@@ -66,12 +66,22 @@ def aggregate_to_daily() -> None:
     today = date.today().isoformat()
     # Note: dùng tất cả reviews (2018-2025) để train RoBERTa tốt hơn
     # BMS sẽ so sánh day-to-day sentiment change, không bị ảnh hưởng tuổi review
-    rows = (
-        supabase.table("reviews_raw")
-        .select("asin,sentiment_label,sentiment_score")
-        .not_.is_("sentiment_label", "null")
-        .execute()
-    ).data
+    rows, offset, limit = [], 0, 1000
+    while True:
+        batch = (
+            supabase.table("reviews_raw")
+            .select("asin,sentiment_label,sentiment_score")
+            .not_.is_("sentiment_label", "null")
+            .range(offset, offset + limit - 1)
+            .execute()
+        ).data
+        if not batch:
+            break
+        rows.extend(batch)
+        if len(batch) < limit:
+            break
+        offset += limit
+    print(f"[Sentiment] Loaded {len(rows)} labelled reviews for aggregation.")
 
     from collections import defaultdict
     by_asin: dict[str, list] = defaultdict(list)

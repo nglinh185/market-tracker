@@ -23,7 +23,7 @@ pip install -r requirements.txt
 cp .env.example .env          # fill in SUPABASE_URL, SUPABASE_KEY, APIFY_TOKEN
 ```
 
-Run migrations 001–004 in order via Supabase SQL Editor.
+Run migrations 001--005 in order via Supabase SQL Editor.
 
 ## Daily pipeline
 
@@ -73,7 +73,7 @@ market-tracker/
 ├── config.py                  # categories, watchlist, actor IDs
 ├── lib/                       # Supabase client, Apify helper, parsers, image store
 ├── scripts/                   # ingest_* + analyze_*  (all DB mutations live here)
-├── migrations/                # 001..004 SQL
+├── migrations/                # 001..005 SQL
 ├── dashboard/                 # Streamlit pages
 ├── openclaw/                  # skills + agent SOULs + manifest
 └── thesis/                    # LaTeX thesis source

@@ -62,6 +62,18 @@ def _mape(y_true: list[float], y_pred: list[float]) -> float:
     return sum(abs(a - b) / a for a, b in zip(y_true, y_pred) if a) / len(y_true) * 100
 
 
+def _linear_trend_forecast(prices: list[float], horizon: int) -> list[float]:
+    """OLS trend line fitted on training prices, extrapolated h steps ahead."""
+    n = len(prices)
+    x = list(range(n))
+    mean_x = sum(x) / n
+    mean_y = sum(prices) / n
+    denom  = sum((xi - mean_x) ** 2 for xi in x)
+    slope  = sum((xi - mean_x) * (yi - mean_y) for xi, yi in zip(x, prices)) / denom if denom else 0
+    intercept = mean_y - slope * mean_x
+    return [round(intercept + slope * (n + h), 4) for h in range(horizon)]
+
+
 def main() -> None:
     _configure_cmdstan()
 
@@ -87,7 +99,7 @@ def main() -> None:
         by_asin.setdefault(r["asin"], []).append(r)
 
     per_asin = []
-    pooled_true, pooled_pred, pooled_naive = [], [], []
+    pooled_true, pooled_pred, pooled_naive, pooled_trend = [], [], [], []
     pooled_in_band = 0
 
     for asin, rows in by_asin.items():
@@ -114,9 +126,11 @@ def main() -> None:
         y_pred = forecast["yhat"].tolist()
         y_lo   = forecast["yhat_lower"].tolist()
         y_hi   = forecast["yhat_upper"].tolist()
-        # Naive baseline: last observed price carried forward.
+        # Baselines
         last_train_price = float(train[-1]["price"])
         y_naive = [last_train_price] * HOLDOUT
+        train_prices = [float(r["price"]) for r in train]
+        y_trend = _linear_trend_forecast(train_prices, HOLDOUT)
 
         in_band = sum(1 for yt, lo, hi in zip(y_true, y_lo, y_hi) if lo <= yt <= hi)
 
@@ -127,11 +141,13 @@ def main() -> None:
             "mae":        round(_mae(y_true, y_pred), 3),
             "mape_pct":   round(_mape(y_true, y_pred), 2),
             "naive_mae":  round(_mae(y_true, y_naive), 3),
+            "trend_mae":  round(_mae(y_true, y_trend), 3),
             "in_80_band": in_band,
         })
         pooled_true.extend(y_true)
         pooled_pred.extend(y_pred)
         pooled_naive.extend(y_naive)
+        pooled_trend.extend(y_trend)
         pooled_in_band += in_band
 
     if not per_asin:
@@ -139,23 +155,25 @@ def main() -> None:
         return
 
     summary = {
-        "as_of":             date.today().isoformat(),
-        "asins_evaluated":   len(per_asin),
-        "horizon_days":      HOLDOUT,
-        "min_history":       MIN_HISTORY,
-        "pooled_mae":        round(_mae(pooled_true, pooled_pred), 3),
-        "pooled_mape_pct":   round(_mape(pooled_true, pooled_pred), 2),
-        "pooled_naive_mae":  round(_mae(pooled_true, pooled_naive), 3),
-        "pi_coverage_pct":   round(pooled_in_band / len(pooled_true) * 100, 1),
-        "per_asin":          sorted(per_asin, key=lambda x: x["mape_pct"]),
+        "as_of":              date.today().isoformat(),
+        "asins_evaluated":    len(per_asin),
+        "horizon_days":       HOLDOUT,
+        "min_history":        MIN_HISTORY,
+        "pooled_mae":         round(_mae(pooled_true, pooled_pred), 3),
+        "pooled_mape_pct":    round(_mape(pooled_true, pooled_pred), 2),
+        "pooled_naive_mae":   round(_mae(pooled_true, pooled_naive), 3),
+        "pooled_trend_mae":   round(_mae(pooled_true, pooled_trend), 3),
+        "pi_coverage_pct":    round(pooled_in_band / len(pooled_true) * 100, 1),
+        "per_asin":           sorted(per_asin, key=lambda x: x["mape_pct"]),
     }
 
     out_file = OUT_DIR / "forecast_eval.json"
     out_file.write_text(json.dumps(summary, indent=2))
 
     print(f"[Eval-Forecast] {summary['asins_evaluated']} ASINs | "
-          f"MAE={summary['pooled_mae']} | MAPE={summary['pooled_mape_pct']}% | "
-          f"naive MAE={summary['pooled_naive_mae']} | 80% PI coverage={summary['pi_coverage_pct']}%")
+          f"Prophet MAE={summary['pooled_mae']} | MAPE={summary['pooled_mape_pct']}% | "
+          f"Naive MAE={summary['pooled_naive_mae']} | Trend MAE={summary['pooled_trend_mae']} | "
+          f"80% PI coverage={summary['pi_coverage_pct']}%")
     print(f"[Eval-Forecast] Written -> {out_file}")
 
 

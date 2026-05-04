@@ -1,5 +1,133 @@
 {
-  "as_of": "2026-04-29",
+  "as_of": "2026-05-04",
+  "roberta": {
+    "n": 3851,
+    "accuracy": 0.8117,
+    "macro_f1": 0.5936,
+    "per_class": {
+      "negative": {
+        "precision": 0.6578,
+        "recall": 0.7822,
+        "f1": 0.7147
+      },
+      "neutral": {
+        "precision": 0.1588,
+        "recall": 0.1572,
+        "f1": 0.158
+      },
+      "positive": {
+        "precision": 0.9295,
+        "recall": 0.8875,
+        "f1": 0.908
+      }
+    },
+    "confusion": {
+      "negative": {
+        "negative": 546,
+        "neutral": 76,
+        "positive": 76
+      },
+      "neutral": {
+        "negative": 136,
+        "neutral": 47,
+        "positive": 116
+      },
+      "positive": {
+        "negative": 148,
+        "neutral": 173,
+        "positive": 2533
+      }
+    },
+    "label_dist_ground_truth": {
+      "positive": 2854,
+      "negative": 698,
+      "neutral": 299
+    },
+    "label_dist_predicted": {
+      "positive": 2725,
+      "negative": 830,
+      "neutral": 296
+    }
+  },
+  "vader": {
+    "n": 3851,
+    "accuracy": 0.791,
+    "macro_f1": 0.5165,
+    "per_class": {
+      "negative": {
+        "precision": 0.6476,
+        "recall": 0.5344,
+        "f1": 0.5856
+      },
+      "neutral": {
+        "precision": 0.0971,
+        "recall": 0.0569,
+        "f1": 0.0717
+      },
+      "positive": {
+        "precision": 0.8568,
+        "recall": 0.9306,
+        "f1": 0.8922
+      }
+    },
+    "confusion": {
+      "negative": {
+        "negative": 373,
+        "neutral": 73,
+        "positive": 252
+      },
+      "neutral": {
+        "negative": 90,
+        "neutral": 17,
+        "positive": 192
+      },
+      "positive": {
+        "negative": 113,
+        "neutral": 85,
+        "positive": 2656
+      }
+    }
+  },
+  "nlptown": {
+    "n": 3851,
+    "accuracy": 0.8387,
+    "macro_f1": 0.6791,
+    "per_class": {
+      "negative": {
+        "precision": 0.6594,
+        "recall": 0.8653,
+        "f1": 0.7485
+      },
+      "neutral": {
+        "precision": 0.3371,
+        "recall": 0.4013,
+        "f1": 0.3664
+      },
+      "positive": {
+        "precision": 0.9717,
+        "recall": 0.8781,
+        "f1": 0.9225
+      }
+    },
+    "confusion": {
+      "negative": {
+        "negative": 604,
+        "neutral": 71,
+        "positive": 23
+      },
+      "neutral": {
+        "negative": 129,
+        "neutral": 120,
+        "positive": 50
+      },
+      "positive": {
+        "negative": 183,
+        "neutral": 165,
+        "positive": 2506
+      }
+    }
+  },
+  "notes": "Ground truth = star rating mapping (noisy proxy). VADER: rule-based lexicon. nlptown: fine-tuned BERT 1-5 stars.",
   "n": 3851,
   "accuracy": 0.8117,
   "macro_f1": 0.5936,
@@ -46,6 +174,5 @@
     "positive": 2725,
     "negative": 830,
     "neutral": 296
-  },
-  "notes": "Ground truth = star rating mapping. Noisy proxy; see eval script docstring."
+  }
 }

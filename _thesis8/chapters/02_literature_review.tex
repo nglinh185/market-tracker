@@ -1,0 +1,357 @@
+\chapter{LITERATURE REVIEW}
+\label{chap:literature_review}
+
+\section{Data acquisition and warehousing in e-commerce}
+
+The first requirement of any market-intelligence system is reliable
+access to marketplace data. In e-commerce contexts, relevant signals are
+distributed across search-result pages, product-detail pages, image
+assets, review pages, and advertising placements. Consequently, the
+technical challenge is not limited to downloading web pages; it also
+includes normalising heterogeneous records, preserving historical
+snapshots, and maintaining a schema that supports downstream analytical
+queries.
+
+\subsection{From traditional scraping to actor-based extraction}
+
+Traditional web scraping commonly relies on Document Object Model (DOM)
+parsers, XPath selectors, CSS selectors, or browser automation tools
+such as Selenium \citep{mitchell2018webscraping, kouzis2016scrapy}.
+These techniques are useful for controlled and relatively stable web
+pages, but they become fragile in modern e-commerce environments where
+interfaces are dynamic, JavaScript-heavy, and frequently modified
+through A/B testing. In addition, large retail platforms can make purely
+custom scraping pipelines expensive to maintain because extraction logic
+must be updated whenever page structure or access conditions change
+\citep{mitchell2018webscraping, apify2024platform}.
+
+Recent data-acquisition practice has therefore shifted toward
+actor-based extraction services. Platforms such as Apify encapsulate
+scraping logic in reusable cloud actors and return structured JSON
+datasets for downstream processing \citep{apify2024platform}. This
+approach does not remove the need for data validation, deduplication, or
+schema design, but it reduces the engineering burden of maintaining
+low-level browser automation. This thesis follows that approach: Amazon
+category rankings, product snapshots, and reviews are collected through
+Apify actors, while project-specific transformation and validation are
+implemented in the Python ingestion scripts.
+
+\subsection{Relational storage, orchestration, and reproducibility}
+
+Once raw marketplace observations are collected, they must be stored in
+a form that supports time-series comparison, metric calculation, and
+agent queries. A relational warehouse is well suited to this task because
+it enables historical snapshots, keyed upserts, and join-based retrieval
+across products, categories, reviews, alerts, and derived metrics.
+Supabase provides a managed PostgreSQL environment together with storage
+and access-control features \citep{supabase2024docs}. In the implemented
+system, Supabase tables store both raw records and analytical outputs,
+while Supabase Storage is used for product-image persistence.
+
+Scheduled orchestration is also central to reproducibility. GitHub
+Actions supports scheduled workflows, manual dispatches, and repeatable
+execution environments \citep{githubactions2024}. In this project, the
+daily and weekly pipelines are implemented as scheduled GitHub Actions
+jobs. This design is more appropriate for the present thesis than a
+real-time streaming system, because the empirical objective is daily
+market monitoring under cost and deployment constraints rather than
+second-by-second surveillance.
+
+\section{Commercial competitive intelligence and dashboard limitations}
+
+Amazon sellers already have access to commercial intelligence platforms,
+including tools such as Helium 10 and Jungle Scout
+\citep{helium10listing, junglescout2024}. These systems provide useful
+visibility into historical prices, product rankings, listing quality,
+keyword competition, and product opportunities. They demonstrate that
+there is real demand for marketplace intelligence and that sellers value
+both quantitative signals, such as Best Sellers Rank (BSR), and
+qualitative signals, such as review content \citep{amazon2024bsr,
+chevalier2006, mudambi2010helpful}.
+
+However, many commercial tools remain dashboard-centred. Dashboards are
+valuable for exploration, but they require users to actively open the
+interface, configure filters, inspect charts, and infer the operational
+meaning of observed changes. This pull-based workflow creates cognitive
+friction, especially when the user must monitor multiple categories,
+products, and signals simultaneously. Earlier work in competitive
+intelligence emphasises the managerial value of timely information
+\citep{gilad1985}, while e-commerce and sponsored-search studies show
+that reviews, ranking visibility, and paid placement can affect digital
+market outcomes \citep{chevalier2006, ghose2009, mudambi2010helpful}.
+Together, these perspectives suggest that the value of data depends not
+only on collection, but also on how quickly and clearly it is transformed
+into decisions.
+
+For this reason, the present thesis positions dashboards as only one
+delivery modality. The Streamlit and web dashboards support analytical
+exploration, while the Telegram-based agent layer is designed to push
+short, role-specific briefs when the system identifies relevant market
+events.
+
+\section{Machine learning for marketplace signal extraction}
+
+Raw marketplace records become useful only after they are transformed
+into interpretable signals. This thesis uses a combination of
+machine-learning models and deterministic rules. The purpose is not to
+replace managerial judgement, but to reduce the volume of raw data into a
+smaller set of defensible indicators.
+
+\subsection{Price forecasting with Prophet}
+
+Price is a central competitive signal in online retail. It changes in
+response to promotions, repricing strategies, inventory pressure, and
+category-level competition. Classical autoregressive methods such as
+ARIMA provide an important foundation for time-series forecasting, but
+they often require careful stationarity assumptions and longer histories
+than are available in short pilot deployments \citep{box2015time}.
+
+Prophet, introduced by \citet{taylor2018forecasting}, is a decomposable
+additive forecasting model designed for practical forecasting at scale.
+It combines trend, seasonality, and holiday effects while tolerating
+missing observations and abrupt trend changes. Although the current
+thesis dataset is too short to exploit weekly or yearly seasonality
+fully, Prophet remains appropriate as a transparent short-horizon
+baseline for producing 7-day price forecasts and prediction intervals.
+More complex forecasting models such as NeuralProphet and Temporal
+Fusion Transformers provide useful future directions
+\citep{triebe2021neuralprophet, lim2021temporal}, but they are not the
+primary modelling choice in the implemented system because the thesis
+prioritises interpretability and deployability under limited data.
+
+\subsection{Review sentiment and aspect-level customer signals}
+
+Customer reviews provide qualitative evidence that cannot be captured by
+price or ranking alone. Sentiment analysis converts unstructured review
+text into polarity labels or scores, allowing the system to track whether
+customer opinion is improving, stable, or deteriorating. Earlier
+sentiment methods relied on lexicons and rule-based models such as VADER
+\citep{hutto2014vader}. Transformer-based language models later
+improved contextual understanding through self-attention
+\citep{vaswani2017attention}, BERT \citep{devlin2019bert}, and RoBERTa
+\citep{liu2019roberta}.
+
+This thesis uses the RoBERTa-based model
+{\texttt{\seqsplit{cardiffnlp/twitter-roberta-base-sentiment-latest}}} through the
+Hugging Face Transformers library \citep{wolf2020transformers,
+loureiro2022timelms, cardiffnlp2026model}. Although the model was not
+trained specifically on Amazon reviews, it provides a practical
+pretrained baseline for classifying review sentiment in a thesis-scale
+system. The review pipeline therefore treats model output as an
+operational signal rather than as a perfect representation of customer
+opinion.
+
+Aspect-based sentiment analysis (ABSA) extends this idea by linking
+sentiment to specific product features, such as battery life, sound
+quality, build quality, or delivery experience \citep{hu2004mining,
+pontiki2014semeval, zhang2022survey}. In the implemented project,
+however, aspect information is not produced by a custom ABSA model.
+Instead, the system reads Amazon's product-level aspect summary when it
+is available. This distinction is important: the thesis uses aspect data
+as a complementary marketplace signal, not as evidence that a new
+aspect-extraction model was developed.
+
+\subsection{Price-tier clustering with K-Means}
+
+Competitive price movements are more meaningful when interpreted within
+the correct market segment. A \$10 price drop may be dramatic in an
+entry-level category but marginal in a premium segment. K-Means
+clustering, originally formalised by \citet{macqueen1967kmeans}, is a
+simple and interpretable unsupervised method for partitioning numerical
+observations into clusters. Market segmentation literature similarly
+emphasises the value of grouping products or customers into comparable
+segments before drawing strategic conclusions \citep{wedel2000marketSegmentation}.
+
+In the implemented system, K-Means is applied to product prices within
+each category's daily Top-50 ranking. The resulting clusters are mapped
+to entry, mid-range, and premium tiers according to their cluster
+centres. This method is intentionally lightweight: it is not a full
+demand-estimation model, but it provides a useful context for comparing
+prices and identifying category-level price structure. The implementation
+uses scikit-learn's K-Means and scaling utilities \citep{pedregosa2011sklearn}.
+
+\subsection{Visual monitoring with perceptual hashing}
+
+Product images play an important role in e-commerce conversion and brand
+positioning. Competitors may update main images, add promotional badges,
+change packaging visuals, or redesign listing creatives. Exact
+byte-level comparison is not suitable for this task because trivial
+compression changes can alter image files without changing visual
+meaning. Perceptual hashing (pHash) addresses this problem by producing
+a compact representation of visual structure, commonly using frequency
+features such as the Discrete Cosine Transform (DCT) \citep{zauner2010phash}.
+
+The project uses pHash to compare a product's current image with its
+previous image hash, implemented with Pillow and the Python ImageHash
+package \citep{pillow2026docs, buchner2024imagehash}. A Hamming-distance
+threshold is then used to decide whether the difference is large enough
+to indicate a meaningful visual change. This approach is computationally
+inexpensive and appropriate for scheduled monitoring. Its limitation is
+that it detects that an image has changed, but it does not explain
+semantically what changed; semantic image interpretation is therefore
+reserved for future work.
+
+\section{Operational market metrics and rule-based intelligence}
+
+In applied competitive intelligence, not every useful signal requires a
+complex predictive model. Many operational decisions depend on composite
+scores, threshold rules, and ranked-list changes. This thesis therefore
+combines machine-learning outputs with deterministic market heuristics.
+
+\subsection{Rank movement, entrant/exit detection, and sponsored visibility}
+
+Best Sellers Rank (BSR) and Top-50 category rankings are central signals
+for Amazon marketplace visibility \citep{amazon2024bsr}. A product
+entering or exiting a category ranking can indicate competitive churn,
+new product momentum, or temporary promotional effects. The implemented
+entrant/exit module uses a set-difference comparison between today's and
+yesterday's ranked ASINs. This method is simple but transparent, which is
+valuable in a thesis context where each alert must be explainable.
+
+Sponsored placements are another important source of competitive
+visibility. In search advertising, share-of-voice measures how much
+visibility a brand receives relative to competitors in a given query or
+placement context \citep{ghose2009}. The implemented sponsored-share
+module estimates brand-level sponsored visibility from
+\texttt{category\_rankings.is\_sponsored}. This does not measure full
+Amazon advertising spend; rather, it provides an observable proxy for
+paid visibility within the collected category result pages.
+
+\subsection{Composite scores: BMS and LQS}
+
+Composite indicators are common in managerial decision support because
+they condense several heterogeneous measurements into a single
+interpretable score. The main risk of such scores is overclaiming:
+weights and thresholds must be presented as transparent heuristics, not
+as universally optimal parameters.
+
+The Brand Momentum Score (BMS) in this thesis is a weighted operational
+metric combining BSR velocity, review velocity, and sentiment. Its role
+is to rank watchlist ASINs by recent competitive momentum, not to infer
+causal drivers of sales. Similarly, the Listing Quality Score (LQS)
+combines listing completeness and reputation-related features, including
+title length, bullet count, image availability, A+ content availability,
+star rating, review count, and sentiment. This design is consistent with
+industry listing-quality tools \citep{amazon2024listing,
+helium10listing, junglescout2024}, but the specific weights in the
+implemented system should be interpreted as project-defined heuristics.
+
+\subsection{Rule-based alerts}
+
+Rule-based alerting remains useful when the goal is operational
+interpretability. In this project, alerts are generated for events such
+as price drops, stockouts, BSR deterioration, image changes, new
+entrants, and exits from the Top 50. Each alert is tied to an explicit
+condition or threshold, making the system easy to audit. This is
+especially important because the downstream Telegram agents must provide
+concise recommendations grounded in observable metrics rather than
+unsupported language-model speculation.
+
+\section{Evaluation under short-window deployment constraints}
+
+Because this thesis is based on a short pilot deployment, the evaluation
+strategy must be modest and transparent. The objective is to test whether
+the implemented analytical components produce measurable and defensible
+outputs, not to claim definitive long-term predictive superiority.
+
+\subsection{Distant supervision for sentiment evaluation}
+
+Manually labelled sentiment datasets are expensive to build. Distant
+supervision offers a practical alternative by using naturally occurring
+signals as noisy labels \citep{go2009twitter}. In review analysis,
+star ratings can serve as a proxy for sentiment: one- and two-star
+ratings are often treated as negative, three-star ratings as neutral, and
+four- and five-star ratings as positive. This approach enables
+large-scale evaluation, but it introduces label noise because review
+text and star rating do not always express the same sentiment.
+
+The implemented evaluation therefore reports not only accuracy, but also
+per-class precision, recall, and macro-F\textsubscript{1}. Macro-F\textsubscript{1}
+is particularly important because Amazon reviews are typically skewed
+toward positive ratings. A classifier can appear accurate by predicting
+the majority class, while still performing poorly on negative or neutral
+reviews. Reporting macro-F\textsubscript{1} provides a more balanced view
+of model behaviour under class imbalance.
+
+\subsection{Walk-forward forecasting evaluation}
+
+Time-series forecasting must be evaluated in a way that respects
+temporal order. Random train-test splitting can leak future information
+into the training set and therefore overstate performance. Walk-forward
+or holdout-based backtesting avoids this problem by training on earlier
+observations and evaluating on later observations.
+
+The implemented forecast evaluation holds out the final three days for
+eligible ASINs, fits Prophet on the earlier observations, and compares
+predictions with actual held-out prices. It reports Mean Absolute Error
+(MAE), Mean Absolute Percentage Error (MAPE), a naive last-observed-price
+baseline, and 80\% prediction-interval coverage. The naive baseline is
+especially important: if Prophet cannot outperform a simple
+last-value-carry-forward forecast on short histories, the thesis must
+disclose that limitation rather than overstate predictive value.
+
+\section{Intelligence delivery: dashboards and tool-using agents}
+
+Analytical outputs must be delivered in a form that supports decision
+making. Dashboards and conversational agents serve different purposes,
+and the implemented system uses both.
+
+\subsection{Visual analytics and dashboards}
+
+Interactive dashboards remain valuable for exploration and visual
+analysis. Streamlit supports rapid development of data applications and
+is appropriate for internal analytical dashboards \citep{streamlit2024docs}.
+In this thesis, the Streamlit dashboard provides pages for market
+overview, price intelligence, brand competition, listing quality,
+sentiment and reviews, and alerts. A lightweight Vercel-deployable web
+dashboard complements it by providing a compact public-facing overview.
+The dashboards use Plotly for interactive charts \citep{plotly2024docs}.
+Both dashboards are pull-based interfaces: they are useful when the user
+chooses to inspect the system.
+
+\subsection{Tool-using LLM agents and push-based delivery}
+
+Recent work on tool-using language models shows that LLMs can become
+more useful when grounded in external tools rather than relying only on
+their internal parameters. Toolformer demonstrates language-model tool
+use \citep{schick2023toolformer}, while ReAct shows how reasoning and
+acting can be interleaved through tool calls \citep{yao2022react}.
+Structured function-calling APIs further popularise this design pattern
+\citep{openai2023functions}.
+
+The present thesis applies this idea in a constrained and auditable way.
+The OpenClaw layer does not allow agents to write to the database.
+Instead, each agent calls read-only Python skills that query Supabase and
+return JSON outputs. The three deployed agents are role-specific:
+Competitor Spy focuses on rankings, BMS, sponsored share, entrant/exit
+events, and image changes; Sentiment Detective focuses on sentiment,
+reviews, aspects, and snapshots; Momentum Strategist synthesises alerts,
+forecasts, BMS, LQS, and sentiment into action-oriented briefs. This
+architecture reduces hallucination risk by grounding agent responses in
+database-backed skill outputs, while also reducing dashboard friction by
+pushing concise briefs through Telegram \citep{telegram2024bot}.
+
+\section{Research gap and proposed contribution}
+
+The literature and commercial landscape reveal four practical gaps.
+First, robust scraping and data-extraction services exist, but they
+typically provide raw datasets rather than thesis-specific analytical
+signals. Second, machine-learning models for forecasting and sentiment
+analysis are well established, but they are often evaluated separately
+from the operational systems that deliver their outputs. Third,
+commercial dashboards provide valuable market visibility, yet their
+pull-based design still requires users to perform much of the monitoring
+and synthesis manually. Finally, recent LLM-agent research demonstrates
+tool use, but many applications remain generic and are not tightly
+grounded in domain-specific, read-only analytical skills.
+
+This thesis addresses these gaps by implementing a scheduled, low-cost,
+multi-channel Amazon market-intelligence prototype. It integrates
+Apify-based data acquisition, a Supabase PostgreSQL warehouse, Python
+analytics scripts, interpretable ML components, composite operational
+metrics, rule-based alerts, Streamlit and web dashboards, and an
+OpenClaw Telegram delivery layer. The contribution is therefore not a
+new standalone machine-learning algorithm; rather, it is the integration
+and evaluation of existing data-engineering, machine-learning, and
+tool-using-agent techniques in a working competitive-intelligence system
+for a clearly bounded Amazon marketplace pilot.

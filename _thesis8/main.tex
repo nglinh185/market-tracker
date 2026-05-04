@@ -1,0 +1,218 @@
+\documentclass[12pt, a4paper]{report}
+
+% ── Packages ──────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{times}                      % Times New Roman
+\usepackage[
+  top=3cm, bottom=3cm,
+  left=3.5cm, right=2.5cm            % NEU standard margins
+]{geometry}
+\usepackage{setspace}
+\onehalfspacing                         % 1.5 line spacing
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath, amssymb}
+\usepackage{listings}                   % code blocks
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[round, authoryear]{natbib}  % APA author-year (Smith, 2020)
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{acronym}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tikz}                       % for title-page border
+\usepackage{seqsplit}                   % break overlong \texttt strings
+\usepackage{microtype}                  % Globally fixes overfull hboxes
+\tolerance=1000
+\emergencystretch=1.5em                 % Allows slight word spacing stretching
+
+% ── Hyperref setup ────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue,
+  pdftitle={Amazon Marketplace Intelligence: A Data-Driven Framework for Competitive Monitoring of Consumer Electronics},
+  pdfauthor={Nguyen Thi Mai Linh},
+}
+
+% ── Chapter title style ───────────────────────────────────────
+% NEU DSEB convention: "CHAPTER N: TITLE" on a single line, centered, bold.
+\titleformat{\chapter}[hang]
+  {\normalfont\Large\bfseries\centering}
+  {CHAPTER \thechapter:}{0.5em}{}
+\titlespacing*{\chapter}{0pt}{-20pt}{24pt}
+
+% Section numbering with trailing period: 1.1. , 1.1.1. , 1.1.1.1.
+\titleformat{\section}
+  {\normalfont\large\bfseries}
+  {\thesection.}{0.5em}{}
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries}
+  {\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\itshape}
+  {\thesubsubsection.}{0.5em}{}
+
+% ── Table of Contents style (NEU DSEB convention) ─────────────
+\renewcommand{\contentsname}{TABLE OF CONTENTS}
+\addto\captionsenglish{\renewcommand{\contentsname}{TABLE OF CONTENTS}}
+
+% Chapter line: "CHAPTER N: TITLE" in bold caps with dotted leader
+\renewcommand{\cftchapfont}{\normalfont\bfseries\MakeUppercase}
+\renewcommand{\cftchappagefont}{\normalfont\bfseries}
+\renewcommand{\cftchappresnum}{CHAPTER\ }
+\renewcommand{\cftchapaftersnum}{:}
+\setlength{\cftchapnumwidth}{6.5em}
+
+% Section: "1.1. Title" bold
+\renewcommand{\cftsecfont}{\normalfont\bfseries}
+\renewcommand{\cftsecpagefont}{\normalfont}
+\renewcommand{\cftsecaftersnum}{.}
+\setlength{\cftsecindent}{1.5em}
+\setlength{\cftsecnumwidth}{2.8em}
+
+% Subsection: "1.1.1. Title" italic
+\renewcommand{\cftsubsecfont}{\normalfont\itshape}
+\renewcommand{\cftsubsecpagefont}{\normalfont}
+\renewcommand{\cftsubsecaftersnum}{.}
+\setlength{\cftsubsecindent}{3.5em}
+\setlength{\cftsubsecnumwidth}{3.4em}
+
+% Dotted leaders for all levels
+\renewcommand{\cftdotsep}{1.5}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforechapskip}{4pt}
+\setlength{\cftbeforesecskip}{2pt}
+\setlength{\cftbeforesubsecskip}{2pt}
+
+% Center the TOC heading
+\renewcommand{\cfttoctitlefont}{\normalfont\Large\bfseries\centering}
+\renewcommand{\cftaftertoctitle}{}
+
+% ── Header/Footer ─────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\small\leftmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Code listing style ────────────────────────────────────────
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{orange!80!black},
+  numbers=left, numberstyle=\tiny,
+  breaklines=true, frame=single,
+  captionpos=b,
+}
+
+% ─────────────────────────────────────────────────────────────
+\begin{document}
+
+% ── Title Page ───────────────────────────────────────────────
+\begin{titlepage}
+  \thispagestyle{empty}
+  \begin{tikzpicture}[remember picture, overlay]
+    \draw[line width=0.4pt]
+      ([xshift= 1.5cm, yshift=-1.5cm]current page.north west) rectangle
+      ([xshift=-1.5cm, yshift= 1.5cm]current page.south east);
+  \end{tikzpicture}
+
+  \centering
+  \vspace*{0.5cm}
+  {\bfseries NATIONAL ECONOMICS UNIVERSITY}\\[0.25cm]
+  {\bfseries FACULTY OF MATHEMATICAL ECONOMICS}\\[1.2cm]
+
+  \includegraphics[width=4.5cm, trim=4 0 4 0, clip]{figures/neu_logo.png}\\[1.4cm]
+
+  {\Huge\bfseries BACHELOR THESIS}\\[1.0cm]
+
+  {\large\bfseries MAJORS: DATA SCIENCE IN ECONOMICS AND BUSINESS}\\[1.4cm]
+
+  {\large\bfseries AMAZON MARKETPLACE INTELLIGENCE:\\[0.3cm]
+  A DATA-DRIVEN FRAMEWORK FOR COMPETITIVE\\[0.3cm]
+  MONITORING OF CONSUMER ELECTRONICS}\\[1.8cm]
+
+  \begin{tabular}{@{}>{\bfseries}l @{\hspace{0.4cm}:\hspace{0.4cm}} l@{}}
+    Student    & Nguyen Thi Mai Linh \\[0.3cm]
+    Student ID & 11223665 \\[0.3cm]
+    Class      & DSEB 64 \\[0.3cm]
+    Instructor & PhD. Nguyen Manh The \\
+  \end{tabular}
+
+  \vfill
+  {\large\bfseries HANOI -- MAY 2026}
+  \vspace*{0.5cm}
+\end{titlepage}
+
+% ── Front Matter ─────────────────────────────────────────────
+\pagenumbering{roman}
+\pagestyle{plain}
+
+\input{chapters/00_acknowledgement}
+\input{chapters/00_statutory}
+\input{chapters/00_abstract}
+
+\cleardoublepage
+\phantomsection
+\tableofcontents
+
+\input{chapters/00_abbreviations}
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+
+% ── Main Chapters ─────────────────────────────────────────────
+\cleardoublepage
+\pagenumbering{arabic}
+\pagestyle{fancy}
+
+\input{chapters/01_introduction}
+\input{chapters/02_literature_review}
+\input{chapters/03_methodology}
+\input{chapters/05_results}
+\input{chapters/06_conclusion}
+
+% ── References ────────────────────────────────────────────────
+\bibliographystyle{apalike}
+\renewcommand{\bibname}{REFERENCES}
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{REFERENCES}
+\bibliography{references}
+
+% ── Appendix ──────────────────────────────────────────────────
+\appendix
+\renewcommand{\thechapter}{\Alph{chapter}}
+\renewcommand{\cftchappresnum}{APPENDIX\ }
+\setlength{\cftchapnumwidth}{7.5em}
+\titleformat{\chapter}[hang]
+  {\normalfont\Large\bfseries\centering}
+  {APPENDIX \thechapter:}{0.5em}{}
+% Reset the running header so appendix pages do not show "REFERENCES"
+\fancyhead[R]{\small APPENDIX \thechapter}
+\renewcommand{\chaptermark}[1]{\markboth{APPENDIX \thechapter}{}}
+
+\input{chapters/appendix_a}
+
+\end{document}

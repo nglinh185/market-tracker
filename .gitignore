@@ -46,3 +46,8 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Additional
+data/
+**/node_modules/
+archive/

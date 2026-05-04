@@ -1,6 +1,6 @@
-# CLAUDE.md — Market Tracker Master Guide
+# AGENTS.md — Market Tracker Master Guide
 
-> Single source of truth for any Claude / OpenClaw agent entering this repo.
+> Single source of truth for any Codex / OpenClaw agent entering this repo.
 > Read this first. Then `openclaw/AGENTS.md` for workspace rules, then the relevant `SOUL.md` for voice.
 
 ---
@@ -47,7 +47,7 @@ Python deps: `requirements.txt`. Repo secrets: `.env` (`SUPABASE_URL`, `SUPABASE
 
 ```
 market-tracker/
-├── CLAUDE.md                 ← you are here
+├── AGENTS.md                 ← you are here
 ├── PROGRESS.md               ← live status log (update after every task)
 ├── lib/
 │   └── db.py                 ← Supabase client (ALL DB access goes through here)
@@ -197,7 +197,12 @@ python scripts/run_analytics.py        # orchestrates all 9 analytics in correct
 ### Dashboard
 
 ```bash
+# Streamlit (internal / thesis-defense local view)
 streamlit run dashboard/app.py
+
+# Public web dashboard (Vercel-deployable static site under web-dashboard/)
+# Reads Supabase via the embedded anon key in web-dashboard/index.html.
+# See web-dashboard/README.md for deploy instructions.
 ```
 
 ---
@@ -216,7 +221,7 @@ streamlit run dashboard/app.py
 
 Every task completion or logic change should trigger an update to **PROGRESS.md** (status rows) and, if architecture shifts, to **this file**.
 
-> **Honest limitation:** Markdown instructions cannot *enforce* auto-updates — Claude can only update these files when it remembers or is reminded. Genuine automation requires a `Stop` hook in `.claude/settings.json`. Ask the owner to wire one up if strict enforcement is needed.
+> **Honest limitation:** Markdown instructions cannot *enforce* auto-updates — Codex can only update these files when it remembers or is reminded. Genuine automation requires a `Stop` hook in `.Codex/settings.json`. Ask the owner to wire one up if strict enforcement is needed.
 
 ---
 

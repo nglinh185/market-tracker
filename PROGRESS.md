@@ -9,9 +9,9 @@
 
 | Item              | Date       |
 | ----------------- | ---------- |
-| Today             | 2026-04-29 |
+| Today             | 2026-05-02 |
 | Thesis deadline   | 2026-05-02 |
-| Days remaining    | **3**      |
+| Days remaining    | **0**      |
 
 ---
 
@@ -32,7 +32,7 @@
 |11. RoBERTa Colab integration              | 🟡 external | Notebook to be archived under `notebooks/`. Repo runs RoBERTa via `analyze_sentiment.py`; Colab code stays as a separate experiment artifact. |
 |12. Dashboard polish                       | ⏳ pending | 6 pages exist; theme/CSS/Plotly polish for thesis defense impact (Day 2-3 plan). |
 |13. Output polish (Telegram bots)          | ✅ done    | SOUL.md + AGENTS.md hardened for Telegram production: no markdown tables, line caps (sentiment 25 / spy 25 / strategist 30), backtick-wrapped numbers/ASINs, mandatory next-step closer (no "Let me know…"), spell-guard `Concerns` (not `Confidences`), grouped alerts by priority. 2026-04-28. |
-|14. Thesis write-up                        | ⏳ pending | LaTeX skeleton under `thesis/`. Architecture chapter ready (3-tier multi-agent + cron). |
+|14. Thesis write-up                        | in progress | Front matter, Chapters 1-4, conclusion, appendix, and references revised against code/output. |
 
 ---
 
@@ -84,7 +84,7 @@ Workspace-level defaults at `openclaw/SOUL.md` + `openclaw/AGENTS.md` exist as a
 | GitHub Actions — Daily Ingest    | ✅ done     | Workflow `Daily Amazon Data Ingest` runs daily at 13:00 ICT                 |
 | Apify ingest                     | ✅ done     | junglee/Amazon-crawler + web_wanderer/amazon-reviews-extractor              |
 | OpenClaw runtime                 | ✅ done     | Installed in VMware Ubuntu 24.04, version 2026.4.20, runtime = direct       |
-| OpenClaw model (per agent)       | ✅ done     | `openai/gpt-4o-mini` via `OPENAI_API_KEY` (in OpenClaw config, not repo)    |
+| OpenClaw model (per agent)       | ✅ done     | 3 active agents on `openai/gpt-5.4-mini`; default agent on `openai/gpt-4o-mini` (kept, unused). `OPENAI_API_KEY` in OpenClaw config, not repo. |
 | Telegram channels (×3)           | ✅ done     | 3 bots: `@babyspyyy_bot` (default→Spy), `@babydetective_bot`, `@babystrategist_bot`. All paired. |
 | Project skills registration      | ✅ done     | 13/13 wrappers under `openclaw/wrappers/`, registered via `skills.load.extraDirs`. Source = `openclaw-extra`. |
 | Multi-agent deployment           | ✅ done     | 3 agents added (`agents add`), each bound 1:1 to its Telegram account (`agents bind`). |
@@ -101,7 +101,7 @@ Workspace-level defaults at `openclaw/SOUL.md` + `openclaw/AGENTS.md` exist as a
 
 1. **Telegram polling network instability.** VM occasionally hits `Network request for 'getUpdates' failed!` — bots reconnect automatically but messages can lag 30–60s. Workaround: VMware NAT restart fixes it. Defense risk: low, but mention in limitations.
 2. **Sentiment aggregation is cumulative, not daily-new.** `analyze_sentiment.py` recomputes `avg_sentiment_score` over every historical review each day; `review_sentiment_daily.review_count_new` is misleadingly named (it's the running total, not new reviews per day). BMS sentiment input therefore moves only when reviews are actually added (weekly). Disclose in the methodology chapter; not breaking.
-3. **`9router-openai/cx/gpt-5.5` proxy was set up but currently unreachable** (`localhost:20128` not listening). Agents fall back to `openai/gpt-4o-mini` which works correctly. Document the failover behavior in thesis "Limitations" section.
+3. **`9router-openai/cx/gpt-5.5` proxy was set up but currently unreachable** (`localhost:20128` not listening). The 3 active agents now call `openai/gpt-5.4-mini` directly; the unused default agent retains `openai/gpt-4o-mini`. Document the failover behavior in thesis "Limitations" section.
 4. **RoBERTa Colab archive** — file `notebooks/sentiment_roberta_experiment.ipynb` not yet committed. Pull from Colab and add before defense.
 5. **Supabase key scoping (security).** Verified anon-key read exposure exists: the public web dashboard ships the anon key embedded in `web-dashboard/index.html` (`window.APP_CONFIG.SUPABASE_ANON_KEY`), so anyone visiting the deployed page can read whatever tables the anon role has SELECT on — including `reviews_raw` based on current schema/policies. Fixing the policies (RLS / column allowlists) requires the Supabase admin console, not code; this is a configuration follow-up, not a code bug. Action items: (a) tighten RLS on `reviews_raw`, `daily_snapshots`, `alerts`, `category_rankings`, `brand_momentum_daily`, `review_sentiment_daily`, `listing_quality_score_daily`, `price_forecast_daily` in Supabase; (b) confirm `SUPABASE_KEY` used by ingest scripts (CI, watchlist, sentiment) is service-role and is **never** copied into the Streamlit dashboard or the static `web-dashboard/`; (c) consider rotating the anon key once policies are tight, since the current key is committed to deploy artifacts.
 
@@ -127,6 +127,45 @@ CLAUDE.md asks for auto-updates to this file on every task. Markdown cannot enfo
 ---
 
 ## Changelog
+
+- **2026-05-02** — LaTeX overflow fixes across thesis:
+  - **Appendix header**: running header showed "REFERENCES" on appendix pages because `\leftmark` was inherited from `\bibliography`. Fixed by adding `\fancyhead[R]` reset and `\chaptermark` override in the appendix preamble of `main.tex`.
+  - **Appendix Table A.1** (migrations): shortened `.sql` suffixes in first column, tightened wording in Purpose column.
+  - **Appendix Table A.2** (entry points): stripped `python scripts/` prefix, used `\small\texttt{}`, shortened Role descriptions.
+  - **Ch.4 Table 4.1** (category baseline): wrapped 7-column tabular in `\resizebox{\textwidth}{!}{}` to auto-scale.
+  - **Ch.3 Table 3.4** (schedules): same `\resizebox` treatment for 4 columns.
+  - **Ch.3 Table 3.6** (hyperparameters): same `\resizebox` treatment, shortened verbose Setting and Rationale text.
+  - **Ch.3 Tables 3.1/3.2** (schema): reduced column widths from `p{3.6cm}` to `p{3.2cm}` and Description from `p{6.3cm}` to `p{5.8cm}`, added `@{\hspace{6pt}}` inter-column spacing.
+  - **Ch.3 §3.1.2** inline SQL: added `\linebreak` between long `\texttt{migrations/001...}` and `\texttt{migrations/005...}` path.
+  - **Ch.2 + Ch.3**: wrapped long RoBERTa model name `cardiffnlp/twitter-roberta-base-sentiment-latest` in `\seqsplit{}` to enable line breaks.
+  - Added `\usepackage{seqsplit}` to `main.tex`.
+
+- **2026-05-02** — Appendix dashboard interface evidence:
+  - Added new section `A.8 Dashboard interface evidence` to `thesis/chapters/appendix_a.tex` with two figure environments for Streamlit and web dashboard screenshots.
+  - Labels: `fig:app_streamlit_overview` and `fig:app_web_overview` (no conflict with existing `fig:*` labels in Ch.3–4).
+  - Captions framed as implementation evidence for pull-based delivery surfaces, not evaluation results.
+  - Pending: user to place screenshot files at `thesis/figures/dashboard_streamlit_overview.png` and `thesis/figures/dashboard_web_overview.png`.
+
+- **2026-05-02** - Thesis front-matter cross-check started:
+  - Reviewed rendered PDF `check_turn_lan_1.pdf` against LaTeX front matter under `thesis/chapters/00_*`.
+  - Scope covered: acknowledgement, statutory declaration, list of abbreviations, and table of contents before Chapter 1.
+  - Key issues found: ToC title renders as `Contents` instead of `TABLE OF CONTENTS`; `List of Figures` is numbered as Arabic page `1`, causing Chapter 1 to start at page `2`; references are absent from ToC; appendix appears as `CHAPTER A` instead of `APPENDIX A`; abbreviation list misses several terms used in thesis/code such as `BI`, `DAG`, `DOM`, `ETL`, `VLM`, `SME`, and `CI/CD`.
+  - Rewrote `00_acknowledgement.tex`, `00_statutory.tex`, and `00_abbreviations.tex` in a more formal academic tone. Expanded abbreviations into a cleaner `longtable` using `booktabs`.
+  - Updated `main.tex` front-matter controls: force `TABLE OF CONTENTS` under English babel, keep `List of Figures` in roman numbering by adding a page break before Arabic numbering, add References to ToC, and switch appendix ToC/chapter label to `APPENDIX A`.
+  - Reviewed Chapter 1 against the actual codebase. Main thesis-code alignment issues: replace over-strong `real-time` / `production-grade` wording with scheduled/daily monitoring; clarify Apify actor-based extraction rather than custom DOM scraping; avoid saying ML models are "optimized" unless backed by tuning; include Supabase Storage, GitHub Actions cron, 13 read-only OpenClaw skills, 3 Telegram agents, Streamlit dashboard, and Vercel web dashboard in scope.
+  - Rewrote `thesis/chapters/01_introduction.tex` end-to-end in academic English. The revised Chapter 1 now frames the project as a scheduled Amazon market-intelligence pilot, explicitly maps objectives to implemented files (`scripts/ingest_*`, `scripts/run_analytics.py`, `scripts/analyze_*`, `openclaw/skills`, `dashboard`, `web-dashboard`), and states exclusions such as no LangChain, no Power BI, no custom browser scraper, and no real-time streaming system.
+  - Rewrote `thesis/chapters/02_literature_review.tex` end-to-end. The revised chapter now anchors theory to the actual codebase: Apify actor extraction, Supabase/Postgres warehousing, GitHub Actions orchestration, Prophet/RoBERTa/K-Means/pHash, BMS/LQS/SOV/rule-based alerts, distant-supervision and walk-forward evaluation, Streamlit/web dashboards, and read-only OpenClaw skill-based Telegram agents. Citation keys were checked against `references.bib` with no missing keys.
+  - Reviewed Chapter 3 methodology against implementation. Key mismatches found: missing `figures/architecture.png`; schema table omits/overstates columns; `lib/db.py` is a thin Supabase wrapper, not an ORM/atomic transaction layer; Apify reliability/proxy claims are too strong; LQS/BMS formulas are underspecified and partly inaccurate; `query_forecast` should be `query_price_forecast`; sentiment aggregation is cumulative despite `review_count_new`; workflow count wording should be one GitHub Actions workflow with multiple jobs/schedules, not two workflows.
+  - Rewrote `thesis/chapters/03_methodology.tex` to match code implementation while preserving the `figures/architecture.png` placeholder for later upload. Fixes include selected schema fields, Apify/cache/dedupe details, one-workflow GitHub Actions schedule, exact BMS/LQS formulas, exact alert thresholds, Prophet forecast vs evaluation thresholds, cumulative sentiment aggregation caveat, OpenClaw skill names/boundaries, and no formal unit-test/structured-logging caveat.
+  - Reviewed Chapter 4 / `thesis/chapters/05_results.tex` against `data/eval/{descriptives,sentiment_eval,forecast_eval}.json`, figure outputs, and analytics scripts.
+  - Rewrote Chapter 4 to frame the results as an empirical evaluation of a scheduled thesis pilot, not a real-time or production-grade system. Fixes include: honest Prophet result (MAE equals naive baseline, use as trend/uncertainty signal), RoBERTa neutral-class weakness, Top-50 entrant/exit interpretation, price-tier counts described as available ASIN price records, 0 pHash image-change events reported as a negative result, alert type/severity counts aligned to current descriptives, and OpenClaw agents described as read-only consumers of Supabase-derived tables.
+  - Local LaTeX compile was not run because `pdflatex`, `latexmk`, and `tectonic` are not installed in the current Windows environment. Checked forbidden/over-strong wording with `rg` and verified all Chapter 4 figure files exist under `thesis/figures/`.
+  - Reviewed Abstract and Conclusion/Future Work together for consistency with Chapter 4 and code outputs. Main mismatches fixed: Abstract still used stale forecast eval numbers (`17` ASINs, MAE `0.601`, MAPE `1.16%`, PI `90.2%`) while current `data/eval/forecast_eval.json` has `16` ASINs, MAE `0.931`, MAPE `2.05%`, PI `89.6%`; Abstract referenced case studies no longer present in the revised Results chapter; Conclusion overclaimed with `Autonomous`, `real-time`, `exceptional`, and forecasting-calibration language.
+  - Rewrote `thesis/chapters/00_abstract.tex` and `thesis/chapters/06_conclusion.tex` completely. Both now use the same evidence set: 13-day window, 1,756 ranking rows, 409 snapshots, 3,986 reviews, 3,851 sentiment eval reviews, RoBERTa accuracy `81.17%` / macro-F1 `0.594`, Prophet equal to naive baseline (`$0.931` MAE), 1,060 entrant/exit events, 1,248 alerts, 55 high-severity alerts, LQS mean `93.4`, and 0 qualifying pHash image-change events. Future Work now focuses on longer data, manual sentiment labels, operational hardening/RLS/tests, richer image explanation, and agent workflow evaluation.
+  - Reviewed Appendix plus List of Tables/List of Figures references. Replaced stale prompt-only Appendix with an implementation artifact appendix that matches the current repo: migrations `001--005`, no standalone `schema.sql` or `main.py`, entry points under `scripts/`, `dashboard/app.py`, `web-dashboard/index.html`, current GitHub Actions schedule/manual modes, read-only OpenClaw skill contract, and evaluation/figure artifacts. Added three appendix tables (`A.1` migrations, `A.2` runtime entry points, `A.3` evaluation/figure artifacts), so List of Tables will include them after LaTeX recompilation.
+  - Updated `README.md` migration references from `001--004` / `001..004` to `001--005` / `001..005` so setup instructions match `migrations/005_price_forecast.sql`. Verified no stale `query_forecast`, `001--004`, `real-time`, `production-grade`, or `autonomous` claims remain in the revised Appendix; the old dashboard home path is mentioned only as an explicit non-entrypoint caveat.
+  - Completed a reference-library audit against thesis citations and direct code dependencies. Rebuilt `thesis/references.bib` with verified papers/docs only; removed or replaced weak/stale entries (`lewis2011`, `richardson2019scrapy`, `liu2023marketplace`, `wu2023autogen`), added missing implementation references for scikit-learn, ImageHash/Pillow, Plotly, CardiffNLP model card, NumPy, pandas, PyTorch, Matplotlib, Requests, python-dotenv, and PyYAML, and added `\nocite{...}` for direct code libraries that are not discussed in the literature chapter. Verified citation coverage: 47 cited/nocited keys, 47 bibliography entries, 0 missing, 0 unused. Browser-use plugin initialization was attempted but blocked by Windows `Access is denied`, so source verification used direct web search/open against DOI, ACL, arXiv, official documentation, and official vendor pages.
+  - Reviewed external `thesis_code_audit.md`. Confirmed the main critical finding was valid: `thesis/figures/architecture.png` was still absent from the repo despite the Chapter 3 reference. Generated a new architecture figure matching the implemented Apify -> ingestion scripts -> Supabase/Postgres -> analytics/evaluation -> dashboards/OpenClaw/Telegram flow. Also tightened Chapter 4 price-tier wording to clarify that tier counts are priced ASIN records across ranking snapshots, not unique Top-50 products.
 
 - **2026-04-29** - PR merge + forecast migration applied:
   - GitHub PR branch `claude/vigorous-jang-82408f` was merged and deleted by the owner. Local `main` fast-forwarded to `0fe0021` (`audit: pre-defense stabilization`); the existing local dashboard/SOUL/AGENTS working-tree edits were preserved untouched.

@@ -1,0 +1,60 @@
+\chapter{CONCLUSION AND FUTURE WORK}
+\label{chap:conclusion}
+
+\section{Summary of contributions}
+
+This thesis designed and implemented an Amazon Marketplace Intelligence Tracker for scheduled competitive monitoring of consumer-electronics products. The contribution is primarily an integration and systems contribution: it connects Amazon data extraction, relational storage, analytical scripts, dashboard exploration, and Telegram-based agent delivery into one reproducible workflow.
+
+The implemented framework addresses the gap between raw marketplace data and usable competitive intelligence. Apify actors collect category rankings, watchlist product snapshots, and customer reviews. Supabase stores both raw and derived tables. Python scripts compute entrant/exit events, sponsored share of voice, price tiers, sentiment, listing quality, brand momentum, alerts, image-change flags, and price forecasts. The Streamlit and web dashboards support pull-based analysis, while three OpenClaw Telegram agents provide push-based summaries through thirteen read-only skills.
+
+The most important design choice is the separation between data mutation and conversational delivery. Ingestion and analytics scripts write to the database on schedule, while OpenClaw skills only read existing Supabase records. This makes the agent layer useful for communication without allowing it to alter the analytical state of the system. For a thesis-scale deployment, this architecture is easier to audit and more defensible than allowing LLM agents to directly mutate the warehouse.
+
+\section{Key empirical findings}
+
+The 13-day pilot collected 1,756 category-ranking rows, 409 daily product snapshots, and 3,986 raw review records. These data supported both descriptive market monitoring and lightweight model evaluation.
+
+For sentiment analysis, RoBERTa achieved 81.17\% accuracy and a macro-$F_1$ score of 0.594 on 3,851 reviews evaluated with star ratings as a distant-supervision proxy. The model performed well on positive reviews ($F_1 = 0.908$) and achieved useful negative-review recall (0.782), which is valuable for detecting customer complaints. However, the neutral class remained weak ($F_1 = 0.158$), confirming that 3-star reviews are a noisy proxy for neutral textual sentiment.
+
+For price forecasting, Prophet was useful as a short-term trend and uncertainty signal but did not outperform the naive last-value baseline in the current data window. Across 16 evaluated ASINs and a three-day holdout, Prophet achieved MAE of \$0.931 and MAPE of 2.05\%, equal to the naive MAE of \$0.931. Its 80\% prediction intervals covered 89.6\% of held-out prices, suggesting conservative interval behavior, but the short and mostly static price histories prevent a strong claim about forecasting superiority.
+
+The rule-based analytics generated 1,060 entrant/exit events and 1,248 alert records, including 55 high-severity alerts. The alert engine helped separate routine Top-50 churn from more important events such as top-10 entrants, price drops, and stockout signals. The LQS results showed that many tracked listings were already highly optimized, with an average score of 93.4 out of 100, so LQS is most useful for finding weaker outliers rather than explaining all rank movement. The image-change module was implemented, but no observed image change exceeded the configured pHash threshold during the pilot.
+
+\section{Limitations of the study}
+
+Several limitations should be considered when interpreting the results.
+
+\subsection{Short observation window}
+
+The most important limitation is the 13-day observation window. This period is enough to demonstrate ingestion, storage, analytics, dashboarding, and agent delivery, but it is too short for robust time-series modelling. Weekly and yearly Prophet seasonality were intentionally disabled, and the evaluation showed that Prophet did not beat the naive last-value baseline. Longer data collection would be required before using the forecast as more than a short-term trend indicator.
+
+\subsection{Noisy sentiment ground truth}
+
+The sentiment evaluation used star ratings as a proxy label because no manually annotated review dataset was available. This introduces label noise, especially for 3-star reviews. A three-star review may contain both praise and criticism, or may penalize shipping rather than the product itself. The weak neutral-class result should therefore be interpreted as both a model limitation and a limitation of the proxy-labelling method.
+
+\subsection{Deployment and engineering constraints}
+
+The prototype was deployed as a thesis pilot rather than a hardened commercial service. Telegram polling can occasionally lag in the VMware environment, structured logging and formal unit tests are limited, and Supabase row-level security for the public web dashboard remains a configuration follow-up. Forecast data now persists to Supabase, but the system still depends on scheduled jobs finishing as expected. These constraints do not invalidate the prototype, but they define the boundary between a working academic system and a hardened service.
+
+\section{Future work}
+
+Future work should focus on strengthening the parts of the system that were most constrained during the thesis timeline.
+
+\subsection{Longer data collection and stronger forecasting baselines}
+
+The first priority is to extend the data window from days to months. A longer history would allow the project to evaluate weekly cycles, promotional periods, and event-driven price changes more fairly. Future evaluation should compare Prophet against multiple baselines, including last-value, moving-average, and simple category-level models, instead of treating Prophet as the default forecasting choice.
+
+\subsection{Manual sentiment validation}
+
+A second improvement is to build a small manually labelled review set for sentiment evaluation. Even a few hundred carefully annotated reviews would make it possible to separate model error from star-rating proxy noise. This would also support more reliable aspect-level analysis, especially for complaints about battery life, durability, comfort, shipping, and product authenticity.
+
+\subsection{Operational hardening}
+
+The engineering layer can be strengthened through formal unit tests, structured logs, data-quality checks, and transactional alert upserts. Supabase row-level security should be tightened before exposing the public web dashboard broadly. The OpenClaw skills should remain read-only, but their outputs could be evaluated with a fixed set of benchmark questions to measure factual accuracy, brevity, and usefulness.
+
+\subsection{Richer image and listing-change explanation}
+
+The current pHash method can detect visual change but cannot explain what changed. A realistic next step is to combine pHash with a vision-language model or a rule-based image metadata comparison so that the system can distinguish between a new product angle, a promotional badge, a packaging redesign, or a minor crop. This should be added only after enough image-change events are collected to evaluate whether the added complexity is useful.
+
+\subsection{Agent evaluation and workflow design}
+
+The three-agent Telegram design can be expanded with systematic user evaluation. Future work could compare dashboard-only use, agent-only briefs, and combined dashboard-plus-agent workflows for decision speed and perceived usefulness. This would move the research contribution beyond technical feasibility toward evidence about how small sellers or analysts actually use the intelligence produced by the system.

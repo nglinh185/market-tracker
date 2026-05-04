@@ -20,6 +20,7 @@ numpy==1.26.4
 # Sentiment analysis
 transformers==4.40.0
 torch==2.3.0
+vaderSentiment==3.3.2
 
 # Price forecasting
 prophet==1.1.5

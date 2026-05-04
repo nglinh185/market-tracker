@@ -52,7 +52,7 @@ def _score_reviews(count: int | None) -> float:
 
 def _score_sentiment(sentiment: float | None) -> float:
     if sentiment is None:
-        return 5  # neutral default nếu chưa có
+        return 0
     return round((sentiment + 1) / 2 * 10, 1)
 
 
