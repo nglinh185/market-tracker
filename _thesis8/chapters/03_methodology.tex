@@ -578,17 +578,24 @@ perfect estimate of the model's true semantic understanding.
 
 For forecast evaluation, \texttt{scripts/evaluate\_forecast.py} uses a
 temporal holdout protocol. For each eligible watchlist ASIN with at
-least 10 price observations, the final $H=3$ days are held out, Prophet
-is fitted on the earlier observations, and predictions are compared with
-actual holdout prices. For each ASIN:
+least $\texttt{MIN\_HISTORY} + H = 10$ price observations, the final
+$H = 3$ days are held out, each candidate model is fitted on the earlier
+observations, and predictions are compared with actual holdout prices.
+For each ASIN and model:
 \begin{align}
-  \text{MAE}_i  &= \frac{1}{H}\sum_t |y_{i,t} - \hat{y}_{i,t}|, \\
-  \text{MAPE}_i &= \frac{1}{H}\sum_t
+  \text{MAE}_i  &= \frac{1}{H}\sum_{t=1}^{H} |y_{i,t} - \hat{y}_{i,t}|, \\
+  \text{MAPE}_i &= \frac{1}{H}\sum_{t=1}^{H}
   \frac{|y_{i,t} - \hat{y}_{i,t}|}{y_{i,t}} \times 100\%.
 \end{align}
-The script also reports naive last-value MAE and 80\% prediction-interval
-coverage. This makes it possible to disclose whether Prophet improves on
-a simple carry-forward baseline under the short observation window.
+Pooled MAE and MAPE are then computed by concatenating held-out points
+across all evaluated ASINs. Five methods are compared: (1) a naive
+carry-forward baseline, (2) a linear trend (OLS) baseline, (3)
+Exponential Smoothing with additive trend (ETS/Holt), (4) ARIMA(1,1,0),
+and (5) Prophet. For ARIMA and ETS, convergence failures on individual
+ASINs (expected with $n \approx 7$--$12$ flat series) trigger an
+automatic fallback to the naive prediction for that ASIN. The script
+additionally reports Prophet's 80\% prediction-interval coverage to
+assess whether the uncertainty envelope is well-calibrated.
 
 \section{Hyperparameter and threshold selection}
 \label{sec:hparams}
@@ -611,7 +618,7 @@ thresholds implemented in the codebase.
     pHash image diff & $d_H > 10$ & Configured in \texttt{config.PHASH\_THRESHOLD}. \\
     Sentiment model & Pretrained RoBERTa & No manually labelled in-domain training set available. \\
     Prophet forecast & $\geq 3$ price points & Minimum in \texttt{analyze\_price\_forecast.py}. \\
-    Prophet eval & 3-day holdout, min 10 obs. & Implemented in \texttt{evaluate\_forecast.py}. \\
+    Forecast eval & 3-day holdout, min 10 obs., 5 models & Naive, OLS, ETS, ARIMA(1,1,0), Prophet compared in \texttt{evaluate\_forecast.py}. \\
     BMS weights & $0.5, 0.3, 0.2$ & BSR velocity, review velocity, sentiment. \\
     LQS weights & $10,15,15,15,20,15,10$ & Title, bullets, image, A+, rating, reviews, sentiment. \\
     Alert: price drop & $\geq 15\%$; high $\geq 30\%$ & Implemented in \texttt{analyze\_alerts.py}. \\
