@@ -15,7 +15,7 @@ The 13-day pilot collected 1,756 category-ranking rows, 409 daily product snapsh
 
 For sentiment analysis, RoBERTa achieved 81.17\% accuracy and a macro-$F_1$ score of 0.594 on 3,851 reviews evaluated with star ratings as a distant-supervision proxy. The model performed well on positive reviews ($F_1 = 0.908$) and achieved useful negative-review recall (0.782), which is valuable for detecting customer complaints. However, the neutral class remained weak ($F_1 = 0.158$), confirming that 3-star reviews are a noisy proxy for neutral textual sentiment.
 
-For price forecasting, Prophet was useful as a short-term trend and uncertainty signal but did not outperform the naive last-value baseline in the current data window. Across 16 evaluated ASINs and a three-day holdout, Prophet achieved MAE of \$0.931 and MAPE of 2.05\%, equal to the naive MAE of \$0.931. Its 80\% prediction intervals covered 89.6\% of held-out prices, suggesting conservative interval behavior, but the short and mostly static price histories prevent a strong claim about forecasting superiority.
+For price forecasting, a five-way temporal holdout comparison was conducted across all 30 watchlist ASINs with a three-day holdout. The models evaluated were: naive carry-forward, linear trend (OLS), Exponential Smoothing (ETS), ARIMA(1,1,0), and Prophet. The naive baseline achieved the lowest pooled MAE (\$1.292), with ARIMA the closest non-trivial alternative (\$1.323, only 2.4\% higher). Prophet ranked fifth with MAE of \$2.970 and MAPE of 6.75\%. The near-equivalence of the naive and ARIMA results confirms that Amazon prices approximate a random walk over short horizons — a data-volume constraint rather than a model deficiency. Despite its lower point-forecast accuracy, Prophet is retained in the deployed system because it is the only evaluated model that produces calibrated uncertainty intervals; its empirical 80\% prediction-interval coverage was 67.8\%.
 
 The rule-based analytics generated 1,060 entrant/exit events and 1,248 alert records, including 55 high-severity alerts. The alert engine helped separate routine Top-50 churn from more important events such as top-10 entrants, price drops, and stockout signals. The LQS results showed that many tracked listings were already highly optimized, with an average score of 93.4 out of 100, so LQS is most useful for finding weaker outliers rather than explaining all rank movement. The image-change module was implemented, but no observed image change exceeded the configured pHash threshold during the pilot.
 
@@ -25,7 +25,7 @@ Several limitations should be considered when interpreting the results.
 
 \subsection{Short observation window}
 
-The most important limitation is the 13-day observation window. This period is enough to demonstrate ingestion, storage, analytics, dashboarding, and agent delivery, but it is too short for robust time-series modelling. Weekly and yearly Prophet seasonality were intentionally disabled, and the evaluation showed that Prophet did not beat the naive last-value baseline. Longer data collection would be required before using the forecast as more than a short-term trend indicator.
+The most important limitation is the 13-day observation window. This period is enough to demonstrate ingestion, storage, analytics, dashboarding, and agent delivery, but it is too short for robust time-series modelling. Weekly and yearly Prophet seasonality were intentionally disabled. The five-way forecast evaluation confirmed that no model outperformed the naive carry-forward baseline, with ARIMA(1,1,0) being the best non-trivial model (MAE \$1.323 versus naive \$1.292). This is consistent with the near-random-walk behavior of Amazon prices over short horizons. Longer data collection — ideally 60 or more days — would be required before the forecast component can be used as more than a short-term trend and volatility indicator.
 
 \subsection{Noisy sentiment ground truth}
 
@@ -39,9 +39,9 @@ The prototype was deployed as a thesis pilot rather than a hardened commercial s
 
 Future work should focus on strengthening the parts of the system that were most constrained during the thesis timeline.
 
-\subsection{Longer data collection and stronger forecasting baselines}
+\subsection{Longer data collection and improved forecasting accuracy}
 
-The first priority is to extend the data window from days to months. A longer history would allow the project to evaluate weekly cycles, promotional periods, and event-driven price changes more fairly. Future evaluation should compare Prophet against multiple baselines, including last-value, moving-average, and simple category-level models, instead of treating Prophet as the default forecasting choice.
+The first priority is to extend the data window from days to months. A longer history would allow the project to evaluate weekly cycles, promotional periods, and event-driven price changes more fairly. The thesis already conducted a five-way model comparison (naive, OLS, ETS, ARIMA, Prophet); the next step is to re-run this evaluation after accumulating 60 or more days of data, at which point trend-aware models such as ETS and Prophet are expected to gain a meaningful advantage over the naive baseline.
 
 \subsection{Manual sentiment validation}
 
