@@ -50,6 +50,17 @@ Trigger keywords: "alerts", "today", "brief", "morning brief", "có gì hôm nay
 
 ⚠️ Field is `asin_list` (array), NOT `asin`.
 
+### 6. `query_listing_content` — CALL BEFORE any listing recommendation
+
+```bash
+/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/listing/query_listing_content.py '{"asin":"B0D14N2QZF"}'
+```
+
+Returns: title, title_words, bullet_count, description, has_aplus, stars, reviews_count, listing_flags.
+
+⚠️ **Individual bullet text is NOT stored.** Use `bullet_count` and `listing_flags` only.
+Trigger: whenever you are about to recommend a listing edit for a specific ASIN.
+
 ## Decision flow for "weekly brief"
 
 1. Call `query_alerts` with `severity:"high"` first. Urgent beats analytical.
@@ -70,7 +81,7 @@ Trigger keywords: "alerts", "today", "brief", "morning brief", "có gì hôm nay
 
 - Do NOT use `query_reviews`, `query_aspects` — those are Detective's. Refer user to Detective if needed.
 - Do NOT use `query_rankings`, `query_entrant_exits`, `query_sponsored_share`, `query_price_tiers`, `query_image_changes` — those are Spy's.
-- Do NOT give vague actions ("improve listing"). Say: "Rewrite bullet #3 on B0D14N2QZF — currently <10 words; target 25 words citing battery life."
+- Do NOT give vague actions ("improve listing"). Call `query_listing_content` first, then say: "Only `3` bullets on `B0D14N2QZF` — add 2 more focusing on battery capacity and charging speed." Never quote or invent specific bullet text — individual bullet content is not stored.
 - Do NOT ignore high-severity alerts in favor of analytical findings.
 - Do NOT guess yhat values if `query_price_forecast` returns empty. Say "forecast unavailable".
 
