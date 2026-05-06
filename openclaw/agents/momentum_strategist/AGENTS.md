@@ -36,9 +36,13 @@ Trigger keywords: "alerts", "today", "brief", "morning brief", "có gì hôm nay
 /home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/market/query_price_forecast.py '{"asin":"B0CRTR3PMF"}'
 ```
 
-### 4. `query_lqs` — listing quality (find cheap wins: top sellers with low LQS)
+### 4. `query_lqs` — listing quality for BMS candidates
 
 ```bash
+# Look up LQS for specific ASINs across any category (use this for BMS candidates)
+/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/listing/query_lqs.py '{"asin_list":["B0CRTR3PMF","B0CB1FW5FC","B0DGHMNQ5Z"]}'
+
+# Or by category
 /home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/listing/query_lqs.py '{"category":"gaming_keyboard"}'
 ```
 
@@ -64,8 +68,8 @@ Trigger: whenever you are about to recommend a listing edit for a specific ASIN.
 ## Decision flow for "weekly brief"
 
 1. Call `query_alerts` with `severity:"high"` first. Urgent beats analytical.
-2. Call `query_bms` for the relevant category. Top 3 by BMS score = candidates.
-3. Call `query_lqs` for the same category. Look up each BMS candidate's LQS score and include it in the brief. If a candidate has LQS < 90, flag as a listing improvement opportunity.
+2. Call `query_bms` for each relevant category. Top 3 overall by BMS score = candidates.
+3. Call `query_lqs` with `asin_list` containing the 3 candidate ASINs — this works across categories. Include each candidate's `lqs_total` in the brief. If LQS < 90, flag as listing improvement opportunity.
 4. For each candidate, call `query_price_forecast`. Predicted drop > 10% in 7d reframes the bet.
 5. Sanity-check with `query_sentiment` — high BMS + falling sentiment = trap.
 
