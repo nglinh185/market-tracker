@@ -556,6 +556,7 @@ forecaster.
 Because no manually labelled in-domain sentiment dataset is available,
 the evaluation uses star ratings as noisy labels:
 \begin{equation}
+  \label{eq:star_proxy}
   y_{\text{star}} = \begin{cases}
     \text{negative} & \text{if rating} \in \{1, 2\}, \\
     \text{neutral}  & \text{if rating} = 3, \\
@@ -573,6 +574,38 @@ because Amazon reviews are skewed toward positive ratings:
 \end{equation}
 The result should be interpreted as a noisy operational check, not a
 perfect estimate of the model's true semantic understanding.
+
+\subsection{Sentiment classification: manual label validation}
+\label{subsec:manual_eval}
+
+To quantify the noise introduced by the star-rating proxy described above, a stratified
+sample of 200 reviews was manually labeled by the author. Reviews were sampled
+proportionally from all three product categories and assigned a ground-truth label
+(\textit{negative}, \textit{neutral}, or \textit{positive}) based solely on review
+text, without reference to the associated star rating or the RoBERTa prediction.
+Manual labeling was performed in a single session to minimise intra-rater drift.
+
+The labeled sample enables three targeted comparisons:
+
+\begin{enumerate}
+    \item \textbf{Star-proxy accuracy against manual labels:} measures how often the
+    star-rating mapping (Equation~\ref{eq:star_proxy}) agrees with human judgment,
+    thereby quantifying the ceiling on any evaluation that uses stars as ground truth.
+
+    \item \textbf{RoBERTa accuracy against manual labels:} measures the model's genuine
+    classification performance on text, independent of star-rating noise.
+    This is the primary measure of true model quality.
+
+    \item \textbf{RoBERTa accuracy against star-proxy labels (same 200-sample):}
+    replicates the proxy evaluation on the same subset to make the three comparisons
+    directly comparable.
+\end{enumerate}
+
+The gap between comparisons (2) and (3) directly quantifies how much of RoBERTa's
+apparent error under proxy evaluation is attributable to noisy labels rather than
+genuine misclassification. This validation is implemented in
+\texttt{scripts/evaluate\_sentiment\_manual.py} and produces
+\texttt{data/eval/sentiment\_manual\_eval.json}.
 
 \subsection{Price forecasting: temporal holdout backtest}
 

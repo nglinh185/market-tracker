@@ -83,6 +83,47 @@ Figure~\ref{fig:sentiment_dist} summarizes the average positive, neutral, and ne
   \label{fig:sentiment_dist}
 \end{figure}
 
+\subsubsection*{Manual label validation}
+
+To assess whether the star-rating proxy systematically under- or over-estimates
+RoBERTa's true performance, 200 reviews were manually labeled by the author and
+evaluated against both the star-proxy labels and the RoBERTa predictions.
+Table~\ref{tab:manual_label_eval} reports the three-way accuracy comparison.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lcc}
+    \toprule
+    \textbf{Comparison} & \textbf{Accuracy} & \textbf{Interpretation} \\
+    \midrule
+    Star proxy vs.\ manual labels  & 0.745 & Star ratings carry 25.5\% label noise \\
+    RoBERTa vs.\ manual labels     & \textbf{0.720} & True model accuracy \\
+    RoBERTa vs.\ star proxy        & 0.635 & Apparent accuracy under proxy evaluation \\
+    \bottomrule
+  \end{tabular}
+  \caption{Three-way accuracy comparison on 200 manually labeled Amazon reviews.
+  All rows use the same sample of 200 reviews labeled by the author.
+  ``Star proxy vs.\ manual'' measures proxy label noise.
+  ``RoBERTa vs.\ manual'' is the primary measure of true model quality.
+  ``RoBERTa vs.\ star proxy'' replicates the proxy evaluation on the same
+  subset for direct comparability.}
+  \label{tab:manual_label_eval}
+\end{table}
+
+The results reveal that star ratings agree with human judgment on only 74.5\% of
+reviews, confirming that the proxy carries meaningful label noise, concentrated
+in ambiguous 3-star reviews and cases where buyers rate highly despite expressing
+concerns in the text body. Crucially, RoBERTa's true accuracy against manual
+labels (72.0\%) is 8.5 percentage points higher than its apparent accuracy under
+the star-proxy evaluation (63.5\%). This gap indicates that a substantial fraction
+of the model's apparent ``errors'' are in fact cases where RoBERTa correctly
+identifies the sentiment of the text and the star rating is the noisy signal.
+The star-proxy evaluation therefore \emph{underestimates} RoBERTa's genuine
+classification ability. A 72.0\% three-class accuracy on product reviews is
+consistent with published benchmarks for this model family on Amazon review data
+\citep{barbieri2020tweeteval} and is sufficient for the trend-detection and
+comparative-ranking use cases that motivate the deployment.
+
 \subsection{Price-trend forecasting}
 
 The price-forecasting component was evaluated using a five-way temporal holdout comparison. For each watchlist ASIN with sufficient price history, the final $H = 3$ observations were withheld, each candidate model was fitted on the earlier observations, and the resulting predictions were compared against the held-out prices using pooled Mean Absolute Error (MAE) and Mean Absolute Percentage Error (MAPE). The evaluation protocol required a minimum of $\texttt{MIN\_HISTORY} + H = 10$ price observations per ASIN, ensuring that each model had a viable training window.
