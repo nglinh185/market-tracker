@@ -36,6 +36,30 @@
 
 ---
 
+## 10-day thesis improvement roadmap
+
+Lộ trình cải thiện thesis từ ~7.5 → ~8.5-9.0, ưu tiên theo ROI.
+
+| Day  | Task                                        | Status                  | Output                                          |
+|------|---------------------------------------------|-------------------------|-------------------------------------------------|
+| 1    | Tier 0 — bug fixes + disclosures + rerun    | ✅ done                 | Refreshed §4 numbers, BMS/LQS reframed          |
+| 2-3  | Sentiment baselines (VADER + nlptown)       | ✅ done                 | §4.2.1 3-way comparison table                   |
+| 4    | Forecast baselines (LR + ETS + ARIMA)       | ✅ done                 | §4.2.2 5-way comparison, naive wins             |
+| 5    | Manual labeling 200 reviews                 | ✅ done (2026-05-06)    | §4.2.1 manual validation subsection (3-way acc) |
+| 6    | Cronbach's alpha + BMS forward validation   | ⏳ pending              | `scripts/validate_composite_scores.py` + §3.3   |
+| 7    | Dynamic watchlist (CLI + migration 006)     | ⏳ pending              | `scripts/manage_watchlist.py` + §1.5, §5.4      |
+| 8    | `query_listing_content` skill               | ⏳ pending              | New skill + Strategist AGENTS.md update         |
+| 9    | Buffer + LaTeX polish                       | ⏳ pending              | Clean compile                                   |
+| 10   | Dry-run defense + screenshot refresh        | ⏳ pending              | Defense-ready                                   |
+
+**Day 6 details:** Cronbach's alpha cho LQS (7 components, defends nếu α > 0.7) + correlate BMS_t với BSR_{t+5} (forward predictive validity).
+
+**Day 7 details:** CLI `manage_watchlist.py add/remove ASIN --category`, migration 006 tạo bảng `watchlist`, `config.py` đọc từ DB.
+
+**Day 8 details:** Skill trả về title/bullets/description/image_urls cho 1 ASIN; fix Strategist hallucinate bullet text khi recommend rewrites.
+
+---
+
 ## Skills audit (13/13)
 
 All skills have a Python CLI (`scripts/skill.py`), a sidecar `.md` doc under `openclaw/skills/<group>/`, and an OpenClaw AgentSkill wrapper at `openclaw/wrappers/<skill>/SKILL.md` (YAML-frontmatter format) registered via `skills.load.extraDirs`.

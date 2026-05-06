@@ -229,6 +229,33 @@ The Brand Momentum Score (BMS) ranked products by combining normalized BSR movem
   \label{fig:bsr_trend}
 \end{figure}
 
+\subsubsection*{Validation attempt and limitations}
+
+An attempt was made to validate LQS internal consistency via Cronbach's alpha
+and BMS forward predictive validity via Spearman rank correlation
+($\rho$, lag = 5 days). Both analyses returned uninformative results due to
+data structure limitations rather than model design errors.
+
+For LQS, three of seven components --- title score, bullet score, and image
+score --- exhibited zero variance across all 540 watchlist-ASIN-day
+observations: every tracked ASIN had a title longer than ten words, five or
+more bullet points, and a main product image. The ceiling effect is a direct
+consequence of curating a watchlist from established top-ranked products. With
+three constant items, Cronbach's alpha is mathematically undefined and the
+result ($\alpha = -0.13$) is artefactual. LQS cannot be validated by internal
+consistency on this dataset and should be interpreted as a formative composite
+whose components are independent dimensions of listing quality, not as a
+reflective scale.
+
+For BMS, per-ASIN Spearman $\rho$ between BMS$_t$ and BSR$_{t+5}$ had a
+median of $+0.13$ with 79\% of ASINs showing a positive (wrong-sign)
+correlation. The pooled negative correlation ($\rho = -0.46$) reflects a
+cross-sectional confound: ASINs that are persistently high-quality tend to have
+both high BMS and low BSR regardless of day-to-day movement. BMS does not
+exhibit temporal forward predictive validity within individual ASIN trajectories
+over the 17-day observation window, confirming its intended role as a
+descriptive ranking heuristic rather than a predictive momentum model.
+
 \subsection{Image-change detection}
 
 The image-change pipeline used perceptual hashing to compare product image snapshots. During the observed window, no actual image-change event exceeded the configured pHash threshold. This is a useful negative result: the system had the mechanism to detect stealth listing-image redesigns, but the tracked window did not contain a qualifying change. Therefore, the thesis should treat image-change detection as an implemented monitoring capability rather than as an empirically frequent event in this dataset.
