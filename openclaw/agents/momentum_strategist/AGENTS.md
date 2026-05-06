@@ -38,13 +38,17 @@ Trigger keywords: "alerts", "today", "brief", "morning brief", "có gì hôm nay
 
 ### 4. `query_lqs` — listing quality for BMS candidates
 
+⚠️ **Always use `asin_list` (not `category`) for the weekly brief** — BMS top candidates span multiple categories; a single-category call will miss some ASINs and return no row for them.
+
 ```bash
-# Look up LQS for specific ASINs across any category (use this for BMS candidates)
+# CORRECT — cross-category lookup by ASIN list (use this for weekly brief)
 /home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/listing/query_lqs.py '{"asin_list":["B0CRTR3PMF","B0CB1FW5FC","B0DGHMNQ5Z"]}'
 
-# Or by category
+# Only use category if you want ALL ASINs in one category (not for brief flow)
 /home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/listing/query_lqs.py '{"category":"gaming_keyboard"}'
 ```
+
+Output field to use: `lqs_total` (float). Match by `asin` field. Every returned row has a valid score.
 
 ### 5. `query_sentiment` — sanity check (high BMS + falling sentiment = trap)
 
@@ -68,8 +72,26 @@ Trigger: whenever you are about to recommend a listing edit for a specific ASIN.
 ## Decision flow for "weekly brief"
 
 1. Call `query_alerts` with `severity:"high"` first. Urgent beats analytical.
-2. Call `query_bms` for each relevant category. Top 3 overall by BMS score = candidates.
-3. Call `query_lqs` with `asin_list` containing the 3 candidate ASINs — this works across categories. Match each result row by `asin` field and write the `lqs_total` value directly into the brief line for that ASIN. Never write "LQS n/a" or "LQS unavailable" if the skill returned a row for that ASIN. If LQS < 90, add a note: "listing gap (no A+)" or similar.
+2. Call `query_bms` for each relevant category. Top 3 overall by BMS score = candidates. Candidates span multiple categories — collect ASINs before calling LQS.
+3. **Call `query_lqs` with `asin_list` containing ALL 3 candidate ASINs in one call.**
+
+   Example — if BMS returned `B0C9ZJHQHM`, `B0CDX5XGLK`, `B0D5FG2RQZ` as top candidates:
+   ```
+   query_lqs '{"asin_list":["B0C9ZJHQHM","B0CDX5XGLK","B0D5FG2RQZ"]}'
+   ```
+   Skill returns a list of rows. Each row contains `"asin"` and `"lqs_total"`. Example output:
+   ```json
+   [
+     {"asin":"B0C9ZJHQHM","lqs_total":91.2,...},
+     {"asin":"B0CDX5XGLK","lqs_total":78.5,...},
+     {"asin":"B0D5FG2RQZ","lqs_total":64.0,...}
+   ]
+   ```
+   For each row: look up `lqs_total` by matching `asin` field → write that number directly into the brief line as `LQS \`91.2\``.
+
+   **HARD RULE: Never write "LQS n/a" or "LQS unavailable" if the skill returned a row for that ASIN.** If a row is present, `lqs_total` is the score. Use it.
+   If LQS < 75, add: "listing gap — A+ missing" or similar.
+
 4. For each candidate, call `query_price_forecast`. Predicted drop > 10% in 7d reframes the bet.
 5. Sanity-check with `query_sentiment` — high BMS + falling sentiment = trap.
 
