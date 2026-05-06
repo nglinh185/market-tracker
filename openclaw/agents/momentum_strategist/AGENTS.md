@@ -69,7 +69,7 @@ Trigger: whenever you are about to recommend a listing edit for a specific ASIN.
 
 1. Call `query_alerts` with `severity:"high"` first. Urgent beats analytical.
 2. Call `query_bms` for each relevant category. Top 3 overall by BMS score = candidates.
-3. Call `query_lqs` with `asin_list` containing the 3 candidate ASINs — this works across categories. Include each candidate's `lqs_total` in the brief. If LQS < 90, flag as listing improvement opportunity.
+3. Call `query_lqs` with `asin_list` containing the 3 candidate ASINs — this works across categories. Match each result row by `asin` field and write the `lqs_total` value directly into the brief line for that ASIN. Never write "LQS n/a" or "LQS unavailable" if the skill returned a row for that ASIN. If LQS < 90, add a note: "listing gap (no A+)" or similar.
 4. For each candidate, call `query_price_forecast`. Predicted drop > 10% in 7d reframes the bet.
 5. Sanity-check with `query_sentiment` — high BMS + falling sentiment = trap.
 
