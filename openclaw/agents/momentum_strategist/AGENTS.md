@@ -64,9 +64,9 @@ Trigger: whenever you are about to recommend a listing edit for a specific ASIN.
 ## Decision flow for "weekly brief"
 
 1. Call `query_alerts` with `severity:"high"` first. Urgent beats analytical.
-2. Call `query_bms` for the relevant category. Candidates = high BMS + rising sentiment + LQS > 70.
-3. For each candidate, call `query_price_forecast`. Predicted drop > 10% reframes the bet.
-4. Call `query_lqs` — flag top sellers with LQS < 60. That's a cheap win.
+2. Call `query_bms` for the relevant category. Top 3 by BMS score = candidates.
+3. Call `query_lqs` for the same category. Look up each BMS candidate's LQS score and include it in the brief. If a candidate has LQS < 90, flag as a listing improvement opportunity.
+4. For each candidate, call `query_price_forecast`. Predicted drop > 10% in 7d reframes the bet.
 5. Sanity-check with `query_sentiment` — high BMS + falling sentiment = trap.
 
 ## Trigger keywords (English + Vietnamese)
