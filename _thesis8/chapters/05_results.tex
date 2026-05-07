@@ -137,7 +137,7 @@ Five models were compared to identify the most suitable forecaster for short Ama
   \item \textbf{Linear Trend (OLS)}: An ordinary least-squares regression is fitted on the training-window prices and extrapolated $H$ steps forward. This baseline captures monotonic drift.
   \item \textbf{Exponential Smoothing (ETS)}: Holt's additive trend model (no seasonality) is fitted via maximum-likelihood optimisation. ETS down-weights older observations exponentially, giving more influence to recent price movement.
   \item \textbf{ARIMA(1,1,0)}: A first-differenced autoregressive model of order one. First-differencing removes linear trend non-stationarity; the single AR lag allows the model to exploit serial autocorrelation in the differenced series.
-  \item \textbf{Prophet}: Facebook Prophet with the \texttt{CMDSTANPY} backend, with daily, weekly, and yearly seasonality disabled. Prophet is retained in the deployed system because it additionally produces calibrated 80\% prediction intervals (\texttt{yhat\_lower}, \texttt{yhat\_upper}), which the Momentum Strategist agent exposes as volatility signals.
+  \item \textbf{Prophet}: Facebook Prophet with the \texttt{CMDSTANPY} backend, with daily, weekly, and yearly seasonality disabled. Prophet is retained in the deployed system because it additionally produces native 80\% prediction intervals (\texttt{yhat\_lower}, \texttt{yhat\_upper}), which the Momentum Strategist agent exposes as volatility signals.
 \end{enumerate}
 
 For models experiencing convergence failure on individual ASINs (a risk with ARIMA and ETS on very flat series), the implementation falls back to the naive prediction for that ASIN, and the failure is logged as a warning. This occurred on a small subset of ASINs and did not affect the pooled result materially.
@@ -163,7 +163,9 @@ All 30 watchlist ASINs met the minimum history threshold of 10 observations. Tab
   \label{tab:forecast_comparison}
 \end{table}
 
-The naive carry-forward baseline achieves the lowest pooled MAE of \$1.292. ARIMA(1,1,0) is the closest competitor at \$1.323 — only 2.4\% higher than naive — while ETS, Linear Trend, and Prophet trail by wider margins. Prophet's pooled MAPE was 6.75\%, and the empirical coverage of its 80\% prediction intervals was 67.8\%, below the nominal 80\% target.
+The naive carry-forward baseline achieves the lowest pooled MAE of \$1.292. ARIMA(1,1,0) is the closest competitor at \$1.323 --- only 2.4\% higher than naive --- while ETS, Linear Trend, and Prophet trail by wider margins. Prophet's pooled MAPE was 6.75\%, and the empirical coverage of its 80\% prediction intervals was 67.8\%, below the nominal 80\% target.
+
+An important caveat is that 19 of the 30 watchlist ASINs (63\%) exhibited no price change across all three holdout days, so their held-out error was identically zero for every model. The pooled MAE figures are therefore disproportionately influenced by the remaining 11 ASINs with non-zero price movement; the most volatile ASIN in this subset contributed a naive holdout MAE of \$20.00 to the pooled average. This distribution should be kept in mind when interpreting the pooled figures: the comparison primarily captures model behaviour on a small number of actively-priced products rather than the watchlist as a whole.
 
 \subsubsection*{Interpretation}
 
@@ -173,7 +175,7 @@ The underperformance of ETS, Trend, and Prophet relative to naive is consistent 
 
 \subsubsection*{Model selection for deployment}
 
-Despite ranking fifth on point-forecast MAE, Prophet is retained as the production forecasting model for two reasons. First, it is the only evaluated model that produces calibrated probabilistic prediction intervals (\texttt{yhat\_lower}, \texttt{yhat\_upper}), which the Momentum Strategist agent uses to signal short-term price volatility rather than a precise point estimate. No equivalent uncertainty envelope is natively available from the ARIMA or Naive implementations used here. Second, Prophet's accuracy disadvantage is expected to diminish as data accumulates: with 30 or more observations per ASIN, the model's changepoint detection and trend-fitting become more reliable. The thesis system is designed as a continuous pipeline, so forecast quality should improve organically over time without requiring code changes.
+Despite ranking fifth on point-forecast MAE, Prophet is retained as the production forecasting model for two reasons. First, it is the only evaluated model that produces native probabilistic prediction intervals (\texttt{yhat\_lower}, \texttt{yhat\_upper}), which the Momentum Strategist agent uses to signal short-term price volatility rather than a precise point estimate. The empirical coverage of these intervals was 67.8\%, falling below the nominal 80\% target and indicating that the intervals are currently undercalibrated --- a known consequence of limited training data. No equivalent uncertainty envelope is natively available from the ARIMA or Naive implementations used here. Second, Prophet's accuracy disadvantage is expected to diminish as data accumulates: with 30 or more observations per ASIN, the model's changepoint detection and trend-fitting become more reliable. The thesis system is designed as a continuous pipeline, so forecast quality should improve organically over time without requiring code changes.
 
 In summary, the evaluation confirms that price forecasting is currently a \emph{directional and volatility signal} rather than a precise prediction engine. This finding is disclosed to end-users through the agent system prompt and is a documented limitation of the prototype.
 
@@ -253,7 +255,7 @@ correlation. The pooled negative correlation ($\rho = -0.46$) reflects a
 cross-sectional confound: ASINs that are persistently high-quality tend to have
 both high BMS and low BSR regardless of day-to-day movement. BMS does not
 exhibit temporal forward predictive validity within individual ASIN trajectories
-over the 17-day observation window, confirming its intended role as a
+over the observation window, confirming its intended role as a
 descriptive ranking heuristic rather than a predictive momentum model.
 
 \subsection{Image-change detection}

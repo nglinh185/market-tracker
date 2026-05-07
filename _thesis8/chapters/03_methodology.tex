@@ -309,7 +309,8 @@ Operating the pipeline at the configuration used in this thesis incurs
 low monthly cost because Supabase, GitHub Actions, Telegram, and the
 self-hosted OpenClaw runtime are used within free or near-free tiers.
 The main recurring cost is Apify usage, with a small additional cost for
-\texttt{gpt-5.4-mini} calls through the OpenClaw Gateway.
+\texttt{gpt-5.4-mini}~\citep{openai2026gpt54mini} inference calls routed
+through the OpenClaw Gateway.
 
 \begin{table}[H]
   \centering
@@ -324,7 +325,7 @@ The main recurring cost is Apify usage, with a small additional cost for
     GitHub Actions & Free tier & \$0 \\
     OpenClaw runtime & Self-hosted VMware & \$0 \\
     Telegram Bot API & Free & \$0 \\
-    OpenAI \texttt{gpt-5.4-mini} & Pay-as-you-go & $<$ \$1 \\
+    OpenAI \texttt{gpt-5.4-mini}~\citep{openai2026gpt54mini} & Pay-as-you-go (\$0.75/MTok input) & $<$ \$1 \\
     \midrule
     \textbf{Total} & & \textbf{$<$ \$11} \\
     \bottomrule
@@ -442,6 +443,11 @@ normalises the three inputs as follows:
     n_{\text{review}} &= \text{clip}\left(\frac{\text{reviews}_{t} - \text{reviews}_{t-1}}{50},0,1\right),\\
     n_{\text{sent}} &= \frac{\text{sentiment}+1}{2}.
 \end{align}
+The denominator of 50 in the review-velocity normalisation is a chosen
+ceiling: any ASIN gaining 50 or more new reviews in a single day receives
+the maximum normalised review score of 1.0. This threshold was set
+empirically to separate routine daily review accumulation from a viral
+or promotionally-driven review surge.
 If BSR or sentiment is unavailable, the code defaults the corresponding
 normalised signal to 0.5. The final score is
 \begin{equation}
@@ -504,7 +510,18 @@ Supabase, not as an autonomous system that directly mutates data.
 \subsection{Agentic framework and gateway}
 
 The OpenClaw Gateway connects Telegram accounts, LLM prompts, and
-registered tools. The deployment uses one-to-one channel binding: each
+registered tools. The three specialist agents route their inference
+through OpenAI's \texttt{gpt-5.4-mini} model
+\citep{openai2026gpt54mini}, which is OpenAI's officially released
+mini-tier model designed specifically for coding, tool use, and
+subagent workflows. The model supports a 400,000-token context window
+and up to 128,000 output tokens, and exposes structured function
+calling, which the OpenClaw Gateway uses to invoke the registered
+Python skills \citep{openai2026gpt54mini}. It was selected over the
+full \texttt{gpt-5.4} model because of its lower per-token cost
+(\$0.75 per million input tokens) and lower inference latency, both
+of which are important for a high-frequency scheduled-brief workload.
+The deployment uses one-to-one channel binding: each
 Telegram bot account is bound to one specialist agent. This avoids the
 need for keyword routing inside a single bot and keeps each agent's
 persona, allowed skills, and output contract isolated.

@@ -317,7 +317,10 @@ their internal parameters. Toolformer demonstrates language-model tool
 use \citep{schick2023toolformer}, while ReAct shows how reasoning and
 acting can be interleaved through tool calls \citep{yao2022react}.
 Structured function-calling APIs further popularise this design pattern
-\citep{openai2023functions}.
+\citep{openai2023functions}. OpenAI's \texttt{gpt-5.4-mini} model
+\citep{openai2026gpt54mini} extends this pattern by optimising
+explicitly for subagent and tool-use workloads, making it a practical
+choice for constrained agentic delivery systems.
 
 The present thesis applies this idea in a constrained and auditable way.
 The OpenClaw layer does not allow agents to write to the database.

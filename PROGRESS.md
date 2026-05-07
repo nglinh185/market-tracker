@@ -152,6 +152,20 @@ CLAUDE.md asks for auto-updates to this file on every task. Markdown cannot enfo
 
 ## Changelog
 
+- **2026-05-07** — gpt-5.4-mini documentation + residual high-risk fixes:
+  - **`references.bib`**: Added `openai2026gpt54mini` BibTeX entry (official OpenAI model docs, snapshot `gpt-5.4-mini-2026-03-17`, accessed May 7 2026).
+  - **`03_methodology.tex` §3.5.1**: Expanded "Agentic framework and gateway" with verified model specs: 400k context window, 128k output, designed for coding/tool-use/subagent workloads, selected over gpt-5.4 for lower latency/cost ($0.75/MTok input). Two `\citep{openai2026gpt54mini}` citations added.
+  - **`03_methodology.tex` cost table**: Row for gpt-5.4-mini now shows actual unit price ($0.75/MTok) with citation.
+  - **`03_methodology.tex` cost prose**: Added citation to model name in narrative text.
+  - **`02_literature_review.tex` §tool-using agents**: Added one sentence citing gpt-5.4-mini as OpenAI's officially released model optimised for subagent/tool-use, anchoring the model choice in the literature review.
+  - **Sweep result**: Zero remaining "calibrated 80%" claims; zero "17-day" mentions; all five high-risk defense topics now have defensible, citation-backed text.
+
+- **2026-05-07** — Pre-submission MUST-FIX: 4 critical thesis corrections applied:
+  - **Fix A — "calibrated" → undercalibrated (3 locations).** `05_results.tex` §5.2.2 candidate model description: "calibrated 80% prediction intervals" → "native 80% prediction intervals". `05_results.tex` §5.2.2 model-selection paragraph: added explicit sentence that 67.8% empirical coverage is undercalibrated. `06_conclusion.tex` key findings: "calibrated uncertainty intervals; its empirical 80%… coverage was 67.8%" → "native uncertainty intervals; its empirical 80%… coverage was 67.8%, falling below the nominal target and indicating undercalibration on the current short training windows."
+  - **Fix B — "17-day observation window" → consistent framing.** `05_results.tex` §5.3.1 BMS validation: changed "over the 17-day observation window" → "over the observation window" to resolve inconsistency with the "13-day pilot" language used throughout the rest of the thesis.
+  - **Fix C — 19/30 zero-change ASIN disclosure.** `05_results.tex` §5.2.2 results paragraph: added full disclosure paragraph stating 19/30 ASINs (63%) had zero price change across all holdout days → their MAE was identically zero for every model → pooled MAE is dominated by 11 volatile ASINs including one with naive MAE = \$20.00.
+  - **Fix D — BMS 50-review velocity cap disclosed.** `03_methodology.tex` §3.3.5 BMS section: added explanation after the align block that the denominator 50 is a chosen normalization ceiling — any ASIN gaining ≥50 reviews/day gets max review score 1.0.
+
 - **2026-05-07** — Day 6: LQS/BMS validation null results added to thesis limitations:
   - Cronbach's alpha diagnostic confirmed: 3/7 LQS components (title, bullet, image scores) have zero variance across the 30-ASIN watchlist → ceiling effect from curated top-tier ASINs → alpha computation meaningless. Not a methodology flaw — a data homogeneity constraint.
   - BMS forward validity (per-ASIN Spearman ρ, lag=5d): median ρ = +0.13, 79% positive. Pooled ρ = −0.46 is cross-sectional confounding, not predictive signal. Consistent with BMS being a descriptive heuristic.
