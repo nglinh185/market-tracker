@@ -523,9 +523,9 @@ The three deployed agents are:
     \texttt{query\_aspects}, and \texttt{query\_snapshots}.
 
     \item \textbf{Momentum Strategist (\texttt{@babystrategist\_bot}):}
-    Uses five skills: \texttt{query\_alerts}, \texttt{query\_bms},
-    \texttt{query\_price\_forecast}, \texttt{query\_lqs}, and
-    \texttt{query\_sentiment}.
+    Uses six skills: \texttt{query\_alerts}, \texttt{query\_bms},
+    \texttt{query\_price\_forecast}, \texttt{query\_lqs},
+    \texttt{query\_sentiment}, and \texttt{query\_listing\_content}.
 \end{enumerate}
 
 \subsection{Skill executions (tools)}
@@ -553,8 +553,7 @@ forecaster.
 
 \subsection{Sentiment classification: distant supervision against stars}
 
-Because no manually labelled in-domain sentiment dataset is available,
-the evaluation uses star ratings as noisy labels:
+The primary evaluation uses star ratings as noisy labels for the full $N = 3{,}851$ review corpus, as manually labelling a dataset of this scale was not feasible within the thesis timeline:
 \begin{equation}
   \label{eq:star_proxy}
   y_{\text{star}} = \begin{cases}
@@ -605,7 +604,7 @@ The gap between comparisons (2) and (3) directly quantifies how much of RoBERTa'
 apparent error under proxy evaluation is attributable to noisy labels rather than
 genuine misclassification. This validation is implemented in
 \texttt{scripts/evaluate\_sentiment\_manual.py} and produces
-\texttt{data/eval/sentiment\_manual\_eval.json}.
+\seqsplit{data/eval/sentiment\_manual\_eval.json}.
 
 \subsection{Price forecasting: temporal holdout backtest}
 
@@ -653,7 +652,7 @@ thresholds implemented in the codebase.
     Prophet forecast & $\geq 3$ price points & Minimum in \texttt{analyze\_price\_forecast.py}. \\
     Forecast eval & 3-day holdout, min 10 obs., 5 models & Naive, OLS, ETS, ARIMA(1,1,0), Prophet compared in \texttt{evaluate\_forecast.py}. \\
     BMS weights & $0.5, 0.3, 0.2$ & BSR velocity, review velocity, sentiment. \\
-    LQS weights & $10,15,15,15,20,15,10$ & Title, bullets, image, A+, rating, reviews, sentiment. \\
+    LQS weights & 10, 15, 15, 15, 20, 15, 10 & Title, bullets, image, A+, rating, reviews, sentiment. \\
     Alert: price drop & $\geq 15\%$; high $\geq 30\%$ & Implemented in \texttt{analyze\_alerts.py}. \\
     Alert: BSR drop & $>500$ positions & Implemented in \texttt{analyze\_alerts.py}. \\
     Alert: stockout & true-to-false transition & Implemented in \texttt{analyze\_alerts.py}. \\

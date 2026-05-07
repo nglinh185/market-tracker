@@ -36,7 +36,7 @@ Two model-based components were evaluated quantitatively: the RoBERTa sentiment 
 
 The sentiment classifier was evaluated on $N = 3{,}851$ Amazon reviews using star ratings as a distant-supervision proxy: 1--2 stars were treated as negative, 3 stars as neutral, and 4--5 stars as positive. This proxy is imperfect because star ratings can reflect delivery, packaging, or expectation mismatch rather than textual sentiment alone, but it provides a reproducible evaluation target without manual labeling.
 
-Two baselines were included to contextualise the result: VADER \citep{hutto2014vader}, a rule-based lexicon analyzer, and \texttt{nlptown/bert-base-multilingual-uncased-sentiment}, a BERT model fine-tuned directly on 1--5 star Amazon and Yelp reviews. The VADER compound score was thresholded at $\pm 0.05$ following the authors' convention. Table~\ref{tab:sentiment_baselines} reports the three-way comparison.
+Two baselines were included to contextualise the result: VADER \citep{hutto2014vader}, a rule-based lexicon analyzer, and \seqsplit{nlptown/bert-base-multilingual-uncased-sentiment}, a BERT model fine-tuned directly on 1--5 star Amazon and Yelp reviews. The VADER compound score was thresholded at $\pm 0.05$ following the authors' convention. Table~\ref{tab:sentiment_baselines} reports the three-way comparison.
 
 \begin{table}[H]
   \centering
@@ -281,7 +281,7 @@ The alert distribution is consistent with the intended design. Routine Top-50 ex
 
 The same Supabase-derived tables supported both pull-based and push-based consumption. The Streamlit dashboard and public web dashboard provide analyst-controlled exploration, while the OpenClaw agents consume the data through 13 read-only Python skills. This separation is important: analytics scripts and scheduled jobs write to Supabase, but agent skills only read and summarize existing records. The resulting architecture reduces the risk of accidental database mutation through conversational interfaces.
 
-The three Telegram-bound agents also map cleanly to the analytical outputs. Competitor Spy uses ranking, BMS, entrant/exit, sponsored-share, price-tier, and image-change skills. Sentiment Detective uses sentiment, review, aspect, and snapshot skills. Momentum Strategist uses alerts, BMS, price forecast, LQS, and sentiment skills. The pilot therefore demonstrates that the same analytics backbone can support multiple specialized decision views without duplicating data pipelines.
+The three Telegram-bound agents also map cleanly to the analytical outputs. Competitor Spy uses ranking, BMS, entrant/exit, sponsored-share, price-tier, and image-change skills. Sentiment Detective uses sentiment, review, aspect, and snapshot skills. Momentum Strategist uses alerts, BMS, price forecast, LQS, sentiment, and listing-content skills. The pilot therefore demonstrates that the same analytics backbone can support multiple specialized decision views without duplicating data pipelines.
 
 \subsection{Cost profile}
 

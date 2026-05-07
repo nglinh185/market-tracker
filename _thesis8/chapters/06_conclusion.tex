@@ -29,7 +29,7 @@ The most important limitation is the 13-day observation window. This period is e
 
 \subsection{Noisy sentiment ground truth}
 
-The sentiment evaluation used star ratings as a proxy label because no manually annotated review dataset was available. This introduces label noise, especially for 3-star reviews. A three-star review may contain both praise and criticism, or may penalize shipping rather than the product itself. The weak neutral-class result should therefore be interpreted as both a model limitation and a limitation of the proxy-labelling method.
+The primary sentiment evaluation on $N = 3{,}851$ reviews used star ratings as a distant-supervision proxy label. While 200 reviews were manually labelled during this project to quantify proxy noise (Table~\ref{tab:manual_label_eval}), this sample is too small to replace the proxy-based evaluation for the full corpus. The proxy introduces label noise, especially for 3-star reviews. A three-star review may contain both praise and criticism, or may penalize shipping rather than the product itself. The weak neutral-class result should therefore be interpreted as both a model limitation and a limitation of the proxy-labelling method.
 
 \subsection{Review corpus sampling and sentiment signal staleness}
 
@@ -41,6 +41,8 @@ Second, there is an important architectural distinction between two review-relat
 
 The prototype was deployed as a thesis pilot rather than a hardened commercial service. Telegram polling can occasionally lag in the VMware environment, structured logging and formal unit tests are limited, and Supabase row-level security for the public web dashboard remains a configuration follow-up. Forecast data now persists to Supabase, but the system still depends on scheduled jobs finishing as expected. These constraints do not invalidate the prototype, but they define the boundary between a working academic system and a hardened service.
 
+An attempt to validate LQS internal consistency via Cronbach's alpha was uninformative due to ceiling effects: three of seven components (title score, bullet score, and image score) exhibited zero variance across the curated watchlist, precluding meaningful computation. Similarly, BMS forward predictive validity (per-ASIN Spearman $\rho$, lag = 5 days) was not confirmed, consistent with its framing as a descriptive ranking heuristic rather than a predictive model.
+
 \section{Future work}
 
 Future work should focus on strengthening the parts of the system that were most constrained during the thesis timeline.
@@ -49,9 +51,9 @@ Future work should focus on strengthening the parts of the system that were most
 
 The first priority is to extend the data window from days to months. A longer history would allow the project to evaluate weekly cycles, promotional periods, and event-driven price changes more fairly. The thesis already conducted a five-way model comparison (naive, OLS, ETS, ARIMA, Prophet); the next step is to re-run this evaluation after accumulating 60 or more days of data, at which point trend-aware models such as ETS and Prophet are expected to gain a meaningful advantage over the naive baseline.
 
-\subsection{Manual sentiment validation}
+\subsection{Expanded manual sentiment annotation}
 
-A second improvement is to build a small manually labelled review set for sentiment evaluation. Even a few hundred carefully annotated reviews would make it possible to separate model error from star-rating proxy noise. This would also support more reliable aspect-level analysis, especially for complaints about battery life, durability, comfort, shipping, and product authenticity.
+A 200-review manually labelled validation set was completed during this project to quantify proxy label noise (Table~\ref{tab:manual_label_eval}). The results confirmed that star-proxy labels carry approximately 25.5\% noise on this corpus, and that RoBERTa's true accuracy against manual labels (72.0\%) is 8.5 percentage points higher than its apparent proxy-evaluation accuracy. Expanding manual annotation to at least 1,000 reviews with a second independent annotator would enable inter-annotator agreement scoring and yield a dataset large enough to support fine-tuning or few-shot adaptation of the sentiment model. Aspect-level annotation --- distinguishing product-quality sentiment from complaints about shipping, delivery, or expectation mismatch --- would further increase the specificity of the deployed sentiment signals.
 
 \subsection{Operational hardening}
 

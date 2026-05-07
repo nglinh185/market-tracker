@@ -7,7 +7,7 @@ This appendix records the repository artifacts used to reproduce the system desc
 
 The Supabase schema is maintained as five SQL migration files. Table~\ref{tab:appendix_migrations} summarizes their current role in the codebase.
 
-\begin{longtable}{p{0.22\textwidth}p{0.70\textwidth}}
+\begin{longtable}{p{0.22\textwidth}@{\hspace{8pt}}p{0.68\textwidth}}
   \caption{Repository migrations used to define the Supabase schema.}
   \label{tab:appendix_migrations}\\
   \toprule
@@ -30,7 +30,7 @@ The Supabase schema is maintained as five SQL migration files. Table~\ref{tab:ap
 
 The repository is organized around explicit scripts rather than one monolithic application entry point. Table~\ref{tab:appendix_entrypoints} lists the main commands used in local development and scheduled execution.
 
-\begin{longtable}{p{0.38\textwidth}p{0.54\textwidth}}
+\begin{longtable}{p{0.38\textwidth}@{\hspace{8pt}}p{0.52\textwidth}}
   \caption{Main runtime entry points in the repository.}
   \label{tab:appendix_entrypoints}\\
   \toprule
@@ -87,14 +87,14 @@ The deployed agents use the following skill groups:
 \begin{itemize}
   \item \textbf{Competitor Spy}: \texttt{query\_bms}, \texttt{query\_rankings}, \texttt{query\_entrant\_exits}, \texttt{query\_sponsored\_share}, \texttt{query\_price\_tiers}, and \texttt{query\_image\_changes}.
   \item \textbf{Sentiment Detective}: \texttt{query\_sentiment}, \texttt{query\_reviews}, \texttt{query\_aspects}, and \texttt{query\_snapshots}.
-  \item \textbf{Momentum Strategist}: \texttt{query\_alerts}, \texttt{query\_bms}, \texttt{query\_price\_forecast}, \texttt{query\_lqs}, and \texttt{query\_sentiment}.
+  \item \textbf{Momentum Strategist}: \texttt{query\_alerts}, \texttt{query\_bms}, \texttt{query\_price\_forecast}, \texttt{query\_lqs}, \texttt{query\_sentiment}, and \texttt{query\_listing\_content}.
 \end{itemize}
 
 \section{Evaluation and thesis figure artifacts}
 
 The thesis results chapter cites three JSON artifacts and six generated result figures. Table~\ref{tab:appendix_eval_artifacts} lists the current artifacts and their source scripts.
 
-\begin{longtable}{p{0.36\textwidth}p{0.56\textwidth}}
+\begin{longtable}{p{0.36\textwidth}@{\hspace{8pt}}p{0.54\textwidth}}
   \caption{Evaluation and figure artifacts used by the thesis.}
   \label{tab:appendix_eval_artifacts}\\
   \toprule

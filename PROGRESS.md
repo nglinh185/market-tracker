@@ -46,10 +46,10 @@ Lộ trình cải thiện thesis từ ~7.5 → ~8.5-9.0, ưu tiên theo ROI.
 | 2-3  | Sentiment baselines (VADER + nlptown)       | ✅ done                 | §4.2.1 3-way comparison table                   |
 | 4    | Forecast baselines (LR + ETS + ARIMA)       | ✅ done                 | §4.2.2 5-way comparison, naive wins             |
 | 5    | Manual labeling 200 reviews                 | ✅ done (2026-05-06)    | §4.2.1 manual validation subsection (3-way acc) |
-| 6    | Cronbach's alpha + BMS forward validation   | ⏳ pending              | `scripts/validate_composite_scores.py` + §3.3   |
-| 7    | Dynamic watchlist (CLI + migration 006)     | ⏳ pending              | `scripts/manage_watchlist.py` + §1.5, §5.4      |
-| 8    | `query_listing_content` skill               | ⏳ pending              | New skill + Strategist AGENTS.md update         |
-| 9    | Buffer + LaTeX polish                       | ⏳ pending              | Clean compile                                   |
+| 6    | Cronbach's alpha + BMS forward validation   | ✅ done (2026-05-07)    | Diagnostic ran; ceiling effect (3/7 LQS components constant) + BMS rho not confirmed. Reported as 2-sentence honest null result in §6.3.4 limitations — no full subsection (would distract committee). |
+| 7    | Dynamic watchlist (CLI + migration 006)     | ⛔ skipped              | User decision: not defensible before committee, risk of breaking CI outweighs benefit |
+| 8    | `query_listing_content` skill               | ✅ done (2026-05-07)    | New skill at `openclaw/skills/listing/query_listing_content.py` + wrapper + Strategist AGENTS.md wired |
+| 9    | Buffer + LaTeX polish                       | ✅ done (2026-05-07)    | Full 70-page PDF review complete; fixes in `06_conclusion.tex`, `03_methodology.tex`, `05_results.tex`, `02_literature_review.tex`, `appendix_a.tex`, `references.bib` (see Changelog) |
 | 10   | Dry-run defense + screenshot refresh        | ⏳ pending              | Defense-ready                                   |
 
 **Day 6 details:** Cronbach's alpha cho LQS (7 components, defends nếu α > 0.7) + correlate BMS_t với BSR_{t+5} (forward predictive validity).
@@ -92,7 +92,7 @@ Each agent's workspace lives at `openclaw/agents/<name>/` with **four files**: `
 |-------------------------|:--------------:|---------------------------------------------------------------------------------------------------------------|------------------------------|
 | `sentiment_detective`   |       ✅       | query_sentiment, query_reviews, query_aspects, query_snapshots                                                | 🔍 `@babydetective_bot`      |
 | `competitor_spy`        |       ✅       | query_bms, query_rankings, query_entrant_exits, query_sponsored_share, query_price_tiers, query_image_changes | 🕵️ `@babyspyyy_bot`          |
-| `momentum_strategist`   |       ✅       | query_alerts, query_bms, query_price_forecast, query_lqs, query_sentiment                                     | 🎯 `@babystrategist_bot`     |
+| `momentum_strategist`   |       ✅       | query_alerts, query_bms, query_price_forecast, query_lqs, query_sentiment, query_listing_content              | 🎯 `@babystrategist_bot`     |
 
 All three are registered as OpenClaw agents (`agents add`) with explicit `agents bind` to a dedicated Telegram account. End-to-end tested with real Supabase data on 2026-04-27.
 
@@ -151,6 +151,26 @@ CLAUDE.md asks for auto-updates to this file on every task. Markdown cannot enfo
 ---
 
 ## Changelog
+
+- **2026-05-07** — Day 6: LQS/BMS validation null results added to thesis limitations:
+  - Cronbach's alpha diagnostic confirmed: 3/7 LQS components (title, bullet, image scores) have zero variance across the 30-ASIN watchlist → ceiling effect from curated top-tier ASINs → alpha computation meaningless. Not a methodology flaw — a data homogeneity constraint.
+  - BMS forward validity (per-ASIN Spearman ρ, lag=5d): median ρ = +0.13, 79% positive. Pooled ρ = −0.46 is cross-sectional confounding, not predictive signal. Consistent with BMS being a descriptive heuristic.
+  - Decision: report as 2 honest sentences in §6.3.4 "Deployment and engineering constraints" — not a full subsection, to avoid committee distraction. Text added: ceiling effect note + BMS framing confirmation.
+
+- **2026-05-07** — Thesis PDF full review (pages 53–70) — continuation:
+  - Reviewed remaining pages 53–70 from the LaTeX source (results §5.3–5.4, full conclusion, appendix A, references).
+  - **Fix — `05_results.tex` §5.4.2**: "Momentum Strategist uses alerts, BMS, price forecast, LQS, and sentiment skills" → added "listing-content" → now correctly lists 6 skills.
+  - **Fix — `02_literature_review.tex` §2.5.2**: "Momentum Strategist synthesises alerts, forecasts, BMS, LQS, and sentiment" → added "listing-content" for consistency.
+  - All `references.bib` entries verified present (47 keys, 0 missing). No further citation gaps.
+  - Souls audit table updated in PROGRESS.md: momentum_strategist now shows all 6 skills including `query_listing_content`.
+
+- **2026-05-07** — Thesis PDF full review + conclusion fixes:
+  - **Full 70-page compiled PDF reviewed** cover-to-cover. Two issues found; both fixed.
+  - **Fix 1 — §6.3.2 "Noisy sentiment ground truth" (false claim removed).** Previous text said "because no manually annotated review dataset was available" — incorrect since 200 reviews were manually labelled in Day 5 (Table 4.4). Replaced with accurate framing: primary evaluation on $N=3{,}851$ used proxy labels (still a real limitation); 200-review manual set exists but is too small to replace the proxy evaluation.
+  - **Fix 2 — §6.4.2 future work (stale item replaced).** Previous text said "build a small manually labelled review set" — this was already done. Renamed subsection to "Expanded manual sentiment annotation". New text acknowledges Table 4.4 (25.5% proxy noise, 72.0% true accuracy), then frames the real future work: expand to ≥1,000 reviews with a second annotator for IAA + fine-tuning support, and add aspect-level annotation.
+  - **Confirmed non-issue:** citation `\citep{barbieri2020tweeteval}` on the "72.0% consistent with benchmarks" sentence was present and correct — earlier "(?" artifact was a PDF rendering glitch, not a broken `\cite{}`.
+  - **LQS n/a fix (previous session).** `momentum_strategist/AGENTS.md` decision flow step 3 rewritten with concrete worked example (JSON input → output → `lqs_total` mapping). Verified via cron run: brief now shows real LQS values (96.5, 96.7, 97.1).
+  - **New limitation subsection added (previous session).** `06_conclusion.tex` §6.3.4 "Review corpus sampling and sentiment signal staleness" added: documents ~133 reviews/ASIN convenience sample due to Apify rate limits, distinguishes `review_velocity` (daily_snapshots.reviews_count delta, real data) from `reviews_raw` text (stale since 19 April 2026 due to scheduling gap), and flags sentiment as a lagging indicator.
 
 - **2026-05-02** — LaTeX overflow fixes across thesis:
   - **Appendix header**: running header showed "REFERENCES" on appendix pages because `\leftmark` was inherited from `\bibliography`. Fixed by adding `\fancyhead[R]` reset and `\chaptermark` override in the appendix preamble of `main.tex`.
