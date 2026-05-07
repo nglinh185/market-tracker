@@ -152,6 +152,10 @@ CLAUDE.md asks for auto-updates to this file on every task. Markdown cannot enfo
 
 ## Changelog
 
+- **2026-05-07 (session 3)** — Thesis content additions to expand from ~57 to ~65 pages:
+  - **`05_results.tex`**: Added RoBERTa confusion matrix table (3×3, N=3,851) with error pattern analysis after sentiment figure. Added top-5 BMS table (B0CB1FW5FC 0.752, B0CRTR3PMF 0.739, B09DT48V16 0.735, B0DGHMNQ5Z 0.715, B0DD41G2NZ 0.710) and top-5/bottom-5 LQS table (max 96.9, min 79.5) in §4.3.
+  - **`appendix_a.tex`**: Added new Section A.5 "Sample Telegram agent output" with a representative Momentum Strategist brief (lstlisting block showing Critical/New entrants/Action needed structure, April 29 pilot data).
+
 - **2026-05-07** — gpt-5.4-mini documentation + residual high-risk fixes:
   - **`references.bib`**: Added `openai2026gpt54mini` BibTeX entry (official OpenAI model docs, snapshot `gpt-5.4-mini-2026-03-17`, accessed May 7 2026).
   - **`03_methodology.tex` §3.5.1**: Expanded "Agentic framework and gateway" with verified model specs: 400k context window, 128k output, designed for coding/tool-use/subagent workloads, selected over gpt-5.4 for lower latency/cost ($0.75/MTok input). Two `\citep{openai2026gpt54mini}` citations added.

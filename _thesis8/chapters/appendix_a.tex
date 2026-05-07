@@ -7,7 +7,7 @@ This appendix records the repository artifacts used to reproduce the system desc
 
 The Supabase schema is maintained as five SQL migration files. Table~\ref{tab:appendix_migrations} summarizes their current role in the codebase.
 
-\begin{longtable}{p{0.22\textwidth}@{\hspace{8pt}}p{0.68\textwidth}}
+\begin{longtable}{p{0.28\textwidth}@{\hspace{10pt}}p{0.62\textwidth}}
   \caption{Repository migrations used to define the Supabase schema.}
   \label{tab:appendix_migrations}\\
   \toprule
@@ -18,11 +18,11 @@ The Supabase schema is maintained as five SQL migration files. Table~\ref{tab:ap
   \textbf{Migration file} & \textbf{Purpose} \\
   \midrule
   \endhead
-  \texttt{001\_new\_tables} & Adds analytics tables: \texttt{entrant\_exit\_events}, \texttt{price\_tier\_daily}, \texttt{reviews\_raw}, \texttt{review\_sentiment\_daily}, \texttt{brand\_momentum\_daily}, \texttt{image\_change\_events}, \texttt{content\_change\_events}, \texttt{listing\_quality\_score\_daily}, sponsored-ad tables, and \texttt{alerts}. Also adds \texttt{is\_active}, \texttt{is\_sponsored}, \texttt{bullet\_count}, and \texttt{description} to existing tables. \\
-  \texttt{002\_add\_columns} & Adds product snapshot fields (\texttt{list\_price}, \texttt{discount\_pct}, \texttt{stars\_breakdown}, \texttt{ebc\_html\_hash}) and sentiment columns (\texttt{sentiment\_label}, \texttt{sentiment\_score}) to \texttt{reviews\_raw}. \\
-  \texttt{003\_add\_aspects} & Adds \texttt{aspects\_json} to \texttt{reviews\_raw} and a GIN index for aspect queries. \\
-  \texttt{004\_reviews\_extra} & Adds review metadata (\texttt{helpful\_votes}, \texttt{is\_vine}, \texttt{has\_images}, \texttt{country}); creates \texttt{product\_review\_summary}. \\
-  \texttt{005\_price\_forecast} & Creates \texttt{price\_forecast\_daily} for Prophet forecast points consumed by \texttt{query\_price\_forecast}. \\
+  {\small\texttt{001\_new\_tables}} & Adds analytics tables: \texttt{entrant\_exit\_events}, \texttt{price\_tier\_daily}, \texttt{reviews\_raw}, \texttt{review\_sentiment\_daily}, \texttt{brand\_momentum\_daily}, \texttt{image\_change\_events}, \texttt{content\_change\_events}, \texttt{listing\_quality\_score\_daily}, sponsored-ad tables, and \texttt{alerts}. Also adds \texttt{is\_active}, \texttt{is\_sponsored}, \texttt{bullet\_count}, and \texttt{description} to existing tables. \\
+  {\small\texttt{002\_add\_columns}} & Adds product snapshot fields (\texttt{list\_price}, \texttt{discount\_pct}, \texttt{stars\_breakdown}, \texttt{ebc\_html\_hash}) and sentiment columns (\texttt{sentiment\_label}, \texttt{sentiment\_score}) to \texttt{reviews\_raw}. \\
+  {\small\texttt{003\_add\_aspects}} & Adds \texttt{aspects\_json} to \texttt{reviews\_raw} and a GIN index for aspect queries. \\
+  {\small\texttt{004\_reviews\_extra}} & Adds review metadata (\texttt{helpful\_votes}, \texttt{is\_vine}, \texttt{has\_images}, \texttt{country}); creates \texttt{product\_review\_summary}. \\
+  {\small\texttt{005\_price\_forecast}} & Creates \texttt{price\_forecast\_daily} for Prophet forecast points consumed by \texttt{query\_price\_forecast}. \\
   \bottomrule
 \end{longtable}
 
@@ -30,7 +30,7 @@ The Supabase schema is maintained as five SQL migration files. Table~\ref{tab:ap
 
 The repository is organized around explicit scripts rather than one monolithic application entry point. Table~\ref{tab:appendix_entrypoints} lists the main commands used in local development and scheduled execution.
 
-\begin{longtable}{p{0.38\textwidth}@{\hspace{8pt}}p{0.52\textwidth}}
+\begin{longtable}{p{0.40\textwidth}@{\hspace{10pt}}p{0.50\textwidth}}
   \caption{Main runtime entry points in the repository.}
   \label{tab:appendix_entrypoints}\\
   \toprule
@@ -49,7 +49,7 @@ The repository is organized around explicit scripts rather than one monolithic a
   {\small\texttt{streamlit run dashboard/app.py}} & Starts the Streamlit dashboard. \\
   {\small\texttt{web-dashboard/index.html}} & Static public dashboard for Vercel deployment. \\
   {\small\texttt{evaluate\_sentiment.py}} & Produces \texttt{data/eval/sentiment\_eval.json}. \\
-  {\small\texttt{evaluate\_sentiment\_manual.py}} & Produces \texttt{data/eval/sentiment\_manual\_eval.json}; requires a manually labeled \texttt{reviews\_to\_label.csv}. \\
+  {\small\seqsplit{\texttt{evaluate\_sentiment\_manual.py}}} & Produces \texttt{data/eval/\seqsplit{sentiment\_manual\_eval.json}}; requires a manually labeled \texttt{reviews\_to\_label.csv}. \\
   {\small\texttt{evaluate\_forecast.py}} & Produces \texttt{data/eval/forecast\_eval.json}. \\
   \bottomrule
 \end{longtable}
@@ -83,18 +83,20 @@ python openclaw/skills/market/query_bms.py \
   '{"category":"gaming_keyboard","top_n":10}'
 \end{lstlisting}
 
+\begin{samepage}
 The deployed agents use the following skill groups:
 \begin{itemize}
   \item \textbf{Competitor Spy}: \texttt{query\_bms}, \texttt{query\_rankings}, \texttt{query\_entrant\_exits}, \texttt{query\_sponsored\_share}, \texttt{query\_price\_tiers}, and \texttt{query\_image\_changes}.
   \item \textbf{Sentiment Detective}: \texttt{query\_sentiment}, \texttt{query\_reviews}, \texttt{query\_aspects}, and \texttt{query\_snapshots}.
   \item \textbf{Momentum Strategist}: \texttt{query\_alerts}, \texttt{query\_bms}, \texttt{query\_price\_forecast}, \texttt{query\_lqs}, \texttt{query\_sentiment}, and \texttt{query\_listing\_content}.
 \end{itemize}
+\end{samepage}
 
 \section{Evaluation and thesis figure artifacts}
 
 The thesis results chapter cites three JSON artifacts and six generated result figures. Table~\ref{tab:appendix_eval_artifacts} lists the current artifacts and their source scripts.
 
-\begin{longtable}{p{0.36\textwidth}@{\hspace{8pt}}p{0.54\textwidth}}
+\begin{longtable}{p{0.44\textwidth}@{\hspace{8pt}}p{0.46\textwidth}}
   \caption{Evaluation and figure artifacts used by the thesis.}
   \label{tab:appendix_eval_artifacts}\\
   \toprule
@@ -105,18 +107,18 @@ The thesis results chapter cites three JSON artifacts and six generated result f
   \textbf{Artifact} & \textbf{Generated by / used for} \\
   \midrule
   \endhead
-  \texttt{data/eval/descriptives.json} & Generated by \texttt{scripts/thesis\_descriptives.py}; used for collection counts, category summaries, alert counts, LQS, BMS, and entrant/exit totals. \\
-  \texttt{data/eval/sentiment\_eval.json} & Generated by \texttt{scripts/evaluate\_sentiment.py}; used for RoBERTa accuracy, macro-$F_1$, and class-level sentiment metrics. \\
-  \texttt{data/eval/sentiment\_manual\_eval.json} & Generated by \texttt{scripts/evaluate\_sentiment\_manual.py}; used for proxy noise quantification and true RoBERTa accuracy against 200 manual labels. See Table~\ref{tab:manual_label_eval}. \\
-  \texttt{data/eval/forecast\_eval.json} & Generated by \texttt{scripts/evaluate\_forecast.py}; used for Prophet MAE, MAPE, naive carry-forward MAE, linear trend MAE, and 80\% prediction-interval coverage. \\
-  \texttt{figures/sentiment\_distribution.png} & Generated by \texttt{scripts/thesis\_figures.py}; Figure~\ref{fig:sentiment_dist}. \\
-  \texttt{figures/entrant\_exit\_by\_category.png} & Generated by \texttt{scripts/thesis\_figures.py}; Figure~\ref{fig:entrant_exit}. \\
-  \texttt{figures/price\_tier\_distribution.png} & Generated by \texttt{scripts/thesis\_figures.py}; Figure~\ref{fig:price_tier}. \\
-  \texttt{figures/lqs\_distribution.png} & Generated by \texttt{scripts/thesis\_figures.py}; Figure~\ref{fig:lqs_dist}. \\
-  \texttt{figures/bsr\_trend.png} & Generated by \texttt{scripts/thesis\_figures.py}; Figure~\ref{fig:bsr_trend}. \\
-  \texttt{figures/alerts\_breakdown.png} & Generated by \texttt{scripts/thesis\_figures.py}; Figure~\ref{fig:alerts_breakdown}. \\
-  \texttt{figures/dashboard\_streamlit\_overview.png} & Screenshot captured during pilot deployment; Figure~\ref{fig:app_streamlit_overview}. \\
-  \texttt{figures/dashboard\_web\_overview.png} & Screenshot captured during pilot deployment; Figure~\ref{fig:app_web_overview}. \\
+  {\small\texttt{data/eval/descriptives.json}} & Generated by {\small\texttt{scripts/\seqsplit{thesis\_descriptives.py}}}; used for collection counts, category summaries, alert counts, LQS, BMS, and entrant/exit totals. \\
+  {\small\texttt{data/eval/sentiment\_eval.json}} & Generated by {\small\texttt{scripts/\seqsplit{evaluate\_sentiment.py}}}; used for RoBERTa accuracy, macro-$F_1$, and class-level sentiment metrics. \\
+  {\small\seqsplit{\texttt{data/eval/sentiment\_manual\_eval.json}}} & Generated by {\small\texttt{scripts/\seqsplit{evaluate\_sentiment\_manual.py}}}; used for proxy noise quantification and true RoBERTa accuracy against 200 manual labels. See Table~\ref{tab:manual_label_eval}. \\
+  {\small\texttt{data/eval/forecast\_eval.json}} & Generated by {\small\texttt{scripts/\seqsplit{evaluate\_forecast.py}}}; used for Prophet MAE, MAPE, naive carry-forward MAE, linear trend MAE, and 80\% prediction-interval coverage. \\
+  {\small\texttt{figures/sentiment\_distribution.png}} & Generated by {\small\texttt{scripts/thesis\_figures.py}}; Figure~\ref{fig:sentiment_dist}. \\
+  {\small\seqsplit{\texttt{figures/entrant\_exit\_by\_category.png}}} & Generated by {\small\texttt{scripts/thesis\_figures.py}}; Figure~\ref{fig:entrant_exit}. \\
+  {\small\seqsplit{\texttt{figures/price\_tier\_distribution.png}}} & Generated by {\small\texttt{scripts/thesis\_figures.py}}; Figure~\ref{fig:price_tier}. \\
+  {\small\texttt{figures/lqs\_distribution.png}} & Generated by {\small\texttt{scripts/thesis\_figures.py}}; Figure~\ref{fig:lqs_dist}. \\
+  {\small\texttt{figures/bsr\_trend.png}} & Generated by {\small\texttt{scripts/thesis\_figures.py}}; Figure~\ref{fig:bsr_trend}. \\
+  {\small\texttt{figures/alerts\_breakdown.png}} & Generated by {\small\texttt{scripts/thesis\_figures.py}}; Figure~\ref{fig:alerts_breakdown}. \\
+  {\small\seqsplit{\texttt{figures/dashboard\_streamlit\_overview.png}}} & Screenshot captured during pilot deployment; Figure~\ref{fig:app_streamlit_overview}. \\
+  {\small\seqsplit{\texttt{figures/dashboard\_web\_overview.png}}} & Screenshot captured during pilot deployment; Figure~\ref{fig:app_web_overview}. \\
   \bottomrule
 \end{longtable}
 
@@ -130,6 +132,38 @@ The daily brief must fit in one Telegram message. Do not use markdown tables. Ke
 \end{quote}
 
 This appendix intentionally keeps the prompt excerpt short. The deployed behavior is governed by the repository files, not by a copied prompt snapshot in the thesis.
+
+\section{Sample Telegram agent output}
+\label{app:telegram_sample}
+
+The following listing reproduces a representative Momentum Strategist brief delivered through Telegram during the pilot deployment. It illustrates how the agent synthesises alert, BMS, LQS, and forecast skill outputs into a concise, role-specific message within a single Telegram message (under 30 lines) following the output contract in Section~A.4.
+
+\begin{lstlisting}[breaklines=true, columns=flexible]
+[Momentum Strategist] Daily Brief -- 2026-04-29
+
+CRITICAL
+- `B0DNJZX7K5` (Portable Charger): stockout alert. Last price `$19.99`.
+  Action: monitor restock; flag if competitor fills the gap within 48 h.
+
+NEW ENTRANTS
+- `B0FQF...` entered Gaming Keyboard Top-50 (#42). BMS `0.41`.
+  Action: track BSR for 3 days to assess promotional vs. organic entry.
+
+ACTION NEEDED
+- `B0CB1FW5FC` BMS `0.752` (top mover, Portable Charger).
+  Rev velocity `116/day`. Sentiment `0.71`.
+  Action: review customer pain-points; update listing if neutral share rises.
+- `B0FQFB8FMG` LQS `79.5` (lowest in watchlist, TWE).
+  Missing A+ content. Sentiment below category mean.
+  Action: add A+ content module; target LQS >= 88 within 2 weeks.
+- `B0CRTR3PMF` 7-day price forecast: `$89.99` -> `$86.50` (lower bound `$82.10`).
+  Action: prepare promotional response if price drops below `$85`.
+
+Forecast note: Prophet intervals currently undercalibrated (67.8% empirical
+coverage). Use as directional signal, not precise prediction.
+\end{lstlisting}
+
+The structure reflects the three priority tiers (Critical, New entrants, Action needed) prescribed in the SOUL.md output contract. Each action names a deliverable and the metric it is expected to move. The brief is generated from live Supabase data; the specific ASINs, scores, and thresholds shown above are from the April 29, 2026 pilot run.
 
 \section{Dashboard interface evidence}
 

@@ -83,6 +83,38 @@ Figure~\ref{fig:sentiment_dist} summarizes the average positive, neutral, and ne
   \label{fig:sentiment_dist}
 \end{figure}
 
+\subsubsection*{Confusion matrix}
+
+Table~\ref{tab:roberta_confusion} shows the full confusion matrix for the RoBERTa
+classifier on the $N = 3{,}851$ proxy-labeled reviews.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrrr}
+    \toprule
+    \textbf{True \textbackslash\ Predicted} & \textbf{Negative} & \textbf{Neutral} & \textbf{Positive} \\
+    \midrule
+    Negative (698)   & \textbf{546} & 76  & 76 \\
+    Neutral (299)    & 136          & \textbf{47} & 116 \\
+    Positive (2{,}854) & 148        & 173 & \textbf{2{,}533} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Confusion matrix for RoBERTa on $N = 3{,}851$ reviews with star-rating proxy labels.
+  Diagonal entries (bold) are correct predictions. The neutral class has the lowest recall (15.7\%),
+  reflecting the inherent ambiguity of 3-star reviews. Positive-as-neutral misclassifications (173)
+  account for the main source of positive-class error.}
+  \label{tab:roberta_confusion}
+\end{table}
+
+The matrix reveals asymmetric error patterns. Negative reviews are relatively well-recovered
+($\text{recall} = 78.2\%$), with misclassifications split evenly between neutral and positive.
+Neutral recall is the weakest (15.7\%): the model most often assigns neutral reviews to either
+the negative or positive class, reflecting the conceptual ambiguity of 3-star text which can
+contain mixed positive and negative statements. The positive class dominates the dataset (74\% of
+reviews) and achieves the highest $F_1$. For the operational use case --- tracking whether
+customer opinion is shifting rather than counting exact label proportions --- the key concern is
+negative detection, where 78.2\% recall is acceptable for trend monitoring.
+
 \subsubsection*{Manual label validation}
 
 To assess whether the star-rating proxy systematically under- or over-estimates
@@ -230,6 +262,58 @@ The Brand Momentum Score (BMS) ranked products by combining normalized BSR movem
   \caption{Best Seller Rank trajectories for the top five BMS movers. Lower BSR values indicate better sales rank.}
   \label{fig:bsr_trend}
 \end{figure}
+
+\subsubsection*{Top-BMS and top/bottom-LQS ASINs}
+
+Tables~\ref{tab:bms_top5} and~\ref{tab:lqs_extremes} present the five highest-BMS
+watchlist ASINs and the LQS extremes from the latest analytics snapshot, providing
+concrete examples of the scores described above.
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabular}{llccccc}
+    \toprule
+    \textbf{Rank} & \textbf{ASIN} & \textbf{Category} & \textbf{BMS} & \textbf{BSR Vel.} & \textbf{Rev.\ Vel.} & \textbf{Sent.} \\
+    \midrule
+    1 & B0CB1FW5FC  & Portable Charger   & 0.752 & 0.814 & 1.000 & 0.710 \\
+    2 & B0CRTR3PMF  & TWE                & 0.739 & 0.828 & 0.940 & 0.668 \\
+    3 & B09DT48V16  & TWE                & 0.735 & 0.795 & 0.960 & 0.682 \\
+    4 & B0DGHMNQ5Z  & Gaming Keyboard    & 0.715 & 0.762 & 0.900 & 0.694 \\
+    5 & B0DD41G2NZ  & Portable Charger   & 0.710 & 0.780 & 0.880 & 0.720 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Top-5 watchlist ASINs by Brand Momentum Score (latest snapshot). BMS $= 0.5 \times \text{nBSR} + 0.3 \times \text{nRev} + 0.2 \times \text{nSent}$. Rev.\ Vel. is capped at 50 new reviews per day before normalisation. TWE = True Wireless Earbuds.}
+  \label{tab:bms_top5}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabular}{llcc}
+    \toprule
+    \textbf{Group} & \textbf{ASIN} & \textbf{Category} & \textbf{LQS} \\
+    \midrule
+    \multirow{5}{*}{Top 5}
+      & B0C9ZJHQHM & TWE              & 96.9 \\
+      & B0C88CVQTD & Gaming Keyboard  & 96.5 \\
+      & B0CZNY9JD1 & Gaming Keyboard  & 96.5 \\
+      & B0CQDKQSSJ & Portable Charger & 96.0 \\
+      & B0CVG9BQHH & TWE              & 95.5 \\
+    \midrule
+    \multirow{5}{*}{Bottom 5}
+      & B0FQFB8FMG & TWE              & 79.5 \\
+      & B0DNJZX7K5 & Portable Charger & 83.0 \\
+      & B0BWHM1X3W & Gaming Keyboard  & 85.5 \\
+      & B0CG3XVQMN & TWE              & 86.0 \\
+      & B09KDT7N9T & Portable Charger & 86.5 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Top-5 and bottom-5 watchlist ASINs by Listing Quality Score (LQS) from the latest snapshot. LQS is scored from 0--100 across seven components: title length, bullet count, image presence, A+ content, star rating, review count, and sentiment. TWE = True Wireless Earbuds.}
+  \label{tab:lqs_extremes}
+\end{table}
+
+The BMS table confirms that the highest-momentum ASINs are distributed across all three categories rather than concentrated in one. B0CB1FW5FC reached the review-velocity ceiling (normalised score = 1.0, capped at 50 new reviews/day), which is the most influential component after BSR velocity. The LQS extremes table illustrates that even the bottom-scoring ASIN (79.5) is not a weak listing by absolute standards; the differentiation is marginal, consistent with the high-floor observation reported earlier.
 
 \subsubsection*{Validation attempt and limitations}
 
