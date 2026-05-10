@@ -9,9 +9,9 @@
 
 | Item              | Date       |
 | ----------------- | ---------- |
-| Today             | 2026-05-02 |
-| Thesis deadline   | 2026-05-02 |
-| Days remaining    | **0**      |
+| Today             | 2026-05-10 |
+| Thesis deadline   | 2026-05-02 (passed) |
+| Status            | **Defense window — dry-run + screenshot refresh remaining** |
 
 ---
 

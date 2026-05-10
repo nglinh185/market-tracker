@@ -69,8 +69,12 @@ market-tracker/
 │   ├── evaluate_sentiment.py ← stars-as-ground-truth eval (thesis appendix)
 │   └── evaluate_forecast.py  ← walk-forward Prophet backtest
 ├── migrations/               ← SQL schema (001–005 active)
-├── dashboard/                ← Streamlit pages
-├── data/forecasts/           ← Prophet outputs
+├── dashboard/                ← Streamlit pages (internal / defense view)
+├── web-dashboard/            ← Vercel-deployable static dashboard
+├── data/eval/                ← thesis eval outputs (sentiment_eval, forecast_eval)
+├── docs/
+│   ├── thesis/               ← LaTeX thesis source
+│   └── exports/              ← compiled thesis PDFs
 └── openclaw/                 ← agentic workspace
     ├── SOUL.md               ← workspace default voice (fallback only — deployed agents have their own)
     ├── AGENTS.md             ← workspace rules (Skill contract, routing, safety)

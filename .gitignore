@@ -34,10 +34,8 @@ wheels/
 *.swo
 *~
 
-# Data
-data/raw/*.json
-data/forecasts/*.json
-data/images/*
+# Data (entire dir — gitignored; subpaths above were redundant)
+data/
 
 # Logs
 *.log
@@ -48,6 +46,25 @@ logs/
 Thumbs.db
 
 # Additional
-data/
 **/node_modules/
 archive/
+
+# Generated thesis page renders (reproducible from docs/exports/*.pdf via pdftoppm)
+thesis_pg-*.jpg
+thesis_page-*.ppm
+
+# Cleanup scaffolding
+archive_candidate/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Local snapshots / Office lockfiles
+tree.txt
+~$*.docx
+~$*.xlsx
+
+# Claude Code internal (worktrees, session data)
+.claude/
+
+# Compiled thesis exports (regenerable from LaTeX source)
+docs/exports/

@@ -197,13 +197,13 @@ All 30 watchlist ASINs met the minimum history threshold of 10 observations. Tab
 
 The naive carry-forward baseline achieves the lowest pooled MAE of \$1.292. ARIMA(1,1,0) is the closest competitor at \$1.323 --- only 2.4\% higher than naive --- while ETS, Linear Trend, and Prophet trail by wider margins. Prophet's pooled MAPE was 6.75\%, and the empirical coverage of its 80\% prediction intervals was 67.8\%, below the nominal 80\% target.
 
-An important caveat is that 19 of the 30 watchlist ASINs (63\%) exhibited no price change across all three holdout days, so their held-out error was identically zero for every model. The pooled MAE figures are therefore disproportionately influenced by the remaining 11 ASINs with non-zero price movement; the most volatile ASIN in this subset contributed a naive holdout MAE of \$20.00 to the pooled average. This distribution should be kept in mind when interpreting the pooled figures: the comparison primarily captures model behaviour on a small number of actively-priced products rather than the watchlist as a whole.
+An important caveat is that 22 of the 30 watchlist ASINs (73\%) exhibited no price change across all three holdout days, so their held-out error was identically zero for every model. The pooled MAE figures are therefore disproportionately influenced by the remaining 8 ASINs with non-zero price movement; the most volatile ASIN in this subset contributed a naive holdout MAE of \$20.00 to the pooled average. This distribution should be kept in mind when interpreting the pooled figures: the comparison primarily captures model behaviour on a small number of actively-priced products rather than the watchlist as a whole.
 
 \subsubsection*{Interpretation}
 
 The dominance of the naive baseline across all more complex alternatives is a well-documented property of short, near-stationary price series \citep{makridakis2018m4}. Amazon marketplace prices are frequently held constant for days or weeks; in such conditions, carry-forward trivially minimises expected absolute error, and any model that attempts to learn trend or autocorrelation risks introducing estimation noise that exceeds its signal gain. The near-equivalence of ARIMA and naive (MAE gap of \$0.031) further supports the interpretation that the observed price series approximates a random walk over short horizons: the differenced AR(1) structure captures essentially no additional predictable autocorrelation beyond what carry-forward already exploits.
 
-The underperformance of ETS, Trend, and Prophet relative to naive is consistent with overfitting on a training window of approximately 7--12 observations: each model has sufficient parameters to learn the specific trajectory of the training prices rather than the underlying generating process. This is an inherent data-volume constraint rather than a deficiency in the models themselves.
+The underperformance of ETS, Trend, and Prophet relative to naive is consistent with overfitting on training windows of 13--15 observations: each model has sufficient parameters to learn the specific trajectory of the training prices rather than the underlying generating process. This is an inherent data-volume constraint rather than a deficiency in the models themselves.
 
 \subsubsection*{Model selection for deployment}
 
@@ -272,18 +272,18 @@ concrete examples of the scores described above.
 \begin{table}[H]
   \centering
   \small
-  \begin{tabular}{llccccc}
+  \begin{tabular}{llcccrc}
     \toprule
     \textbf{Rank} & \textbf{ASIN} & \textbf{Category} & \textbf{BMS} & \textbf{BSR Vel.} & \textbf{Rev.\ Vel.} & \textbf{Sent.} \\
     \midrule
-    1 & B0CB1FW5FC  & Portable Charger   & 0.752 & 0.814 & 1.000 & 0.710 \\
-    2 & B0CRTR3PMF  & TWE                & 0.739 & 0.828 & 0.940 & 0.668 \\
-    3 & B09DT48V16  & TWE                & 0.735 & 0.795 & 0.960 & 0.682 \\
-    4 & B0DGHMNQ5Z  & Gaming Keyboard    & 0.715 & 0.762 & 0.900 & 0.694 \\
-    5 & B0DD41G2NZ  & Portable Charger   & 0.710 & 0.780 & 0.880 & 0.720 \\
+    1 & B0CB1FW5FC  & Portable Charger & 0.752 & $+0.125$ & 116 & $+0.710$ \\
+    2 & B0CRTR3PMF  & TWE              & 0.739 & $+0.015$ & 142 & $+0.849$ \\
+    3 & B09DT48V16  & TWE              & 0.735 & $+0.087$ &  59 & $+0.629$ \\
+    4 & B0DGHMNQ5Z  & TWE              & 0.715 & ---      &  73 & $+0.654$ \\
+    5 & B0DD41G2NZ  & TWE              & 0.710 & $+0.186$ &  42 & $+0.613$ \\
     \bottomrule
   \end{tabular}
-  \caption{Top-5 watchlist ASINs by Brand Momentum Score (latest snapshot). BMS $= 0.5 \times \text{nBSR} + 0.3 \times \text{nRev} + 0.2 \times \text{nSent}$. Rev.\ Vel. is capped at 50 new reviews per day before normalisation. TWE = True Wireless Earbuds.}
+  \caption{Top-5 watchlist ASINs by Brand Momentum Score from the 2026-04-29 snapshot. Columns show the raw inputs to the BMS formula defined in \S3.3.5 (BSR velocity as fractional rank improvement; review velocity in new reviews per day, capped at 50 during normalisation; sentiment scalar in $[-1,1]$). ``---'' indicates BSR velocity unavailable for that ASIN, in which case the implementation defaults the normalised BSR signal to 0.5. TWE = True Wireless Earbuds.}
   \label{tab:bms_top5}
 \end{table}
 
@@ -295,25 +295,25 @@ concrete examples of the scores described above.
     \textbf{Group} & \textbf{ASIN} & \textbf{Category} & \textbf{LQS} \\
     \midrule
     \multirow{5}{*}{Top 5}
-      & B0C9ZJHQHM & TWE              & 96.9 \\
-      & B0C88CVQTD & Gaming Keyboard  & 96.5 \\
-      & B0CZNY9JD1 & Gaming Keyboard  & 96.5 \\
-      & B0CQDKQSSJ & Portable Charger & 96.0 \\
-      & B0CVG9BQHH & TWE              & 95.5 \\
+      & B0C9ZJHQHM & Gaming Keyboard  & 96.9 \\
+      & B0CRTR3PMF & TWE              & 96.8 \\
+      & B0CDX5XGLK & Gaming Keyboard  & 96.7 \\
+      & B0CLLHSWRL & Gaming Keyboard  & 96.7 \\
+      & B0CB1FW5FC & Portable Charger & 96.6 \\
     \midrule
     \multirow{5}{*}{Bottom 5}
       & B0FQFB8FMG & TWE              & 79.5 \\
-      & B0DNJZX7K5 & Portable Charger & 83.0 \\
-      & B0BWHM1X3W & Gaming Keyboard  & 85.5 \\
-      & B0CG3XVQMN & TWE              & 86.0 \\
-      & B09KDT7N9T & Portable Charger & 86.5 \\
+      & B0DGHMNQ5Z & TWE              & 81.7 \\
+      & B0G1PJLWLZ & TWE              & 88.3 \\
+      & B0DCZ56QNL & Portable Charger & 90.2 \\
+      & B0CFHHCMNS & Portable Charger & 91.4 \\
     \bottomrule
   \end{tabular}
-  \caption{Top-5 and bottom-5 watchlist ASINs by Listing Quality Score (LQS) from the latest snapshot. LQS is scored from 0--100 across seven components: title length, bullet count, image presence, A+ content, star rating, review count, and sentiment. TWE = True Wireless Earbuds.}
+  \caption{Top-5 and bottom-5 watchlist ASINs by Listing Quality Score (LQS) from the 2026-04-29 snapshot. LQS is scored from 0--100 across seven active components: title length, bullet count, image presence, A+ content, star rating, review count, and sentiment. The Bottom-5 group is ordered from lowest to highest LQS. TWE = True Wireless Earbuds.}
   \label{tab:lqs_extremes}
 \end{table}
 
-The BMS table confirms that the highest-momentum ASINs are distributed across all three categories rather than concentrated in one. B0CB1FW5FC reached the review-velocity ceiling (normalised score = 1.0, capped at 50 new reviews/day), which is the most influential component after BSR velocity. The LQS extremes table illustrates that even the bottom-scoring ASIN (79.5) is not a weak listing by absolute standards; the differentiation is marginal, consistent with the high-floor observation reported earlier.
+The BMS table is dominated by True Wireless Earbuds (4 of 5), with Portable Charger B0CB1FW5FC as the top mover. B0CB1FW5FC and B0CRTR3PMF both saturated the review-velocity ceiling (raw 116 and 142 new reviews respectively, capped at 50 in normalisation), which is the second-largest weight in the BMS formula after BSR velocity; B0CRTR3PMF additionally has the highest sentiment of the group ($+0.849$). The LQS extremes table illustrates that even the bottom-scoring ASIN (B0FQFB8FMG, 79.5) is not a weak listing by absolute standards: four of the bottom five score above 88, and the top-five spread is only 0.3 points (96.6--96.9), consistent with the high-floor observation reported earlier.
 
 \subsubsection*{Validation attempt and limitations}
 
@@ -365,7 +365,7 @@ The alert distribution is consistent with the intended design. Routine Top-50 ex
 
 \subsection{Dashboard and agent consumption}
 
-The same Supabase-derived tables supported both pull-based and push-based consumption. The Streamlit dashboard and public web dashboard provide analyst-controlled exploration, while the OpenClaw agents consume the data through 13 read-only Python skills. This separation is important: analytics scripts and scheduled jobs write to Supabase, but agent skills only read and summarize existing records. The resulting architecture reduces the risk of accidental database mutation through conversational interfaces.
+The same Supabase-derived tables supported both pull-based and push-based consumption. The Streamlit dashboard and public web dashboard provide analyst-controlled exploration, while the OpenClaw agents consume the data through 14 read-only Python skills. This separation is important: analytics scripts and scheduled jobs write to Supabase, but agent skills only read and summarize existing records. The resulting architecture reduces the risk of accidental database mutation through conversational interfaces.
 
 The three Telegram-bound agents also map cleanly to the analytical outputs. Competitor Spy uses ranking, BMS, entrant/exit, sponsored-share, price-tier, and image-change skills. Sentiment Detective uses sentiment, review, aspect, and snapshot skills. Momentum Strategist uses alerts, BMS, price forecast, LQS, sentiment, and listing-content skills. The pilot therefore demonstrates that the same analytics backbone can support multiple specialized decision views without duplicating data pipelines.
 

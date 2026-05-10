@@ -1,8 +1,15 @@
 """
 Generate publication-quality matplotlib figures for the thesis chapters.
 
-Reads from Supabase (read-only) and writes PNGs to ``thesis/figures/``. Run
+Reads from Supabase (read-only) and writes PNGs to
+``docs/thesis/_thesis8/figures/`` (the path consumed by main.tex). Run
 locally before compiling the LaTeX document.
+
+Snapshot-dependent figures (BSR-trend, LQS, sentiment, price-tier) are
+pinned to ``THESIS_SNAPSHOT_DATE`` defined below, so figures stay coherent
+with the tables in Chapter 4 (which are sourced from
+data/eval/descriptives.json). Set ``THESIS_SNAPSHOT_DATE = None`` to
+fall back to the live latest snapshot per table.
 
 Figures produced:
     1. price_tier_distribution.png  - violin/strip plot of prices per category x tier
@@ -52,7 +59,13 @@ CAT_COLOR = {
 TIER_COLOR = {"entry": "#9ecae1", "mid": "#3182bd", "premium": "#08519c"}
 SENTIMENT_COLOR = {"positive": "#2ca02c", "neutral": "#bdbdbd", "negative": "#d62728"}
 
-FIG_DIR = Path("thesis/figures")
+# Anchor every snapshot-dependent figure (BSR-trend, LQS, sentiment, price-tier)
+# to the same date used by data/eval/descriptives.json so figures and Chapter 4
+# tables stay coherent. Set to None to fall back to the live "latest" date for
+# each table (the original behaviour).
+THESIS_SNAPSHOT_DATE: str | None = "2026-04-29"
+
+FIG_DIR = Path("docs/thesis/_thesis8/figures")
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -84,6 +97,13 @@ def _latest_date(table: str) -> str | None:
     return res.data[0]["snapshot_date"] if res.data else None
 
 
+def _resolve_snap_date(table: str) -> str | None:
+    """Return THESIS_SNAPSHOT_DATE if set, else the live latest date for the table."""
+    if THESIS_SNAPSHOT_DATE:
+        return THESIS_SNAPSHOT_DATE
+    return _latest_date(table)
+
+
 def _fetch_all(table: str, columns: str, **eq_filters) -> list[dict]:
     rows: list[dict] = []
     page_size = 1000
@@ -110,7 +130,7 @@ def _asin_to_category() -> dict[str, str]:
 # Figure 1 — Price tier distribution
 # ─────────────────────────────────────────────────────────────────────
 def fig_price_tier_distribution() -> None:
-    snap_date = _latest_date("price_tier_daily")
+    snap_date = _resolve_snap_date("price_tier_daily")
     rows = (
         supabase.table("price_tier_daily")
         .select("browse_node,price,cluster_name")
@@ -174,7 +194,7 @@ def fig_price_tier_distribution() -> None:
 # Figure 2 — LQS distribution
 # ─────────────────────────────────────────────────────────────────────
 def fig_lqs_distribution() -> None:
-    snap_date = _latest_date("listing_quality_score_daily")
+    snap_date = _resolve_snap_date("listing_quality_score_daily")
     rows = (
         supabase.table("listing_quality_score_daily")
         .select("asin,lqs_total")
@@ -224,7 +244,7 @@ def fig_lqs_distribution() -> None:
 # Figure 3 — BSR trend for top-5 BMS movers
 # ─────────────────────────────────────────────────────────────────────
 def fig_bsr_trend() -> None:
-    snap_date = _latest_date("brand_momentum_daily")
+    snap_date = _resolve_snap_date("brand_momentum_daily")
     top_rows = (
         supabase.table("brand_momentum_daily")
         .select("asin,bms_score")
@@ -276,7 +296,7 @@ def fig_bsr_trend() -> None:
 # Figure 4 — Sentiment distribution per category (stacked)
 # ─────────────────────────────────────────────────────────────────────
 def fig_sentiment_distribution() -> None:
-    snap_date = _latest_date("review_sentiment_daily")
+    snap_date = _resolve_snap_date("review_sentiment_daily")
     rows = (
         supabase.table("review_sentiment_daily")
         .select("asin,positive_ratio,negative_ratio")

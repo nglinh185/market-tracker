@@ -74,10 +74,13 @@ market-tracker/
 ├── lib/                       # Supabase client, Apify helper, parsers, image store
 ├── scripts/                   # ingest_* + analyze_*  (all DB mutations live here)
 ├── migrations/                # 001..005 SQL
-├── dashboard/                 # Streamlit pages
+├── dashboard/                 # Streamlit pages (internal / defense view)
+├── web-dashboard/             # Vercel-deployable static dashboard
 ├── openclaw/                  # skills + agent SOULs + manifest
-└── thesis/                    # LaTeX thesis source
+└── docs/
+    ├── thesis/                # LaTeX thesis source
+    └── exports/               # Compiled thesis PDFs
 ```
 
-Legacy root-level `collector_*.py` and `db.py` are thin deprecation shims that forward to
-`scripts/ingest_*.py` and `lib/db.py`. Prefer the new paths.
+See [`web-dashboard/README.md`](web-dashboard/README.md) for the public dashboard
+deploy steps.
