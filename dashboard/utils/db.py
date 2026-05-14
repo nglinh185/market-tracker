@@ -16,9 +16,16 @@ load_dotenv()
 from supabase import create_client
 
 
+def _get_secret(name: str) -> str | None:
+    try:
+        return st.secrets[name]
+    except (KeyError, FileNotFoundError, Exception):
+        return os.getenv(name)
+
+
 @st.cache_resource
 def get_client():
-    return create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    return create_client(_get_secret("SUPABASE_URL"), _get_secret("SUPABASE_KEY"))
 
 
 # Lazy module-level access: `from utils.db import supabase` returns a proxy
