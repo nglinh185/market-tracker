@@ -88,7 +88,7 @@ market-tracker/
     ├── wrappers/             ← OpenClaw AgentSkill wrappers (YAML-frontmatter SKILL.md per skill)
     │   ├── query_bms/SKILL.md
     │   ├── query_sentiment/SKILL.md
-    │   └── …                  ← 13 total, registered via skills.load.extraDirs
+    │   └── …                  ← 14 total, registered via skills.load.extraDirs
     └── agents/               ← per-agent isolated workspaces
         ├── sentiment_detective/        ← bound to @babydetective_bot
         │   ├── SOUL.md         ← voice + rules
@@ -169,7 +169,7 @@ node openclaw.mjs channels add --channel telegram --account <id> --token "$TOKEN
 node openclaw.mjs agents list
 node openclaw.mjs agents bindings
 
-# Skills (13 wrappers, source = openclaw-extra)
+# Skills (14 wrappers, source = openclaw-extra)
 node openclaw.mjs skills list
 
 # Cron (3 jobs in Asia/Ho_Chi_Minh)

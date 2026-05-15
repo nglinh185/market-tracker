@@ -23,10 +23,10 @@
 | 2. ML analytics (BMS, sentiment, LQS, …)  | ✅ done    | 9 scripts in `scripts/`, outputs in Supabase + `data/`. RoBERTa sentiment wired via `scripts/analyze_sentiment.py` |
 | 3. Streamlit dashboard                    | ✅ done    | 6 pages under `dashboard/`                              |
 | 4. OpenClaw workspace scaffold            | ✅ done    | `manifest.yaml`, `SOUL.md`, `AGENTS.md` in place        |
-| 5. Skills — 13 Python + 13 SKILL.md       | ✅ done    | see Skills audit below                                  |
+| 5. Skills — 14 Python + 14 SKILL.md       | ✅ done    | see Skills audit below                                  |
 | 6. Agents — 3 SOUL.md                     | ✅ done    | see Souls audit below                                   |
 | 7. Gateway runtime + Telegram pairing     | ✅ done    | OpenClaw 2026.4.20 on VMware; Telegram channel connected; `/status` + `/start` verified |
-| 8. Project skill registration (Gateway)   | ✅ done    | 13/13 skills loaded as `openclaw-extra` via `skills.load.extraDirs = openclaw/wrappers/`. Each wrapper has YAML-frontmatter SKILL.md mapping to the Python CLI under venv. |
+| 8. Project skill registration (Gateway)   | ✅ done    | 14/14 skills loaded as `openclaw-extra` via `skills.load.extraDirs = openclaw/wrappers/`. Each wrapper has YAML-frontmatter SKILL.md mapping to the Python CLI under venv. |
 | 9. Multi-agent deployment (3 bots)        | ✅ done    | 3 specialist agents: `competitor_spy` (`@babyspyyy_bot`), `sentiment_detective` (`@babydetective_bot`), `momentum_strategist` (`@babystrategist_bot`). Each agent has SOUL/IDENTITY/AGENTS/USER markdown. 1:1 channel binding. End-to-end verified with real Supabase data. |
 |10. Cron scheduling                        | ✅ done    | 3 cron jobs in `Asia/Ho_Chi_Minh`: daily brief 8 AM (Strategist), weekly competitor 9 AM Mon (Spy), weekly sentiment 9 AM Wed (Detective). Test run delivered 3-list brief to Telegram. |
 |11. RoBERTa Colab integration              | 🟡 external | Notebook to be archived under `notebooks/`. Repo runs RoBERTa via `analyze_sentiment.py`; Colab code stays as a separate experiment artifact. |
@@ -60,7 +60,7 @@ Lộ trình cải thiện thesis từ ~7.5 → ~8.5-9.0, ưu tiên theo ROI.
 
 ---
 
-## Skills audit (13/13)
+## Skills audit (14/14)
 
 All skills have a Python CLI (`scripts/skill.py`), a sidecar `.md` doc under `openclaw/skills/<group>/`, and an OpenClaw AgentSkill wrapper at `openclaw/wrappers/<skill>/SKILL.md` (YAML-frontmatter format) registered via `skills.load.extraDirs`.
 
@@ -78,7 +78,8 @@ All skills have a Python CLI (`scripts/skill.py`), a sidecar `.md` doc under `op
 |10 | `query_snapshots`       | listing   |  ✅   |      ✅       |        ✅          |     ✅     |
 |11 | `query_image_changes`   | listing   |  ✅   |      ✅       |        ✅          |     ✅     |
 |12 | `query_lqs`             | listing   |  ✅   |      ✅       |        ✅          |     ✅     |
-|13 | `query_alerts`          | alerts    |  ✅   |      ✅       |        ✅          |     ✅     |
+|13 | `query_listing_content` | listing   |  ✅   |      ✅       |        ✅          |     ✅     |
+|14 | `query_alerts`          | alerts    |  ✅   |      ✅       |        ✅          |     ✅     |
 
 Test command template (in VM): `/home/ubuntu/market-tracker/venv/bin/python /home/ubuntu/market-tracker/openclaw/skills/<group>/<skill>.py '<json-args>'`
 
@@ -110,7 +111,7 @@ Workspace-level defaults at `openclaw/SOUL.md` + `openclaw/AGENTS.md` exist as a
 | OpenClaw runtime                 | ✅ done     | Installed in VMware Ubuntu 24.04, version 2026.4.20, runtime = direct       |
 | OpenClaw model (per agent)       | ✅ done     | 3 active agents on `openai/gpt-5.4-mini`; default agent on `openai/gpt-4o-mini` (kept, unused). `OPENAI_API_KEY` in OpenClaw config, not repo. |
 | Telegram channels (×3)           | ✅ done     | 3 bots: `@babyspyyy_bot` (default→Spy), `@babydetective_bot`, `@babystrategist_bot`. All paired. |
-| Project skills registration      | ✅ done     | 13/13 wrappers under `openclaw/wrappers/`, registered via `skills.load.extraDirs`. Source = `openclaw-extra`. |
+| Project skills registration      | ✅ done     | 14/14 wrappers under `openclaw/wrappers/`, registered via `skills.load.extraDirs`. Source = `openclaw-extra`. |
 | Multi-agent deployment           | ✅ done     | 3 agents added (`agents add`), each bound 1:1 to its Telegram account (`agents bind`). |
 | End-to-end Telegram brief        | ✅ done     | Verified 2026-04-27: each bot returns real Supabase data on natural-language queries. Cron `daily-brief-strategist` test run delivered full 3-list brief. |
 | Cron schedules (×3)              | ✅ done     | daily 8 AM (Strategist), Mon 9 AM (Spy), Wed 9 AM (Detective). All `Asia/Ho_Chi_Minh`. |

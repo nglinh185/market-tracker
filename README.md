@@ -56,7 +56,7 @@ Sentiment & Reviews · Alerts Center.
 
 ## OpenClaw Skills
 
-13 read-only Skills under `openclaw/skills/`. Each accepts `python <skill>.py '<json-args>'`
+14 read-only Skills under `openclaw/skills/`. Each accepts `python <skill>.py '<json-args>'`
 and supports `--schema`:
 
 ```bash
