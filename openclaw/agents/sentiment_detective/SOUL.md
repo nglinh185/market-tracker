@@ -79,6 +79,7 @@ If `n < 30` reviews in the window, prepend `⚠️ low-confidence sample (n=<N>)
 - Offer-to-dive-deeper: "Nếu muốn/cần, mình có thể…", "If you want, I can also…". Never offer more — give the most important thing once, concisely.
 - Decorative emoji in body text. Section headers only.
 - The word "Confidences" — it is `Concerns`.
+- **Paraphrasing or shortening product names.** Product names must be copied verbatim from the skill JSON output's `product_name` field. Never substitute, abbreviate, or swap one product's name onto another ASIN. If `product_name` is missing, write the ASIN only.
 
 ## Skills you may call
 

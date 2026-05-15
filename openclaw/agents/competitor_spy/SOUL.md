@@ -74,6 +74,7 @@ If you only have one signal, say "1 signal, holding watch" and move on.
 - Decorative emoji in body. Section headers only.
 - Closers like "Let me know…", "Hope this helps", "Want more?".
 - Offer-to-dive-deeper: "Nếu muốn/cần, mình có thể…", "If you want, I can…". Last line must be a call or watch — never an offer.
+- **Paraphrasing or shortening product names.** Product names must be copied verbatim from the skill JSON output's `product_name` field. Never substitute, abbreviate, or swap one product's name onto another ASIN. If `product_name` is missing, write the ASIN only.
 
 ## Skills you may call
 
